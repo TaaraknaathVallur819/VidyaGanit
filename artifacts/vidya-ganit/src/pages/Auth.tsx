@@ -6,14 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { UserCircle, Users } from "lucide-react";
+import { useRegisterUser, useLoginUser } from "@workspace/api-client-react";
+import { useAuth } from "@/lib/auth";
 
 type Mode = "login" | "register";
 type Role = "student" | "parent";
 type Gender = "male" | "female";
 type ParentType = "father" | "mother";
 type StudentClass = "4" | "5" | "6" | "7";
-
-const TAKEN_NAMES = ["arjun", "priya", "rohan", "anjali", "vikram", "meera", "riya", "aarav"];
 
 function TileButton({
   selected,
@@ -44,17 +44,19 @@ function TileButton({
 
 export default function Auth() {
   const [, setLocation] = useLocation();
+  const { setUser } = useAuth();
   const searchParams = new URLSearchParams(window.location.search);
   const initialMode = (searchParams.get("mode") as Mode) || "login";
 
   const [mode, setMode] = useState<Mode>(initialMode);
   const [role, setRole] = useState<Role>("student");
 
-  // Login State
+  // Login state
   const [loginId, setLoginId] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
 
-  // Register State
+  // Register state
   const [regName, setRegName] = useState("");
   const [regContact, setRegContact] = useState("");
   const [regPassword, setRegPassword] = useState("");
@@ -63,38 +65,28 @@ export default function Auth() {
   const [parentType, setParentType] = useState<ParentType | null>(null);
   const [studentClass, setStudentClass] = useState<StudentClass | null>(null);
 
+  const registerMutation = useRegisterUser();
+  const loginMutation = useLoginUser();
+
   useEffect(() => {
-    if (regName) {
-      if (TAKEN_NAMES.includes(regName.toLowerCase().trim())) {
-        setNameError("Username is taken already, please try a different one");
-      } else {
-        setNameError("");
-      }
-    } else {
-      setNameError("");
-    }
-  }, [regName]);
+    setLoginError("");
+  }, [loginId, loginPassword]);
 
   const getPasswordStrength = (pwd: string) => {
     if (!pwd) return { label: "", color: "", barColor: "", level: 0 };
-
     const hasLetters = /[a-zA-Z]/.test(pwd);
     const hasNumbers = /[0-9]/.test(pwd);
     const hasSymbols = /[^a-zA-Z0-9]/.test(pwd);
     const isLongEnough = pwd.length >= 8;
-
     if (!isLongEnough || (hasLetters && !hasNumbers && !hasSymbols)) {
       return { label: "Weak", color: "text-red-500", barColor: "bg-red-500", level: 1 };
     }
-
     if (isLongEnough && !(hasLetters && hasNumbers && hasSymbols)) {
       return { label: "Medium", color: "text-orange-500", barColor: "bg-orange-500", level: 2 };
     }
-
     if (isLongEnough && hasLetters && hasNumbers && hasSymbols) {
       return { label: "Strong", color: "text-green-500", barColor: "bg-green-500", level: 3 };
     }
-
     return { label: "Weak", color: "text-red-500", barColor: "bg-red-500", level: 1 };
   };
 
@@ -109,23 +101,52 @@ export default function Auth() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (loginId.toUpperCase().startsWith("VG-STU-")) {
-      setLocation("/dashboard/student");
-    } else if (loginId.toUpperCase().startsWith("VG-PAR-")) {
-      setLocation("/dashboard/parent");
-    } else {
-      alert("Invalid ID prefix. Must start with VG-STU- or VG-PAR-");
-    }
+    setLoginError("");
+    loginMutation.mutate(
+      { data: { vidyaId: loginId.trim(), password: loginPassword } },
+      {
+        onSuccess: (user) => {
+          setUser(user);
+          setLocation(`/dashboard/${user.role}`);
+        },
+        onError: (err) => {
+          const msg =
+            (err as { data?: { error?: string } })?.data?.error ??
+            "Oops! That ID or password doesn't match our records. Please check and try again.";
+          setLoginError(msg);
+        },
+      },
+    );
   };
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isRegisterValid) return;
-
-    const randomNum = Math.floor(10000 + Math.random() * 90000);
-    const newId = role === "student" ? `VG-STU-${randomNum}` : `VG-PAR-${randomNum}`;
-
-    setLocation(`/success?id=${newId}&role=${role}`);
+    registerMutation.mutate(
+      {
+        data: {
+          name: regName.trim(),
+          password: regPassword,
+          role,
+          gender: gender!,
+          studentClass: role === "student" ? studentClass : null,
+          parentType: role === "parent" ? parentType : null,
+          contact: role === "parent" ? regContact.trim() || null : null,
+        },
+      },
+      {
+        onSuccess: (user) => {
+          setUser(user);
+          setLocation(`/success?id=${user.vidyaId}&role=${user.role}`);
+        },
+        onError: (err) => {
+          const msg =
+            (err as { data?: { error?: string } })?.data?.error ??
+            "Something went wrong. Please try again.";
+          setNameError(msg);
+        },
+      },
+    );
   };
 
   return (
@@ -172,7 +193,7 @@ export default function Auth() {
                       value={loginId}
                       onChange={(e) => setLoginId(e.target.value)}
                       placeholder="e.g. VG-STU-12345"
-                      className="h-12 text-lg px-4 bg-gray-50 border-gray-200 focus-visible:ring-primary focus-visible:ring-offset-2"
+                      className="h-12 text-lg px-4 bg-gray-50 border-gray-200 focus-visible:ring-primary"
                       required
                     />
                   </div>
@@ -188,11 +209,37 @@ export default function Auth() {
                       className="h-12 text-lg px-4 bg-gray-50 border-gray-200"
                       required
                     />
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        data-testid="link-forgot-password"
+                        onClick={() => setLocation("/forgot-password")}
+                        className="text-sm text-primary hover:underline font-medium mt-1"
+                      >
+                        Forgot Password?
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                <Button type="submit" data-testid="button-submit-login" className="w-full h-12 text-lg rounded-xl font-semibold mt-6 bg-primary hover:bg-primary/90">
-                  Log In
+                {loginError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    data-testid="message-login-error"
+                    className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 font-medium"
+                  >
+                    {loginError}
+                  </motion.div>
+                )}
+
+                <Button
+                  type="submit"
+                  data-testid="button-submit-login"
+                  disabled={loginMutation.isPending}
+                  className="w-full h-12 text-lg rounded-xl font-semibold mt-6 bg-primary hover:bg-primary/90 disabled:opacity-50"
+                >
+                  {loginMutation.isPending ? "Logging in..." : "Log In"}
                 </Button>
               </motion.form>
             ) : (
@@ -237,20 +284,8 @@ export default function Auth() {
                   <div className="space-y-2">
                     <Label className="text-foreground font-medium">I am a</Label>
                     <div className="flex gap-3">
-                      <TileButton
-                        selected={parentType === "father"}
-                        onClick={() => setParentType("father")}
-                        testId="tile-parent-father"
-                      >
-                        Father
-                      </TileButton>
-                      <TileButton
-                        selected={parentType === "mother"}
-                        onClick={() => setParentType("mother")}
-                        testId="tile-parent-mother"
-                      >
-                        Mother
-                      </TileButton>
+                      <TileButton selected={parentType === "father"} onClick={() => setParentType("father")} testId="tile-parent-father">Father</TileButton>
+                      <TileButton selected={parentType === "mother"} onClick={() => setParentType("mother")} testId="tile-parent-mother">Mother</TileButton>
                     </div>
                   </div>
                 )}
@@ -261,12 +296,7 @@ export default function Auth() {
                     <Label className="text-foreground font-medium">My Class</Label>
                     <div className="flex gap-3">
                       {(["4", "5", "6", "7"] as StudentClass[]).map((cls) => (
-                        <TileButton
-                          key={cls}
-                          selected={studentClass === cls}
-                          onClick={() => setStudentClass(cls)}
-                          testId={`tile-class-${cls}`}
-                        >
+                        <TileButton key={cls} selected={studentClass === cls} onClick={() => setStudentClass(cls)} testId={`tile-class-${cls}`}>
                           Class {cls}
                         </TileButton>
                       ))}
@@ -295,20 +325,8 @@ export default function Auth() {
                 <div className="space-y-2">
                   <Label className="text-foreground font-medium">Gender</Label>
                   <div className="flex gap-3">
-                    <TileButton
-                      selected={gender === "male"}
-                      onClick={() => setGender("male")}
-                      testId="tile-gender-male"
-                    >
-                      Male
-                    </TileButton>
-                    <TileButton
-                      selected={gender === "female"}
-                      onClick={() => setGender("female")}
-                      testId="tile-gender-female"
-                    >
-                      Female
-                    </TileButton>
+                    <TileButton selected={gender === "male"} onClick={() => setGender("male")} testId="tile-gender-male">Male</TileButton>
+                    <TileButton selected={gender === "female"} onClick={() => setGender("female")} testId="tile-gender-female">Female</TileButton>
                   </div>
                 </div>
 
@@ -341,14 +359,11 @@ export default function Auth() {
                     className="h-12 text-lg px-4 bg-gray-50 border-gray-200"
                     required
                   />
-
                   {regPassword && (
                     <div className="mt-2 space-y-2">
-                      <div className="flex justify-between items-center text-sm font-medium">
-                        <span data-testid="text-password-strength" className={strength.color}>
-                          Password Strength: {strength.label}
-                        </span>
-                      </div>
+                      <span data-testid="text-password-strength" className={`text-sm font-medium ${strength.color}`}>
+                        Password Strength: {strength.label}
+                      </span>
                       <div className="flex gap-1 h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
                         <div className={`h-full transition-all duration-300 ${strength.level >= 1 ? strength.barColor : "bg-transparent"}`} style={{ width: "33.33%" }} />
                         <div className={`h-full transition-all duration-300 ${strength.level >= 2 ? strength.barColor : "bg-transparent"}`} style={{ width: "33.33%" }} />
@@ -367,10 +382,10 @@ export default function Auth() {
                 <Button
                   type="submit"
                   data-testid="button-submit-register"
-                  disabled={!isRegisterValid}
+                  disabled={!isRegisterValid || registerMutation.isPending}
                   className="w-full h-12 text-lg rounded-xl font-semibold mt-2 bg-primary hover:bg-primary/90 disabled:opacity-50"
                 >
-                  Create Account
+                  {registerMutation.isPending ? "Creating account..." : "Create Account"}
                 </Button>
               </motion.form>
             )}
