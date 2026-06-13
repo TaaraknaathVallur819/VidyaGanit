@@ -8,6 +8,33 @@ import { Card, CardContent } from "@/components/ui/card";
 import { UserCircle, Users } from "lucide-react";
 import { useRegisterUser, useLoginUser } from "@workspace/api-client-react";
 import { useAuth } from "@/lib/auth";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const MAJOR_BOARDS = [
+  { value: "CBSE", label: "CBSE – Central Board of Secondary Education" },
+  { value: "ICSE", label: "ICSE – Indian Certificate of Secondary Education" },
+  { value: "IB", label: "IB – International Baccalaureate" },
+  { value: "IGCSE", label: "IGCSE – Cambridge International" },
+  { value: "Maharashtra State Board", label: "Maharashtra State Board" },
+  { value: "Karnataka State Board", label: "Karnataka State Board" },
+  { value: "Tamil Nadu State Board", label: "Tamil Nadu State Board" },
+  { value: "Andhra Pradesh State Board", label: "Andhra Pradesh State Board" },
+  { value: "Telangana State Board", label: "Telangana State Board" },
+  { value: "Kerala State Board", label: "Kerala State Board" },
+  { value: "Gujarat State Board", label: "Gujarat State Board" },
+  { value: "Rajasthan State Board", label: "Rajasthan State Board" },
+  { value: "UP Board (UPMSP)", label: "UP Board – UPMSP" },
+  { value: "West Bengal Board", label: "West Bengal Board" },
+  { value: "Bihar Board (BSEB)", label: "Bihar Board – BSEB" },
+  { value: "MP Board (MPBSE)", label: "MP Board – MPBSE" },
+  { value: "Other", label: "Other (please specify below)" },
+];
 
 type Mode = "login" | "register";
 type Role = "student" | "parent";
@@ -64,6 +91,8 @@ export default function Auth() {
   const [gender, setGender] = useState<Gender | null>(null);
   const [parentType, setParentType] = useState<ParentType | null>(null);
   const [studentClass, setStudentClass] = useState<StudentClass | null>(null);
+  const [boardSelection, setBoardSelection] = useState<string>("");
+  const [customBoard, setCustomBoard] = useState("");
 
   const registerMutation = useRegisterUser();
   const loginMutation = useLoginUser();
@@ -92,12 +121,17 @@ export default function Auth() {
 
   const strength = getPasswordStrength(regPassword);
 
+  const resolvedBoard =
+    boardSelection === "Other" ? customBoard.trim() : boardSelection;
+
   const isRegisterValid =
     !nameError &&
     regPassword &&
     strength.level === 3 &&
     gender !== null &&
-    (role === "student" ? studentClass !== null : parentType !== null);
+    (role === "student"
+      ? studentClass !== null && resolvedBoard.length > 0
+      : parentType !== null);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,6 +164,7 @@ export default function Auth() {
           role,
           gender: gender!,
           studentClass: role === "student" ? studentClass : null,
+          board: role === "student" ? resolvedBoard || null : null,
           parentType: role === "parent" ? parentType : null,
           contact: role === "parent" ? regContact.trim() || null : null,
         },
@@ -301,6 +336,50 @@ export default function Auth() {
                         </TileButton>
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {/* Board selection — students only */}
+                {role === "student" && (
+                  <div className="space-y-2">
+                    <Label className="text-foreground font-medium">My Board</Label>
+                    <Select
+                      value={boardSelection}
+                      onValueChange={(val) => {
+                        setBoardSelection(val);
+                        if (val !== "Other") setCustomBoard("");
+                      }}
+                    >
+                      <SelectTrigger
+                        data-testid="select-board"
+                        className="h-12 text-base px-4 bg-gray-50 border-gray-200"
+                      >
+                        <SelectValue placeholder="Select your school board" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {MAJOR_BOARDS.map((b) => (
+                          <SelectItem key={b.value} value={b.value}>
+                            {b.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {boardSelection === "Other" && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Input
+                          data-testid="input-custom-board"
+                          value={customBoard}
+                          onChange={(e) => setCustomBoard(e.target.value)}
+                          placeholder="Type your board name here"
+                          className="h-12 text-base px-4 bg-gray-50 border-gray-200 mt-2"
+                        />
+                      </motion.div>
+                    )}
                   </div>
                 )}
 

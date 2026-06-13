@@ -20,6 +20,8 @@ export interface UserRegistrationInput {
   /** @nullable */
   studentClass?: UserRegistrationInputStudentClass;
   /** @nullable */
+  board?: string | null;
+  /** @nullable */
   parentType?: UserRegistrationInputParentType;
   /** @nullable */
   contact?: string | null;

@@ -16,6 +16,8 @@ export interface UserProfile {
   /** @nullable */
   studentClass?: string | null;
   /** @nullable */
+  board?: string | null;
+  /** @nullable */
   parentType?: string | null;
   /** @nullable */
   contact?: string | null;

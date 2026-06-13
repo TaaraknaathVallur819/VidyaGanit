@@ -23,7 +23,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
     return;
   }
 
-  const { name, password, role, gender, studentClass, parentType, contact } = parsed.data;
+  const { name, password, role, gender, studentClass, board, parentType, contact } = parsed.data;
 
   const [existing] = await db
     .select()
@@ -47,6 +47,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
       role,
       gender,
       studentClass: studentClass ?? null,
+      board: board ?? null,
       parentType: parentType ?? null,
       contact: contact ?? null,
     })
@@ -61,6 +62,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
       role: user.role,
       gender: user.gender,
       studentClass: user.studentClass ?? null,
+      board: user.board ?? null,
       parentType: user.parentType ?? null,
       contact: user.contact ?? null,
     }),
@@ -101,6 +103,7 @@ router.post("/auth/login", async (req, res): Promise<void> => {
       role: user.role,
       gender: user.gender,
       studentClass: user.studentClass ?? null,
+      board: user.board ?? null,
       parentType: user.parentType ?? null,
       contact: user.contact ?? null,
     }),

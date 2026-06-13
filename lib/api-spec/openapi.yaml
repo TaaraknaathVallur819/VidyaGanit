@@ -137,6 +137,8 @@ components:
         studentClass:
           type: ["string", "null"]
           enum: ["4", "5", "6", "7", null]
+        board:
+          type: ["string", "null"]
         parentType:
           type: ["string", "null"]
           enum: [father, mother, null]
@@ -176,6 +178,8 @@ components:
           type: string
           enum: [male, female]
         studentClass:
+          type: ["string", "null"]
+        board:
           type: ["string", "null"]
         parentType:
           type: ["string", "null"]

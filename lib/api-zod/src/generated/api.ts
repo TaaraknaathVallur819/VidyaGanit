@@ -31,6 +31,7 @@ export const RegisterUserBody = zod.object({
   "role": zod.enum(['student', 'parent']),
   "gender": zod.enum(['male', 'female']),
   "studentClass": zod.union([zod.literal('4'),zod.literal('5'),zod.literal('6'),zod.literal('7'),zod.literal(null)]).nullish(),
+  "board": zod.string().nullish(),
   "parentType": zod.union([zod.literal('father'),zod.literal('mother'),zod.literal(null)]).nullish(),
   "contact": zod.string().nullish()
 })
@@ -50,6 +51,7 @@ export const LoginUserResponse = zod.object({
   "role": zod.enum(['student', 'parent']),
   "gender": zod.enum(['male', 'female']),
   "studentClass": zod.string().nullish(),
+  "board": zod.string().nullish(),
   "parentType": zod.string().nullish(),
   "contact": zod.string().nullish()
 })
