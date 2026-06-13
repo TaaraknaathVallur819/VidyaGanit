@@ -5,31 +5,63 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { z } from "zod";
 import { UserCircle, Users } from "lucide-react";
 
 type Mode = "login" | "register";
 type Role = "student" | "parent";
+type Gender = "male" | "female";
+type ParentType = "father" | "mother";
+type StudentClass = "4" | "5" | "6" | "7";
 
 const TAKEN_NAMES = ["arjun", "priya", "rohan", "anjali", "vikram", "meera", "riya", "aarav"];
 
+function TileButton({
+  selected,
+  onClick,
+  children,
+  testId,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+  testId?: string;
+}) {
+  return (
+    <button
+      type="button"
+      data-testid={testId}
+      onClick={onClick}
+      className={`flex-1 py-3 px-4 rounded-xl border-2 text-sm font-semibold transition-all ${
+        selected
+          ? "border-primary bg-primary/5 text-primary"
+          : "border-muted bg-white text-muted-foreground hover:border-primary/30"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
 export default function Auth() {
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
   const searchParams = new URLSearchParams(window.location.search);
   const initialMode = (searchParams.get("mode") as Mode) || "login";
-  
+
   const [mode, setMode] = useState<Mode>(initialMode);
   const [role, setRole] = useState<Role>("student");
-  
+
   // Login State
   const [loginId, setLoginId] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  
+
   // Register State
   const [regName, setRegName] = useState("");
   const [regContact, setRegContact] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [nameError, setNameError] = useState("");
+  const [gender, setGender] = useState<Gender | null>(null);
+  const [parentType, setParentType] = useState<ParentType | null>(null);
+  const [studentClass, setStudentClass] = useState<StudentClass | null>(null);
 
   useEffect(() => {
     if (regName) {
@@ -44,8 +76,8 @@ export default function Auth() {
   }, [regName]);
 
   const getPasswordStrength = (pwd: string) => {
-    if (!pwd) return { label: "", color: "" };
-    
+    if (!pwd) return { label: "", color: "", barColor: "", level: 0 };
+
     const hasLetters = /[a-zA-Z]/.test(pwd);
     const hasNumbers = /[0-9]/.test(pwd);
     const hasSymbols = /[^a-zA-Z0-9]/.test(pwd);
@@ -54,12 +86,8 @@ export default function Auth() {
     if (!isLongEnough || (hasLetters && !hasNumbers && !hasSymbols)) {
       return { label: "Weak", color: "text-red-500", barColor: "bg-red-500", level: 1 };
     }
-    
-    if (isLongEnough && hasLetters && !hasNumbers && !hasSymbols) {
-      return { label: "Weak", color: "text-red-500", barColor: "bg-red-500", level: 1 };
-    }
 
-    if (isLongEnough && ((hasLetters && hasNumbers) || (hasLetters && hasSymbols)) && !(hasLetters && hasNumbers && hasSymbols)) {
+    if (isLongEnough && !(hasLetters && hasNumbers && hasSymbols)) {
       return { label: "Medium", color: "text-orange-500", barColor: "bg-orange-500", level: 2 };
     }
 
@@ -71,7 +99,14 @@ export default function Auth() {
   };
 
   const strength = getPasswordStrength(regPassword);
-  
+
+  const isRegisterValid =
+    !nameError &&
+    regPassword &&
+    strength.level === 3 &&
+    gender !== null &&
+    (role === "student" ? studentClass !== null : parentType !== null);
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (loginId.toUpperCase().startsWith("VG-STU-")) {
@@ -85,12 +120,11 @@ export default function Auth() {
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    if (nameError) return;
-    if (strength.level < 3) return;
-    
+    if (!isRegisterValid) return;
+
     const randomNum = Math.floor(10000 + Math.random() * 90000);
     const newId = role === "student" ? `VG-STU-${randomNum}` : `VG-PAR-${randomNum}`;
-    
+
     setLocation(`/success?id=${newId}&role=${role}`);
   };
 
@@ -169,16 +203,18 @@ export default function Auth() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.2 }}
                 onSubmit={handleRegister}
-                className="space-y-6"
+                className="space-y-5"
               >
                 <div className="text-center space-y-2 mb-6">
                   <h2 className="text-2xl font-bold text-foreground">Join VidyaGanit</h2>
                   <p className="text-muted-foreground text-sm">Select your role to get started.</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-6">
+                {/* Role tiles */}
+                <div className="grid grid-cols-2 gap-4">
                   <button
                     type="button"
+                    data-testid="tile-role-student"
                     onClick={() => setRole("student")}
                     className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all gap-2 ${role === "student" ? "border-primary bg-primary/5 text-primary" : "border-muted bg-white text-muted-foreground hover:border-primary/30"}`}
                   >
@@ -187,6 +223,7 @@ export default function Auth() {
                   </button>
                   <button
                     type="button"
+                    data-testid="tile-role-parent"
                     onClick={() => setRole("parent")}
                     className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all gap-2 ${role === "parent" ? "border-primary bg-primary/5 text-primary" : "border-muted bg-white text-muted-foreground hover:border-primary/30"}`}
                   >
@@ -195,64 +232,130 @@ export default function Auth() {
                   </button>
                 </div>
 
-                <div className="space-y-4">
+                {/* Parent type: Father / Mother */}
+                {role === "parent" && (
                   <div className="space-y-2">
-                    <Label htmlFor="reg-name" className="text-foreground font-medium">Full Name</Label>
-                    <Input
-                      id="reg-name"
-                      data-testid="input-register-name"
-                      value={regName}
-                      onChange={(e) => setRegName(e.target.value)}
-                      placeholder="e.g. Rohan Sharma"
-                      className={`h-12 text-lg px-4 bg-gray-50 ${nameError ? "border-red-500 focus-visible:ring-red-500" : "border-gray-200"}`}
-                      required
-                    />
-                    {nameError && (
-                      <p className="text-sm text-red-500 font-medium mt-1">{nameError}</p>
-                    )}
-                  </div>
-
-                  {role === "parent" && (
-                    <div className="space-y-2">
-                      <Label htmlFor="reg-contact" className="text-foreground font-medium">Email or Phone</Label>
-                      <Input
-                        id="reg-contact"
-                        data-testid="input-register-contact"
-                        value={regContact}
-                        onChange={(e) => setRegContact(e.target.value)}
-                        placeholder="Email or Phone"
-                        className="h-12 text-lg px-4 bg-gray-50 border-gray-200"
-                        required
-                      />
+                    <Label className="text-foreground font-medium">I am a</Label>
+                    <div className="flex gap-3">
+                      <TileButton
+                        selected={parentType === "father"}
+                        onClick={() => setParentType("father")}
+                        testId="tile-parent-father"
+                      >
+                        Father
+                      </TileButton>
+                      <TileButton
+                        selected={parentType === "mother"}
+                        onClick={() => setParentType("mother")}
+                        testId="tile-parent-mother"
+                      >
+                        Mother
+                      </TileButton>
                     </div>
-                  )}
+                  </div>
+                )}
 
+                {/* Student class selection */}
+                {role === "student" && (
                   <div className="space-y-2">
-                    <Label htmlFor="reg-password" className="text-foreground font-medium">Create Password</Label>
+                    <Label className="text-foreground font-medium">My Class</Label>
+                    <div className="flex gap-3">
+                      {(["4", "5", "6", "7"] as StudentClass[]).map((cls) => (
+                        <TileButton
+                          key={cls}
+                          selected={studentClass === cls}
+                          onClick={() => setStudentClass(cls)}
+                          testId={`tile-class-${cls}`}
+                        >
+                          Class {cls}
+                        </TileButton>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="reg-name" className="text-foreground font-medium">Full Name</Label>
+                  <Input
+                    id="reg-name"
+                    data-testid="input-register-name"
+                    value={regName}
+                    onChange={(e) => setRegName(e.target.value)}
+                    placeholder="e.g. Rohan Sharma"
+                    className={`h-12 text-lg px-4 bg-gray-50 ${nameError ? "border-red-500 focus-visible:ring-red-500" : "border-gray-200"}`}
+                    required
+                  />
+                  {nameError && (
+                    <p data-testid="error-name-taken" className="text-sm text-red-500 font-medium mt-1">{nameError}</p>
+                  )}
+                </div>
+
+                {/* Gender */}
+                <div className="space-y-2">
+                  <Label className="text-foreground font-medium">Gender</Label>
+                  <div className="flex gap-3">
+                    <TileButton
+                      selected={gender === "male"}
+                      onClick={() => setGender("male")}
+                      testId="tile-gender-male"
+                    >
+                      Male
+                    </TileButton>
+                    <TileButton
+                      selected={gender === "female"}
+                      onClick={() => setGender("female")}
+                      testId="tile-gender-female"
+                    >
+                      Female
+                    </TileButton>
+                  </div>
+                </div>
+
+                {/* Parent contact */}
+                {role === "parent" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-contact" className="text-foreground font-medium">Email or Phone</Label>
                     <Input
-                      id="reg-password"
-                      data-testid="input-register-password"
-                      type="password"
-                      value={regPassword}
-                      onChange={(e) => setRegPassword(e.target.value)}
-                      placeholder="Use letters, numbers & symbols"
+                      id="reg-contact"
+                      data-testid="input-register-contact"
+                      value={regContact}
+                      onChange={(e) => setRegContact(e.target.value)}
+                      placeholder="Email or Phone"
                       className="h-12 text-lg px-4 bg-gray-50 border-gray-200"
                       required
                     />
-                    
-                    {regPassword && (
-                      <div className="mt-2 space-y-2">
-                        <div className="flex justify-between items-center text-sm font-medium">
-                          <span className={strength.color}>Password Strength: {strength.label}</span>
-                        </div>
-                        <div className="flex gap-1 h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
-                          <div className={`h-full transition-all duration-300 ${strength.level >= 1 ? strength.barColor : "bg-transparent"}`} style={{width: '33.33%'}} />
-                          <div className={`h-full transition-all duration-300 ${strength.level >= 2 ? strength.barColor : "bg-transparent"}`} style={{width: '33.33%'}} />
-                          <div className={`h-full transition-all duration-300 ${strength.level >= 3 ? strength.barColor : "bg-transparent"}`} style={{width: '33.33%'}} />
-                        </div>
-                      </div>
-                    )}
                   </div>
+                )}
+
+                {/* Password */}
+                <div className="space-y-2">
+                  <Label htmlFor="reg-password" className="text-foreground font-medium">Create Password</Label>
+                  <Input
+                    id="reg-password"
+                    data-testid="input-register-password"
+                    type="password"
+                    value={regPassword}
+                    onChange={(e) => setRegPassword(e.target.value)}
+                    placeholder="Use letters, numbers & symbols"
+                    className="h-12 text-lg px-4 bg-gray-50 border-gray-200"
+                    required
+                  />
+
+                  {regPassword && (
+                    <div className="mt-2 space-y-2">
+                      <div className="flex justify-between items-center text-sm font-medium">
+                        <span data-testid="text-password-strength" className={strength.color}>
+                          Password Strength: {strength.label}
+                        </span>
+                      </div>
+                      <div className="flex gap-1 h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                        <div className={`h-full transition-all duration-300 ${strength.level >= 1 ? strength.barColor : "bg-transparent"}`} style={{ width: "33.33%" }} />
+                        <div className={`h-full transition-all duration-300 ${strength.level >= 2 ? strength.barColor : "bg-transparent"}`} style={{ width: "33.33%" }} />
+                        <div className={`h-full transition-all duration-300 ${strength.level >= 3 ? strength.barColor : "bg-transparent"}`} style={{ width: "33.33%" }} />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {regPassword && strength.level < 3 && (
@@ -261,11 +364,11 @@ export default function Auth() {
                   </div>
                 )}
 
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   data-testid="button-submit-register"
-                  disabled={!!nameError || (!!regPassword && strength.level < 3) || !regPassword}
-                  className="w-full h-12 text-lg rounded-xl font-semibold mt-6 bg-primary hover:bg-primary/90 disabled:opacity-50"
+                  disabled={!isRegisterValid}
+                  className="w-full h-12 text-lg rounded-xl font-semibold mt-2 bg-primary hover:bg-primary/90 disabled:opacity-50"
                 >
                   Create Account
                 </Button>
