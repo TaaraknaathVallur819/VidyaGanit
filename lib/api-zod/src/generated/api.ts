@@ -58,6 +58,74 @@ export const LoginUserResponse = zod.object({
 
 
 /**
+ * @summary Get user profile
+ */
+export const GetProfileParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetProfileResponse = zod.object({
+  "vidyaId": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['student', 'parent']),
+  "gender": zod.enum(['male', 'female']),
+  "studentClass": zod.string().nullish(),
+  "board": zod.string().nullish(),
+  "parentType": zod.string().nullish(),
+  "contact": zod.string().nullish()
+})
+
+
+/**
+ * @summary Update user profile
+ */
+export const UpdateProfileParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+
+
+
+export const UpdateProfileBody = zod.object({
+  "name": zod.string().min(1).optional(),
+  "gender": zod.enum(['male', 'female']).optional(),
+  "contact": zod.string().nullish()
+})
+
+export const UpdateProfileResponse = zod.object({
+  "vidyaId": zod.string(),
+  "name": zod.string(),
+  "role": zod.enum(['student', 'parent']),
+  "gender": zod.enum(['male', 'female']),
+  "studentClass": zod.string().nullish(),
+  "board": zod.string().nullish(),
+  "parentType": zod.string().nullish(),
+  "contact": zod.string().nullish()
+})
+
+
+/**
+ * @summary Change user password
+ */
+export const ChangePasswordParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const changePasswordBodyNewPasswordMin = 8;
+
+
+
+export const ChangePasswordBody = zod.object({
+  "currentPassword": zod.string(),
+  "newPassword": zod.string().min(changePasswordBodyNewPasswordMin)
+})
+
+export const ChangePasswordResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
  * @summary Request a password reset
  */
 export const ForgotPasswordBody = zod.object({

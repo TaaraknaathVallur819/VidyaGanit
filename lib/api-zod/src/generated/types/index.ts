@@ -6,11 +6,14 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './changePasswordInput';
 export * from './errorResponse';
 export * from './forgotPasswordInput';
 export * from './healthStatus';
 export * from './loginInput';
 export * from './messageResponse';
+export * from './profileUpdate';
+export * from './profileUpdateGender';
 export * from './userProfile';
 export * from './userProfileGender';
 export * from './userProfileRole';

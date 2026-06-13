@@ -107,6 +107,28 @@ export interface UserProfile {
   contact?: string | null;
 }
 
+export type ProfileUpdateGender = typeof ProfileUpdateGender[keyof typeof ProfileUpdateGender];
+
+
+export const ProfileUpdateGender = {
+  male: 'male',
+  female: 'female',
+} as const;
+
+export interface ProfileUpdate {
+  /** @minLength 1 */
+  name?: string;
+  gender?: ProfileUpdateGender;
+  /** @nullable */
+  contact?: string | null;
+}
+
+export interface ChangePasswordInput {
+  currentPassword: string;
+  /** @minLength 8 */
+  newPassword: string;
+}
+
 export interface MessageResponse {
   message: string;
 }

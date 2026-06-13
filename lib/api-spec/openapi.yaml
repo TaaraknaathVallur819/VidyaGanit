@@ -83,6 +83,97 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /profile/{vidyaId}:
+    get:
+      operationId: getProfile
+      tags: [auth]
+      summary: Get user profile
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Profile data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateProfile
+      tags: [auth]
+      summary: Update user profile
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /profile/{vidyaId}/change-password:
+    post:
+      operationId: changePassword
+      tags: [auth]
+      summary: Change user password
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordInput"
+      responses:
+        "200":
+          description: Password changed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "401":
+          description: Current password incorrect
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /auth/forgot-password:
     post:
       operationId: forgotPassword
@@ -185,6 +276,28 @@ components:
           type: ["string", "null"]
         contact:
           type: ["string", "null"]
+
+    ProfileUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        gender:
+          type: string
+          enum: [male, female]
+        contact:
+          type: ["string", "null"]
+
+    ChangePasswordInput:
+      type: object
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+          minLength: 8
 
     MessageResponse:
       type: object

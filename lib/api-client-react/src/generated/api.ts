@@ -20,11 +20,13 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ChangePasswordInput,
   ErrorResponse,
   ForgotPasswordInput,
   HealthStatus,
   LoginInput,
   MessageResponse,
+  ProfileUpdate,
   UserProfile,
   UserRegistrationInput
 } from './api.schemas';
@@ -259,6 +261,227 @@ export const useLoginUser = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getLoginUserMutationOptions(options));
+    }
+
+export const getGetProfileUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/profile/${vidyaId}`
+}
+
+/**
+ * @summary Get user profile
+ */
+export const getProfile = async (vidyaId: string, options?: RequestInit): Promise<UserProfile> => {
+
+  return customFetch<UserProfile>(getGetProfileUrl(vidyaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetProfileQueryKey = (vidyaId: string,) => {
+    return [
+    `/api/profile/${vidyaId}`
+    ] as const;
+    }
+
+
+export const getGetProfileQueryOptions = <TData = Awaited<ReturnType<typeof getProfile>>, TError = ErrorType<ErrorResponse>>(vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetProfileQueryKey(vidyaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProfile>>> = ({ signal }) => getProfile(vidyaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProfile>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetProfileQueryResult = NonNullable<Awaited<ReturnType<typeof getProfile>>>
+export type GetProfileQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get user profile
+ */
+
+export function useGetProfile<TData = Awaited<ReturnType<typeof getProfile>>, TError = ErrorType<ErrorResponse>>(
+ vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetProfileQueryOptions(vidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpdateProfileUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/profile/${vidyaId}`
+}
+
+/**
+ * @summary Update user profile
+ */
+export const updateProfile = async (vidyaId: string,
+    profileUpdate: ProfileUpdate, options?: RequestInit): Promise<UserProfile> => {
+
+  return customFetch<UserProfile>(getUpdateProfileUrl(vidyaId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      profileUpdate,)
+  }
+);}
+
+
+
+
+export const getUpdateProfileMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProfile>>, TError,{vidyaId: string;data: BodyType<ProfileUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateProfile>>, TError,{vidyaId: string;data: BodyType<ProfileUpdate>}, TContext> => {
+
+const mutationKey = ['updateProfile'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateProfile>>, {vidyaId: string;data: BodyType<ProfileUpdate>}> = (props) => {
+          const {vidyaId,data} = props ?? {};
+
+          return  updateProfile(vidyaId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateProfileMutationResult = NonNullable<Awaited<ReturnType<typeof updateProfile>>>
+    export type UpdateProfileMutationBody = BodyType<ProfileUpdate>
+    export type UpdateProfileMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Update user profile
+ */
+export const useUpdateProfile = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProfile>>, TError,{vidyaId: string;data: BodyType<ProfileUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateProfile>>,
+        TError,
+        {vidyaId: string;data: BodyType<ProfileUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateProfileMutationOptions(options));
+    }
+
+export const getChangePasswordUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/profile/${vidyaId}/change-password`
+}
+
+/**
+ * @summary Change user password
+ */
+export const changePassword = async (vidyaId: string,
+    changePasswordInput: ChangePasswordInput, options?: RequestInit): Promise<MessageResponse> => {
+
+  return customFetch<MessageResponse>(getChangePasswordUrl(vidyaId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      changePasswordInput,)
+  }
+);}
+
+
+
+
+export const getChangePasswordMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof changePassword>>, TError,{vidyaId: string;data: BodyType<ChangePasswordInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof changePassword>>, TError,{vidyaId: string;data: BodyType<ChangePasswordInput>}, TContext> => {
+
+const mutationKey = ['changePassword'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof changePassword>>, {vidyaId: string;data: BodyType<ChangePasswordInput>}> = (props) => {
+          const {vidyaId,data} = props ?? {};
+
+          return  changePassword(vidyaId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ChangePasswordMutationResult = NonNullable<Awaited<ReturnType<typeof changePassword>>>
+    export type ChangePasswordMutationBody = BodyType<ChangePasswordInput>
+    export type ChangePasswordMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Change user password
+ */
+export const useChangePassword = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof changePassword>>, TError,{vidyaId: string;data: BodyType<ChangePasswordInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof changePassword>>,
+        TError,
+        {vidyaId: string;data: BodyType<ChangePasswordInput>},
+        TContext
+      > => {
+      return useMutation(getChangePasswordMutationOptions(options));
     }
 
 export const getForgotPasswordUrl = () => {
