@@ -2,7 +2,12 @@ import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
 import { db, usersTable } from "@workspace/db";
 import { SendChatMessageBody } from "@workspace/api-zod";
-import { generateSocraticResponse, type ChatEntry } from "../lib/tutor";
+import {
+  generateSocraticResponse,
+  detectTopic,
+  type ChatEntry,
+} from "../lib/tutor";
+import { computeXpAndBadges } from "../lib/xp";
 
 const router: IRouter = Router();
 
@@ -49,7 +54,28 @@ router.post("/chat/message", async (req, res): Promise<void> => {
     res.write(`data: ${JSON.stringify({ chunk: word + " " })}\n\n`);
   }
 
-  res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+  const topic = detectTopic(message);
+  const { xpGained, newBadges } = computeXpAndBadges({
+    topic,
+    message,
+    currentXp: user.xp ?? 0,
+    existingBadges: user.badges ?? [],
+    historyLength: chatHistory.length,
+  });
+
+  const newXp = (user.xp ?? 0) + xpGained;
+  const allBadges = [
+    ...new Set([...(user.badges ?? []), ...newBadges]),
+  ];
+
+  await db
+    .update(usersTable)
+    .set({ xp: newXp, badges: allBadges })
+    .where(eq(usersTable.vidyaId, vidyaId));
+
+  res.write(
+    `data: ${JSON.stringify({ done: true, xpAwarded: xpGained, newBadges })}\n\n`,
+  );
   res.end();
 });
 

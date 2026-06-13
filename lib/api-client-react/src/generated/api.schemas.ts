@@ -105,6 +105,8 @@ export interface UserProfile {
   parentType?: string | null;
   /** @nullable */
   contact?: string | null;
+  xp: number;
+  badges: string[];
 }
 
 export type ProfileUpdateGender = typeof ProfileUpdateGender[keyof typeof ProfileUpdateGender];

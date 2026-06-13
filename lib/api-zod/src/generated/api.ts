@@ -45,6 +45,8 @@ export const LoginUserBody = zod.object({
   "password": zod.string()
 })
 
+export const loginUserResponseXpDefault = 0;
+
 export const LoginUserResponse = zod.object({
   "vidyaId": zod.string(),
   "name": zod.string(),
@@ -53,7 +55,9 @@ export const LoginUserResponse = zod.object({
   "studentClass": zod.string().nullish(),
   "board": zod.string().nullish(),
   "parentType": zod.string().nullish(),
-  "contact": zod.string().nullish()
+  "contact": zod.string().nullish(),
+  "xp": zod.number().default(loginUserResponseXpDefault),
+  "badges": zod.array(zod.string())
 })
 
 
@@ -64,6 +68,8 @@ export const GetProfileParams = zod.object({
   "vidyaId": zod.coerce.string()
 })
 
+export const getProfileResponseXpDefault = 0;
+
 export const GetProfileResponse = zod.object({
   "vidyaId": zod.string(),
   "name": zod.string(),
@@ -72,7 +78,9 @@ export const GetProfileResponse = zod.object({
   "studentClass": zod.string().nullish(),
   "board": zod.string().nullish(),
   "parentType": zod.string().nullish(),
-  "contact": zod.string().nullish()
+  "contact": zod.string().nullish(),
+  "xp": zod.number().default(getProfileResponseXpDefault),
+  "badges": zod.array(zod.string())
 })
 
 
@@ -92,6 +100,8 @@ export const UpdateProfileBody = zod.object({
   "contact": zod.string().nullish()
 })
 
+export const updateProfileResponseXpDefault = 0;
+
 export const UpdateProfileResponse = zod.object({
   "vidyaId": zod.string(),
   "name": zod.string(),
@@ -100,7 +110,9 @@ export const UpdateProfileResponse = zod.object({
   "studentClass": zod.string().nullish(),
   "board": zod.string().nullish(),
   "parentType": zod.string().nullish(),
-  "contact": zod.string().nullish()
+  "contact": zod.string().nullish(),
+  "xp": zod.number().default(updateProfileResponseXpDefault),
+  "badges": zod.array(zod.string())
 })
 
 

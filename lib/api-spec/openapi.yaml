@@ -379,7 +379,7 @@ components:
 
     UserProfile:
       type: object
-      required: [vidyaId, name, role, gender]
+      required: [vidyaId, name, role, gender, xp, badges]
       properties:
         vidyaId:
           type: string
@@ -399,6 +399,13 @@ components:
           type: ["string", "null"]
         contact:
           type: ["string", "null"]
+        xp:
+          type: integer
+          default: 0
+        badges:
+          type: array
+          items:
+            type: string
 
     ProfileUpdate:
       type: object

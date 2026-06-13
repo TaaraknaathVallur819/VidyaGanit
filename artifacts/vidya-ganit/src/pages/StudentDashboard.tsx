@@ -29,7 +29,25 @@ import {
   BookOpen,
   CheckCircle2,
 } from "lucide-react";
-import SocraticChat from "@/components/SocraticChat";
+import SocraticChat, { BADGE_CATALOG } from "@/components/SocraticChat";
+
+function getLevelInfo(xp: number) {
+  const LEVELS = [
+    { level: 1, name: "Beginner", min: 0, nextMin: 100 },
+    { level: 2, name: "Explorer", min: 100, nextMin: 250 },
+    { level: 3, name: "Achiever", min: 250, nextMin: 500 },
+    { level: 4, name: "Champion", min: 500, nextMin: 1000 },
+    { level: 5, name: "Master", min: 1000, nextMin: Infinity },
+  ];
+  const lvl =
+    [...LEVELS].reverse().find((l) => xp >= l.min) ?? LEVELS[0];
+  const progress =
+    lvl.nextMin === Infinity
+      ? 100
+      : Math.min(100, ((xp - lvl.min) / (lvl.nextMin - lvl.min)) * 100);
+  const xpToNext = lvl.nextMin === Infinity ? 0 : lvl.nextMin - xp;
+  return { ...lvl, progress, xpToNext };
+}
 
 function getPasswordStrength(pwd: string) {
   if (!pwd) return { label: "", color: "", barColor: "", level: 0 };
@@ -44,7 +62,6 @@ function getPasswordStrength(pwd: string) {
   return { label: "Strong", color: "text-green-500", barColor: "bg-green-500", level: 3 };
 }
 
-const BADGE_SLOTS = 8;
 
 export default function StudentDashboard() {
   const { user, setUser } = useAuth();
@@ -55,6 +72,9 @@ export default function StudentDashboard() {
   });
 
   const displayed = profile ?? user;
+  const xp = displayed?.role === "student" ? (displayed.xp ?? 0) : 0;
+  const earnedBadges: string[] = displayed?.role === "student" ? (displayed.badges ?? []) : [];
+  const levelInfo = getLevelInfo(xp);
 
   // Edit Profile dialog
   const [editOpen, setEditOpen] = useState(false);
@@ -218,16 +238,24 @@ export default function StudentDashboard() {
                   <div className="flex items-center gap-2">
                     <Zap className="w-5 h-5 text-amber-500" />
                     <h3 className="font-bold text-lg text-foreground">Math XP</h3>
-                    <Badge variant="secondary" className="ml-auto text-base font-bold px-3 py-1">0 XP</Badge>
+                    <Badge variant="secondary" className="ml-auto text-base font-bold px-3 py-1">{xp} XP</Badge>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-xs text-muted-foreground mb-1.5 font-medium">
-                      <span>Level 1 — Beginner</span>
-                      <span>0 / 100 XP to Level 2</span>
+                      <span>Level {levelInfo.level} — {levelInfo.name}</span>
+                      {levelInfo.nextMin === Infinity
+                        ? <span>Max Level! 🏆</span>
+                        : <span>{levelInfo.xpToNext} XP to Level {levelInfo.level + 1}</span>
+                      }
                     </div>
                     <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full" style={{ width: "0%" }} />
+                      <motion.div
+                        className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${levelInfo.progress}%` }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                      />
                     </div>
                   </div>
 
@@ -235,21 +263,41 @@ export default function StudentDashboard() {
                     <div className="flex items-center gap-2 mb-3">
                       <Star className="w-5 h-5 text-amber-400" />
                       <h3 className="font-bold text-foreground">Badges Earned</h3>
-                      <span className="text-xs text-muted-foreground ml-auto">0 / {BADGE_SLOTS} earned</span>
+                      <span className="text-xs text-muted-foreground ml-auto">{earnedBadges.length} / {BADGE_CATALOG.length} earned</span>
                     </div>
                     <div className="grid grid-cols-4 gap-3">
-                      {Array.from({ length: BADGE_SLOTS }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="aspect-square rounded-xl bg-gray-100 border-2 border-dashed border-gray-200 flex items-center justify-center"
-                        >
-                          <Star className="w-6 h-6 text-gray-300" />
-                        </div>
-                      ))}
+                      {BADGE_CATALOG.map((badge) => {
+                        const earned = earnedBadges.includes(badge.id);
+                        return (
+                          <motion.div
+                            key={badge.id}
+                            initial={false}
+                            animate={earned ? { scale: [1, 1.12, 1] } : {}}
+                            transition={{ duration: 0.4 }}
+                            className={`aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5 p-1 transition-colors ${
+                              earned
+                                ? "bg-amber-50 border-2 border-amber-200 shadow-sm"
+                                : "bg-gray-100 border-2 border-dashed border-gray-200"
+                            }`}
+                            title={earned ? badge.name : "Keep learning to unlock!"}
+                          >
+                            {earned ? (
+                              <>
+                                <span className="text-xl leading-none">{badge.emoji}</span>
+                                <span className="text-[9px] text-amber-700 font-semibold text-center leading-tight px-0.5">{badge.name}</span>
+                              </>
+                            ) : (
+                              <Star className="w-5 h-5 text-gray-300" />
+                            )}
+                          </motion.div>
+                        );
+                      })}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-3 text-center">
-                      Complete lessons to earn badges and XP points!
-                    </p>
+                    {earnedBadges.length === 0 && (
+                      <p className="text-xs text-muted-foreground mt-3 text-center">
+                        Ask any maths question in the Workspace to earn badges and XP! 🌟
+                      </p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -261,9 +309,10 @@ export default function StudentDashboard() {
         <TabsContent value="workspace" className="mt-0 flex-1 overflow-hidden flex flex-col">
           <SocraticChat
             vidyaId={vidyaId}
-            studentName={displayed.name ?? "Student"}
-            studentClass={displayed.studentClass ?? null}
-            board={displayed.board ?? null}
+            studentName={displayed?.name ?? "Student"}
+            studentClass={displayed?.studentClass ?? null}
+            board={displayed?.board ?? null}
+            onXpAwarded={() => { refetch(); }}
           />
         </TabsContent>
       </Tabs>

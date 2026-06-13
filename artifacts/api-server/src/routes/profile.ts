@@ -32,6 +32,8 @@ function toProfile(user: typeof usersTable.$inferSelect) {
     board: user.board ?? null,
     parentType: user.parentType ?? null,
     contact: user.contact ?? null,
+    xp: user.xp ?? 0,
+    badges: user.badges ?? [],
   };
 }
 

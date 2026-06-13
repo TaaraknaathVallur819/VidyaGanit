@@ -9,7 +9,7 @@ export type ChatEntry = {
   content: string;
 };
 
-type Topic =
+export type Topic =
   | "greeting"
   | "giveup"
   | "fraction"
@@ -35,7 +35,7 @@ function isHigherClass(ctx: StudentContext): boolean {
   return classLevel(ctx) >= 6;
 }
 
-function detectTopic(msg: string): Topic {
+export function detectTopic(msg: string): Topic {
   const m = msg.toLowerCase();
 
   if (/\b(hi|hello|hey|good morning|good afternoon|namaste|hola)\b/.test(m))

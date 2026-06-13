@@ -21,4 +21,6 @@ export interface UserProfile {
   parentType?: string | null;
   /** @nullable */
   contact?: string | null;
+  xp: number;
+  badges: string[];
 }

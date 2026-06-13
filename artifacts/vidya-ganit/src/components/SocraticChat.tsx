@@ -1,6 +1,17 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Camera, Paperclip, SendHorizonal, RefreshCw } from "lucide-react";
+import { Mic, Camera, Paperclip, SendHorizonal, RefreshCw, Zap } from "lucide-react";
+
+export const BADGE_CATALOG: { id: string; emoji: string; name: string }[] = [
+  { id: "first_step", emoji: "🌟", name: "First Step" },
+  { id: "fraction_friend", emoji: "🍕", name: "Fraction Friend" },
+  { id: "cricket_scholar", emoji: "🏏", name: "Cricket Scholar" },
+  { id: "geometry_genius", emoji: "📐", name: "Geometry Genius" },
+  { id: "algebra_ace", emoji: "🧮", name: "Algebra Ace" },
+  { id: "hot_streak", emoji: "🔥", name: "Hot Streak" },
+  { id: "never_give_up", emoji: "💪", name: "Never Give Up" },
+  { id: "century_club", emoji: "🏆", name: "Century Club" },
+];
 
 type Message = {
   id: string;
@@ -14,11 +25,15 @@ type HistoryEntry = {
   content: string;
 };
 
+type XpToast = { id: string; amount: number };
+type BadgeToast = { id: string; emoji: string; name: string };
+
 type Props = {
   vidyaId: string;
   studentName: string;
   studentClass: string | null;
   board: string | null;
+  onXpAwarded?: () => void;
 };
 
 function TypingDots() {
@@ -88,8 +103,8 @@ const WELCOME = (name: string, cls: string | null, board: string | null) => {
     `I won't hand you answers directly — but I WILL help you discover them yourself. ` +
     `That makes them stick in your brain forever! 🧠✨\n\n` +
     (info ? `I know your ${info} syllabus really well. ` : "") +
-    `Ask me any maths challenge — fractions, multiplication, geometry, percentages, equations — anything at all!\n\n` +
-    `What maths problem shall we tackle first? 🌟`
+    `Ask me any maths challenge — fractions, multiplication, geometry, percentages, equations — anything!\n\n` +
+    `Every question earns you XP and badges too! 🌟 What shall we tackle first?`
   );
 };
 
@@ -98,6 +113,7 @@ export default function SocraticChat({
   studentName,
   studentClass,
   board,
+  onXpAwarded,
 }: Props) {
   const fn = studentName.split(" ")[0];
   const initial = fn[0]?.toUpperCase() ?? "S";
@@ -106,6 +122,8 @@ export default function SocraticChat({
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [xpToasts, setXpToasts] = useState<XpToast[]>([]);
+  const [badgeToasts, setBadgeToasts] = useState<BadgeToast[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -122,14 +140,27 @@ export default function SocraticChat({
     }
   };
 
+  const showXpToast = (amount: number) => {
+    const id = `xp-${Date.now()}`;
+    setXpToasts((prev) => [...prev, { id, amount }]);
+    setTimeout(() => setXpToasts((prev) => prev.filter((t) => t.id !== id)), 2200);
+  };
+
+  const showBadgeToast = (emoji: string, name: string) => {
+    const id = `badge-${Date.now()}-${name}`;
+    setBadgeToasts((prev) => [...prev, { id, emoji, name }]);
+    setTimeout(
+      () => setBadgeToasts((prev) => prev.filter((t) => t.id !== id)),
+      3800,
+    );
+  };
+
   const sendMessage = async (text?: string) => {
     const msg = (text ?? input).trim();
     if (!msg || isStreaming) return;
 
     setInput("");
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-    }
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
 
     const userMsgId = `u-${Date.now()}`;
     const tutorMsgId = `t-${Date.now()}`;
@@ -169,7 +200,10 @@ export default function SocraticChat({
             const data = JSON.parse(line.slice(6)) as {
               chunk?: string;
               done?: boolean;
+              xpAwarded?: number;
+              newBadges?: string[];
             };
+
             if (typeof data.chunk === "string") {
               fullContent += data.chunk;
               setMessages((prev) =>
@@ -178,6 +212,7 @@ export default function SocraticChat({
                 ),
               );
             }
+
             if (data.done) {
               setMessages((prev) =>
                 prev.map((m) =>
@@ -189,6 +224,18 @@ export default function SocraticChat({
                 { role: "user", content: msg },
                 { role: "assistant", content: fullContent },
               ]);
+
+              if (data.xpAwarded) {
+                showXpToast(data.xpAwarded);
+                onXpAwarded?.();
+              }
+              if (data.newBadges?.length) {
+                data.newBadges.forEach((badgeId) => {
+                  const def = BADGE_CATALOG.find((b) => b.id === badgeId);
+                  if (def) showBadgeToast(def.emoji, def.name);
+                });
+              }
+
               setIsStreaming(false);
             }
           } catch {
@@ -234,7 +281,7 @@ export default function SocraticChat({
   ];
 
   return (
-    <div className="flex flex-col h-full bg-[#F5F0FF]">
+    <div className="relative flex flex-col h-full bg-[#F5F0FF]">
       {/* Chat header */}
       <div className="px-4 py-3 bg-white border-b border-indigo-100 flex items-center gap-3 shrink-0">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-lg select-none shadow-sm">
@@ -264,7 +311,6 @@ export default function SocraticChat({
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 min-h-0">
-        {/* Static welcome bubble */}
         <TutorBubble content={WELCOME(studentName, studentClass, board)} />
 
         <AnimatePresence initial={false}>
@@ -278,16 +324,12 @@ export default function SocraticChat({
               {msg.role === "user" ? (
                 <StudentBubble content={msg.content} initial={initial} />
               ) : (
-                <TutorBubble
-                  content={msg.content}
-                  isStreaming={msg.isStreaming}
-                />
+                <TutorBubble content={msg.content} isStreaming={msg.isStreaming} />
               )}
             </motion.div>
           ))}
         </AnimatePresence>
 
-        {/* Quick starters shown only when no messages */}
         {messages.length === 0 && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
@@ -320,7 +362,6 @@ export default function SocraticChat({
       {/* Input bar */}
       <div className="px-4 py-3 bg-white border-t border-indigo-100 shrink-0">
         <div className="flex items-end gap-2 bg-gray-50 rounded-2xl border border-gray-200 px-3 py-2 focus-within:border-indigo-300 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
-          {/* Left icons */}
           <div className="flex items-center gap-0.5 pb-0.5">
             <button
               type="button"
@@ -344,8 +385,6 @@ export default function SocraticChat({
               <Mic className="w-4 h-4" />
             </button>
           </div>
-
-          {/* Textarea */}
           <textarea
             ref={textareaRef}
             value={input}
@@ -359,8 +398,6 @@ export default function SocraticChat({
             rows={1}
             disabled={isStreaming}
           />
-
-          {/* Send button */}
           <button
             type="button"
             onClick={() => sendMessage()}
@@ -371,9 +408,55 @@ export default function SocraticChat({
           </button>
         </div>
         <p className="text-[10px] text-muted-foreground text-center mt-1.5 select-none">
-          Enter → send &nbsp;·&nbsp; Shift+Enter → new line &nbsp;·&nbsp; Tutor never gives the answer directly 🧠
+          Enter → send &nbsp;·&nbsp; Shift+Enter → new line &nbsp;·&nbsp; Every question earns XP! 🌟
         </p>
       </div>
+
+      {/* XP float toasts */}
+      <AnimatePresence>
+        {xpToasts.map((toast) => (
+          <motion.div
+            key={toast.id}
+            initial={{ opacity: 1, y: 0, scale: 1 }}
+            animate={{ opacity: 0, y: -70, scale: 1.15 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.9, ease: "easeOut" }}
+            className="absolute bottom-[88px] right-5 z-50 pointer-events-none"
+          >
+            <div className="flex items-center gap-1.5 bg-amber-500 text-white text-sm font-bold px-3 py-1.5 rounded-full shadow-lg">
+              <Zap className="w-3.5 h-3.5" />
+              +{toast.amount} XP
+            </div>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+
+      {/* Badge unlock toasts */}
+      <AnimatePresence>
+        {badgeToasts.map((toast, i) => (
+          <motion.div
+            key={toast.id}
+            initial={{ opacity: 0, x: -20, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -20, scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="absolute z-50"
+            style={{ bottom: `${100 + i * 80}px`, left: "16px" }}
+          >
+            <div className="flex items-center gap-2.5 bg-white border-2 border-amber-300 rounded-xl px-3 py-2.5 shadow-xl max-w-[220px]">
+              <span className="text-2xl shrink-0">{toast.emoji}</span>
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wide">
+                  🎉 Badge Unlocked!
+                </p>
+                <p className="text-sm font-bold text-foreground truncate">
+                  {toast.name}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
   );
 }
