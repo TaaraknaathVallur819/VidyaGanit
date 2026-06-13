@@ -177,6 +177,19 @@ export const UnlinkStudentResponse = zod.object({
 
 
 /**
+ * @summary Send a message to the Socratic math tutor (SSE stream)
+ */
+export const SendChatMessageBody = zod.object({
+  "vidyaId": zod.string(),
+  "message": zod.string(),
+  "history": zod.array(zod.object({
+  "role": zod.enum(['user', 'assistant']),
+  "content": zod.string()
+})).optional()
+})
+
+
+/**
  * @summary Request a password reset
  */
 export const ForgotPasswordBody = zod.object({

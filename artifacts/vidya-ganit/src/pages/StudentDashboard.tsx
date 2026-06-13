@@ -29,6 +29,7 @@ import {
   BookOpen,
   CheckCircle2,
 } from "lucide-react";
+import SocraticChat from "@/components/SocraticChat";
 
 function getPasswordStrength(pwd: string) {
   if (!pwd) return { label: "", color: "", barColor: "", level: 0 };
@@ -131,8 +132,8 @@ export default function StudentDashboard() {
   if (!displayed) return null;
 
   return (
-    <div className="flex-1 bg-gray-50/50 min-h-full">
-      <Tabs defaultValue="profile" className="h-full">
+    <div className="flex-1 bg-gray-50/50 flex flex-col" style={{ height: "100dvh" }}>
+      <Tabs defaultValue="workspace" className="flex flex-col flex-1 overflow-hidden">
         <div className="border-b bg-white px-6 pt-4">
           <div className="max-w-3xl mx-auto">
             <h1 className="text-2xl font-bold text-foreground mb-3">Student Workspace</h1>
@@ -257,16 +258,13 @@ export default function StudentDashboard() {
         </TabsContent>
 
         {/* ── Workspace Tab ── */}
-        <TabsContent value="workspace" className="mt-0 p-6">
-          <div className="max-w-3xl mx-auto flex items-center justify-center min-h-[400px]">
-            <div className="text-center space-y-3">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto">
-                <BookOpen className="w-8 h-8 text-primary" />
-              </div>
-              <h2 className="text-2xl font-bold text-foreground">Future Student Workspace</h2>
-              <p className="text-muted-foreground max-w-sm">Your personalized Socratic math lessons will appear here. Stay tuned!</p>
-            </div>
-          </div>
+        <TabsContent value="workspace" className="mt-0 flex-1 overflow-hidden flex flex-col">
+          <SocraticChat
+            vidyaId={vidyaId}
+            studentName={displayed.name ?? "Student"}
+            studentClass={displayed.studentClass ?? null}
+            board={displayed.board ?? null}
+          />
         </TabsContent>
       </Tabs>
 

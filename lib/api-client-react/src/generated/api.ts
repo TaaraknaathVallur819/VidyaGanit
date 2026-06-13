@@ -21,6 +21,7 @@ import type {
 
 import type {
   ChangePasswordInput,
+  ChatMessageInput,
   ErrorResponse,
   ForgotPasswordInput,
   HealthStatus,
@@ -706,6 +707,77 @@ export const useUnlinkStudent = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getUnlinkStudentMutationOptions(options));
+    }
+
+export const getSendChatMessageUrl = () => {
+
+
+
+
+  return `/api/chat/message`
+}
+
+/**
+ * @summary Send a message to the Socratic math tutor (SSE stream)
+ */
+export const sendChatMessage = async (chatMessageInput: ChatMessageInput, options?: RequestInit): Promise<unknown> => {
+
+  return customFetch<unknown>(getSendChatMessageUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      chatMessageInput,)
+  }
+);}
+
+
+
+
+export const getSendChatMessageMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendChatMessage>>, TError,{data: BodyType<ChatMessageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof sendChatMessage>>, TError,{data: BodyType<ChatMessageInput>}, TContext> => {
+
+const mutationKey = ['sendChatMessage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendChatMessage>>, {data: BodyType<ChatMessageInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  sendChatMessage(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SendChatMessageMutationResult = NonNullable<Awaited<ReturnType<typeof sendChatMessage>>>
+    export type SendChatMessageMutationBody = BodyType<ChatMessageInput>
+    export type SendChatMessageMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Send a message to the Socratic math tutor (SSE stream)
+ */
+export const useSendChatMessage = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendChatMessage>>, TError,{data: BodyType<ChatMessageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof sendChatMessage>>,
+        TError,
+        {data: BodyType<ChatMessageInput>},
+        TContext
+      > => {
+      return useMutation(getSendChatMessageMutationOptions(options));
     }
 
 export const getForgotPasswordUrl = () => {

@@ -1,0 +1,1 @@
+- [Socratic Chat Architecture](socratic-chat.md) — rule-based tutor engine, SSE streaming, ready for OpenAI swap

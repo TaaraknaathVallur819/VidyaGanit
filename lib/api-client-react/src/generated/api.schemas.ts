@@ -133,6 +133,25 @@ export interface MessageResponse {
   message: string;
 }
 
+export type ChatHistoryItemRole = typeof ChatHistoryItemRole[keyof typeof ChatHistoryItemRole];
+
+
+export const ChatHistoryItemRole = {
+  user: 'user',
+  assistant: 'assistant',
+} as const;
+
+export interface ChatHistoryItem {
+  role: ChatHistoryItemRole;
+  content: string;
+}
+
+export interface ChatMessageInput {
+  vidyaId: string;
+  message: string;
+  history?: ChatHistoryItem[];
+}
+
 export interface LinkStudentInput {
   studentVidyaId: string;
 }

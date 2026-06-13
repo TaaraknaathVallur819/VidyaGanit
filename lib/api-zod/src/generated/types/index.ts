@@ -7,6 +7,9 @@
  */
 
 export * from './changePasswordInput';
+export * from './chatHistoryItem';
+export * from './chatHistoryItemRole';
+export * from './chatMessageInput';
 export * from './errorResponse';
 export * from './forgotPasswordInput';
 export * from './healthStatus';
