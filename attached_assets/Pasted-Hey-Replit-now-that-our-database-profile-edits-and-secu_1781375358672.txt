@@ -1,0 +1,22 @@
+Hey Replit, now that our database, profile edits, and secure login systems are working flawlessly, let's build out the Student Workspace and activate the Socratic Chat Interface!
+
+When a student logs in and clicks over to their dashboard, instead of a blank screen, I want a vibrant, playful, and high-energy chat room designed specifically for kids aged 9 to 12. Here is exactly what we need to build:
+
+1. The Chat Interface Layout
+
+Create a clean, beautiful chat window in the center of the student workspace. Give it rounded corners, clear message bubbles (one color for the tutor, another for the student), and warm, engaging colors.
+
+At the standard bottom of the workspace, build a large chat input bar. Right next to or inside the text box, place three high-visibility placeholder icons: a Microphone (🎙️), a Camera (📷), and a Paperclip (📎).
+
+2. Program the "Socratic Tutor Brain" (Simulated Text Responses)
+Connect a smart chat response system to this window. When a student types a math problem or question into the chat, the tutor must strictly follow these rules:
+
+The Golden Rule: NEVER give away the final answer, a completed formula, or a simplified fraction under any circumstances. If the kid says "I don't know," "I give up," or "Just tell me the answer," refuse gently and give an even simpler real-world hint.
+
+Syllabus-Aware Teaching: Read the logged-in student's Class and Board from our database. If they are Class 5 State Board, keep the language simple and math style aligned with that exact framework. If they are Class 7 ICSE, use the slightly more formal terminology and rigorous step-by-step logic expected in their syllabus.
+
+Fun Local Analogies: Explain the math concepts using fun, relatable, real-world examples. Use things like calculating cricket run rates, slicing a pizza, sharing bars of chocolate, or earning reward points in mobile games. Throw in friendly emojis (🏏, 🍕, 🌟, 🚀).
+
+The One-Step Pause: Only explain the very first tiny clue or arithmetic step, then stop. Always conclude your message with an encouraging question asking them what they think the next immediate step should be.
+
+Let's activate this custom Socratic chat room for our students!
