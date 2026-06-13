@@ -1,0 +1,51 @@
+Hey Replit, let's start building my web app called VidyaGanit. It's a Socratic math tuition app for kids in Classes 4 to 7 and their parents. Because both kids and adults will use it, I need the design to look super clean and professional for parents, but still warm, friendly, and welcoming for young students.
+
+For this first step, I want to build the basic visual framework, the landing page, the login/create account screens, and the core validation rules. Don't worry about heavy databases or AI features yet—let's just get the look, navigation, and initial account logic working perfectly.
+
+Here is exactly what I need you to build:
+
+1. A Persistent Top Header
+Put a clean navigation bar at the very top of the app that stays there on every page. It should have the app name "VidyaGanit" on the left. On the right, add a little language selector placeholder that reads [English / हिंदी / தமிழ்] and a button that says [Switch Role].
+
+2. The Landing Page
+Create a beautiful, modern homepage. Give it a friendly headline welcoming people to personalized math tutoring for middle schoolers. Right below the headline, put two big, clear buttons: [Create a New Account] and [Log In to Existing Account].
+
+3. The Create Account & Login Screen Layout
+When someone clicks those buttons, show a nice form card in the center of the screen.
+
+For the Login view: Keep it simple. Just have a box asking for their "Unique VidyaGanit ID" and a password box.
+
+For the Create Account view: Put two interactive tabs or tiles at the top that say "I am a Student" and "I am a Parent".
+
+If they click Student, show only Name and Password fields.
+
+If they click Parent, expand the form to show fields for Name, a combined box for Email ID / Phone Number, and a Password field. Make all the input boxes large and easy to tap.
+
+4. Account Creation Security Guardrails & Validation (Important!)
+When someone tries to create an account, enforce these strict rules right on the screen:
+
+Name Availability Check: Create a small mock list of "taken" names in the background. If a user types a name that is already in use and hits submit, block the account creation and display this exact error text directly under the name field: "Username is taken already, please try a different one".
+
+Password Length & Strength Meter: As the user types their password, evaluate its strength dynamically in real-time. It must be a minimum of 8 characters long. Display a clear, color-coded text indicator right below the field:
+
+Show "Password Strength: Weak" in Red if it's less than 8 characters, or just simple letters.
+
+Show "Password Strength: Medium" in Orange if it hits 8 characters but is too simple.
+
+Show "Password Strength: Strong" in Green if it's 8+ characters and uses a complex mix of letters, numbers, and symbols.
+
+The Registration Gate: If the password is Weak or Medium, do not allow them to submit the form. Instead, show a polite message saying: "To keep your VidyaGanit account completely safe, your password needs to be a bit stronger! Please try a different password using letters, numbers, and symbols." Only unlock the submit button if the strength indicator is Green (Strong).
+
+5. Unique ID Generation on Success
+Once they successfully pass the validation rules and click "Submit", generate a random 5-digit number and show an "Account Created Successfully" screen:
+
+If they created an account as a student, show their new permanent ID formatted like: VG-STU-[the 5 random digits] (e.g., VG-STU-48291).
+
+If they created an account as a parent, show their permanent ID formatted like: VG-PAR-[the 5 random digits] (e.g., VG-PAR-48291).
+
+Add a prominent note telling them: "Please save this ID safely! You will need it for all future log-ins." Then provide a "Go to Dashboard" button.
+
+6. Simple Mock Dashboards
+Once they click "Go to Dashboard" from that success screen, clear the screen and route them to their respective placeholder page. If they are a student, show a blank page with a big title that says "Future Student Workspace". If they are a parent, show a blank page with a big title that says "Future Parent Dashboard".
+
+Let's build this visual and logic framework first!
