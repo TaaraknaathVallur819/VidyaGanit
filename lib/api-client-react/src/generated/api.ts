@@ -24,6 +24,9 @@ import type {
   ErrorResponse,
   ForgotPasswordInput,
   HealthStatus,
+  LinkStudentInput,
+  LinkedStudentProfile,
+  LinkedStudentsResponse,
   LoginInput,
   MessageResponse,
   ProfileUpdate,
@@ -482,6 +485,227 @@ export const useChangePassword = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getChangePasswordMutationOptions(options));
+    }
+
+export const getGetLinkedStudentsUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/profile/${vidyaId}/linked-students`
+}
+
+/**
+ * @summary Get students linked to a parent
+ */
+export const getLinkedStudents = async (vidyaId: string, options?: RequestInit): Promise<LinkedStudentsResponse> => {
+
+  return customFetch<LinkedStudentsResponse>(getGetLinkedStudentsUrl(vidyaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetLinkedStudentsQueryKey = (vidyaId: string,) => {
+    return [
+    `/api/profile/${vidyaId}/linked-students`
+    ] as const;
+    }
+
+
+export const getGetLinkedStudentsQueryOptions = <TData = Awaited<ReturnType<typeof getLinkedStudents>>, TError = ErrorType<ErrorResponse>>(vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLinkedStudents>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetLinkedStudentsQueryKey(vidyaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLinkedStudents>>> = ({ signal }) => getLinkedStudents(vidyaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLinkedStudents>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetLinkedStudentsQueryResult = NonNullable<Awaited<ReturnType<typeof getLinkedStudents>>>
+export type GetLinkedStudentsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get students linked to a parent
+ */
+
+export function useGetLinkedStudents<TData = Awaited<ReturnType<typeof getLinkedStudents>>, TError = ErrorType<ErrorResponse>>(
+ vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLinkedStudents>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetLinkedStudentsQueryOptions(vidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getLinkStudentUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/profile/${vidyaId}/link-student`
+}
+
+/**
+ * @summary Link a student to a parent account
+ */
+export const linkStudent = async (vidyaId: string,
+    linkStudentInput: LinkStudentInput, options?: RequestInit): Promise<LinkedStudentProfile> => {
+
+  return customFetch<LinkedStudentProfile>(getLinkStudentUrl(vidyaId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      linkStudentInput,)
+  }
+);}
+
+
+
+
+export const getLinkStudentMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof linkStudent>>, TError,{vidyaId: string;data: BodyType<LinkStudentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof linkStudent>>, TError,{vidyaId: string;data: BodyType<LinkStudentInput>}, TContext> => {
+
+const mutationKey = ['linkStudent'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof linkStudent>>, {vidyaId: string;data: BodyType<LinkStudentInput>}> = (props) => {
+          const {vidyaId,data} = props ?? {};
+
+          return  linkStudent(vidyaId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LinkStudentMutationResult = NonNullable<Awaited<ReturnType<typeof linkStudent>>>
+    export type LinkStudentMutationBody = BodyType<LinkStudentInput>
+    export type LinkStudentMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Link a student to a parent account
+ */
+export const useLinkStudent = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof linkStudent>>, TError,{vidyaId: string;data: BodyType<LinkStudentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof linkStudent>>,
+        TError,
+        {vidyaId: string;data: BodyType<LinkStudentInput>},
+        TContext
+      > => {
+      return useMutation(getLinkStudentMutationOptions(options));
+    }
+
+export const getUnlinkStudentUrl = (vidyaId: string,
+    studentVidyaId: string,) => {
+
+
+
+
+  return `/api/profile/${vidyaId}/link-student/${studentVidyaId}`
+}
+
+/**
+ * @summary Unlink a student from a parent account
+ */
+export const unlinkStudent = async (vidyaId: string,
+    studentVidyaId: string, options?: RequestInit): Promise<MessageResponse> => {
+
+  return customFetch<MessageResponse>(getUnlinkStudentUrl(vidyaId,studentVidyaId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getUnlinkStudentMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unlinkStudent>>, TError,{vidyaId: string;studentVidyaId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof unlinkStudent>>, TError,{vidyaId: string;studentVidyaId: string}, TContext> => {
+
+const mutationKey = ['unlinkStudent'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unlinkStudent>>, {vidyaId: string;studentVidyaId: string}> = (props) => {
+          const {vidyaId,studentVidyaId} = props ?? {};
+
+          return  unlinkStudent(vidyaId,studentVidyaId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnlinkStudentMutationResult = NonNullable<Awaited<ReturnType<typeof unlinkStudent>>>
+
+    export type UnlinkStudentMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Unlink a student from a parent account
+ */
+export const useUnlinkStudent = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unlinkStudent>>, TError,{vidyaId: string;studentVidyaId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof unlinkStudent>>,
+        TError,
+        {vidyaId: string;studentVidyaId: string},
+        TContext
+      > => {
+      return useMutation(getUnlinkStudentMutationOptions(options));
     }
 
 export const getForgotPasswordUrl = () => {

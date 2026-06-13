@@ -15,6 +15,10 @@ import { useAuth } from "@/lib/auth";
 import {
   useGetProfile,
   getGetProfileQueryKey,
+  useGetLinkedStudents,
+  getGetLinkedStudentsQueryKey,
+  useLinkStudent,
+  useUnlinkStudent,
   useUpdateProfile,
   useChangePassword,
 } from "@workspace/api-client-react";
@@ -27,6 +31,10 @@ import {
   LayoutDashboard,
   CheckCircle2,
   UserPlus,
+  X,
+  BookOpen,
+  GraduationCap,
+  Loader2,
 } from "lucide-react";
 
 function getPasswordStrength(pwd: string) {
@@ -49,6 +57,60 @@ export default function ParentDashboard() {
   const { data: profile, refetch } = useGetProfile(vidyaId, {
     query: { enabled: !!vidyaId, queryKey: getGetProfileQueryKey(vidyaId) },
   });
+
+  const {
+    data: linkedData,
+    refetch: refetchLinked,
+    isLoading: linkedLoading,
+  } = useGetLinkedStudents(vidyaId, {
+    query: { enabled: !!vidyaId, queryKey: getGetLinkedStudentsQueryKey(vidyaId) },
+  });
+  const students = linkedData?.students ?? [];
+
+  const [linkInput, setLinkInput] = useState("");
+  const [linkError, setLinkError] = useState("");
+  const [linkSuccess, setLinkSuccess] = useState("");
+  const linkMutation = useLinkStudent();
+  const unlinkMutation = useUnlinkStudent();
+
+  const handleLinkStudent = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLinkError("");
+    setLinkSuccess("");
+    const trimmed = linkInput.trim().toUpperCase();
+    if (!trimmed) return;
+    linkMutation.mutate(
+      { vidyaId, data: { studentVidyaId: trimmed } },
+      {
+        onSuccess: (student) => {
+          setLinkSuccess(`${student.name} linked successfully!`);
+          setLinkInput("");
+          refetchLinked();
+        },
+        onError: (err) => {
+          setLinkError(
+            (err as { data?: { error?: string } })?.data?.error ??
+              "Could not link student. Please check the ID.",
+          );
+        },
+      },
+    );
+  };
+
+  const handleUnlink = (studentVidyaId: string, studentName: string) => {
+    unlinkMutation.mutate(
+      { vidyaId, studentVidyaId },
+      {
+        onSuccess: () => {
+          setLinkSuccess(`${studentName} removed from your account.`);
+          refetchLinked();
+        },
+        onError: () => {
+          setLinkError("Failed to remove student. Please try again.");
+        },
+      },
+    );
+  };
 
   const displayed = profile ?? user;
 
@@ -218,7 +280,7 @@ export default function ParentDashboard() {
               </Card>
             </motion.div>
 
-            {/* Connected Children */}
+            {/* Connected Students */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -226,20 +288,107 @@ export default function ParentDashboard() {
             >
               <Card className="border-0 shadow-md rounded-2xl overflow-hidden">
                 <CardContent className="p-6">
-                  <div className="flex items-center gap-2 mb-4">
+                  <div className="flex items-center gap-2 mb-5">
                     <UserPlus className="w-5 h-5 text-primary" />
                     <h3 className="font-bold text-lg text-foreground">Connected Students</h3>
+                    {students.length > 0 && (
+                      <span className="ml-auto text-xs font-semibold bg-primary/10 text-primary px-2.5 py-1 rounded-full">
+                        {students.length} linked
+                      </span>
+                    )}
                   </div>
 
-                  <div className="flex flex-col items-center justify-center py-8 text-center space-y-3 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                      <User className="w-6 h-6 text-gray-400" />
-                    </div>
-                    <p className="text-sm font-semibold text-muted-foreground">No linked students yet</p>
-                    <p className="text-xs text-muted-foreground max-w-xs">
-                      Student linking will be available in the next update. You will be able to monitor your child's progress here.
+                  {/* Link input */}
+                  <form onSubmit={handleLinkStudent} className="flex gap-2 mb-5">
+                    <Input
+                      value={linkInput}
+                      onChange={(e) => {
+                        setLinkInput(e.target.value);
+                        setLinkError("");
+                        setLinkSuccess("");
+                      }}
+                      placeholder="Enter student's VidyaGanit ID (e.g. VG-STU-12345)"
+                      className="h-10 flex-1 font-mono text-sm"
+                    />
+                    <Button
+                      type="submit"
+                      size="sm"
+                      disabled={!linkInput.trim() || linkMutation.isPending}
+                      className="h-10 px-4 rounded-xl gap-1.5 shrink-0"
+                    >
+                      {linkMutation.isPending ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <UserPlus className="w-4 h-4" />
+                      )}
+                      Link
+                    </Button>
+                  </form>
+
+                  {linkError && (
+                    <p className="text-sm text-red-500 font-medium mb-3 flex items-center gap-1.5">
+                      <X className="w-4 h-4 shrink-0" /> {linkError}
                     </p>
-                  </div>
+                  )}
+                  {linkSuccess && (
+                    <p className="text-sm text-green-600 font-medium mb-3 flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 shrink-0" /> {linkSuccess}
+                    </p>
+                  )}
+
+                  {/* Student list */}
+                  {linkedLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    </div>
+                  ) : students.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8 text-center space-y-3 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                        <User className="w-6 h-6 text-gray-400" />
+                      </div>
+                      <p className="text-sm font-semibold text-muted-foreground">No linked students yet</p>
+                      <p className="text-xs text-muted-foreground max-w-xs">
+                        Enter your child's VidyaGanit ID above to connect their account.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {students.map((s) => (
+                        <div
+                          key={s.vidyaId}
+                          className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-primary/20 transition-colors"
+                        >
+                          <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                            <GraduationCap className="w-6 h-6" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-foreground text-sm truncate">{s.name}</p>
+                            <p className="text-xs text-muted-foreground font-mono mt-0.5">{s.vidyaId}</p>
+                            <div className="flex items-center gap-3 mt-1.5">
+                              {s.studentClass && (
+                                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                                  <BookOpen className="w-3 h-3" />
+                                  Class {s.studentClass}
+                                </span>
+                              )}
+                              {s.board && (
+                                <span className="text-xs text-muted-foreground">{s.board}</span>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleUnlink(s.vidyaId, s.name)}
+                            disabled={unlinkMutation.isPending}
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors shrink-0"
+                            title="Remove student"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>

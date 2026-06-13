@@ -133,6 +133,32 @@ export interface MessageResponse {
   message: string;
 }
 
+export interface LinkStudentInput {
+  studentVidyaId: string;
+}
+
+export type LinkedStudentProfileGender = typeof LinkedStudentProfileGender[keyof typeof LinkedStudentProfileGender];
+
+
+export const LinkedStudentProfileGender = {
+  male: 'male',
+  female: 'female',
+} as const;
+
+export interface LinkedStudentProfile {
+  vidyaId: string;
+  name: string;
+  gender: LinkedStudentProfileGender;
+  /** @nullable */
+  studentClass?: string | null;
+  /** @nullable */
+  board?: string | null;
+}
+
+export interface LinkedStudentsResponse {
+  students: LinkedStudentProfile[];
+}
+
 export interface ErrorResponse {
   error: string;
 }

@@ -126,6 +126,57 @@ export const ChangePasswordResponse = zod.object({
 
 
 /**
+ * @summary Get students linked to a parent
+ */
+export const GetLinkedStudentsParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetLinkedStudentsResponse = zod.object({
+  "students": zod.array(zod.object({
+  "vidyaId": zod.string(),
+  "name": zod.string(),
+  "gender": zod.enum(['male', 'female']),
+  "studentClass": zod.string().nullish(),
+  "board": zod.string().nullish()
+}))
+})
+
+
+/**
+ * @summary Link a student to a parent account
+ */
+export const LinkStudentParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const LinkStudentBody = zod.object({
+  "studentVidyaId": zod.string()
+})
+
+export const LinkStudentResponse = zod.object({
+  "vidyaId": zod.string(),
+  "name": zod.string(),
+  "gender": zod.enum(['male', 'female']),
+  "studentClass": zod.string().nullish(),
+  "board": zod.string().nullish()
+})
+
+
+/**
+ * @summary Unlink a student from a parent account
+ */
+export const UnlinkStudentParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "studentVidyaId": zod.coerce.string()
+})
+
+export const UnlinkStudentResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
  * @summary Request a password reset
  */
 export const ForgotPasswordBody = zod.object({
