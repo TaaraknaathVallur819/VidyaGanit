@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Copy, Check } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Success() {
@@ -9,6 +10,24 @@ export default function Success() {
   const searchParams = new URLSearchParams(window.location.search);
   const id = searchParams.get("id") || "VG-STU-00000";
   const role = searchParams.get("role") || "student";
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(id);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = id;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleDashboard = () => {
     setLocation(`/dashboard/${role}`);
@@ -36,9 +55,32 @@ export default function Success() {
             
             <h2 className="text-3xl font-bold text-foreground">Account Created Successfully!</h2>
             
-            <div className="bg-primary/5 border border-primary/20 w-full p-6 rounded-xl space-y-2">
+            <div className="bg-primary/5 border border-primary/20 w-full p-6 rounded-xl space-y-3">
               <p className="text-sm text-primary/80 font-medium uppercase tracking-wider">Your Permanent ID</p>
               <p className="text-4xl font-mono font-bold tracking-widest text-primary">{id}</p>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCopy}
+                data-testid="button-copy-id"
+                className={`w-full h-11 rounded-xl font-semibold gap-2 transition-colors ${
+                  copied
+                    ? "border-green-300 bg-green-50 text-green-700 hover:bg-green-50 hover:text-green-700"
+                    : "border-primary/30 text-primary hover:bg-primary/5"
+                }`}
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    Copy ID
+                  </>
+                )}
+              </Button>
             </div>
 
             <div className="bg-orange-50 border border-orange-200 text-orange-800 p-4 rounded-lg text-sm font-medium w-full">
