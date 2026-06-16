@@ -597,7 +597,7 @@ components:
           type: ["string", "null"]
         language:
           type: ["string", "null"]
-          enum: [en, ta, hi, te, null]
+          enum: [en, hi, bn, mr, te, ta, gu, ur, kn, ml, pa, or, as, brx, doi, ks, kok, mai, mni, ne, sa, sat, sd, null]
         xp:
           type: integer
           default: 0
@@ -619,7 +619,7 @@ components:
           type: ["string", "null"]
         language:
           type: string
-          enum: [en, ta, hi, te]
+          enum: [en, hi, bn, mr, te, ta, gu, ur, kn, ml, pa, or, as, brx, doi, ks, kok, mai, mni, ne, sa, sat, sd]
 
     ChangePasswordInput:
       type: object
@@ -650,7 +650,7 @@ components:
           type: string
         language:
           type: string
-          enum: [en, ta, hi, te]
+          enum: [en, hi, bn, mr, te, ta, gu, ur, kn, ml, pa, or, as, brx, doi, ks, kok, mai, mni, ne, sa, sat, sd]
         history:
           type: array
           items:
@@ -872,7 +872,7 @@ components:
           type: ["string", "null"]
         language:
           type: string
-          enum: [en, ta, hi, te]
+          enum: [en, hi, bn, mr, te, ta, gu, ur, kn, ml, pa, or, as, brx, doi, ks, kok, mai, mni, ne, sa, sat, sd]
         history:
           type: array
           items:
@@ -891,7 +891,7 @@ components:
           type: string
         language:
           type: string
-          enum: [en, ta, hi, te]
+          enum: [en, hi, bn, mr, te, ta, gu, ur, kn, ml, pa, or, as, brx, doi, ks, kok, mai, mni, ne, sa, sat, sd]
 
     TranscriptionResponse:
       type: object

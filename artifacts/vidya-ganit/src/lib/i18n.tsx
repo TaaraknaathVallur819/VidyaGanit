@@ -1,12 +1,73 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import bn from "./locales/bn";
+import mr from "./locales/mr";
+import gu from "./locales/gu";
+import ur from "./locales/ur";
+import kn from "./locales/kn";
+import ml from "./locales/ml";
+import pa from "./locales/pa";
+import or from "./locales/or";
+import as from "./locales/as";
+import brx from "./locales/brx";
+import doi from "./locales/doi";
+import ks from "./locales/ks";
+import kok from "./locales/kok";
+import mai from "./locales/mai";
+import mni from "./locales/mni";
+import ne from "./locales/ne";
+import sa from "./locales/sa";
+import sat from "./locales/sat";
+import sd from "./locales/sd";
 
-export type Language = "en" | "ta" | "hi" | "te";
+export type Language =
+  | "en"
+  | "hi"
+  | "bn"
+  | "mr"
+  | "te"
+  | "ta"
+  | "gu"
+  | "ur"
+  | "kn"
+  | "ml"
+  | "pa"
+  | "or"
+  | "as"
+  | "brx"
+  | "doi"
+  | "ks"
+  | "kok"
+  | "mai"
+  | "mni"
+  | "ne"
+  | "sa"
+  | "sat"
+  | "sd";
 
 export const LANGUAGES: { code: Language; label: string; native: string }[] = [
   { code: "en", label: "English", native: "English" },
-  { code: "ta", label: "Tamil", native: "தமிழ்" },
   { code: "hi", label: "Hindi", native: "हिन्दी" },
+  { code: "bn", label: "Bengali", native: "বাংলা" },
+  { code: "mr", label: "Marathi", native: "मराठी" },
   { code: "te", label: "Telugu", native: "తెలుగు" },
+  { code: "ta", label: "Tamil", native: "தமிழ்" },
+  { code: "gu", label: "Gujarati", native: "ગુજરાતી" },
+  { code: "ur", label: "Urdu", native: "اردو" },
+  { code: "kn", label: "Kannada", native: "ಕನ್ನಡ" },
+  { code: "ml", label: "Malayalam", native: "മലയാളം" },
+  { code: "pa", label: "Punjabi", native: "ਪੰਜਾਬੀ" },
+  { code: "or", label: "Odia", native: "ଓଡ଼ିଆ" },
+  { code: "as", label: "Assamese", native: "অসমীয়া" },
+  { code: "brx", label: "Bodo", native: "बड़ो" },
+  { code: "doi", label: "Dogri", native: "डोगरी" },
+  { code: "ks", label: "Kashmiri", native: "کٲشُر" },
+  { code: "kok", label: "Konkani", native: "कोंकणी" },
+  { code: "mai", label: "Maithili", native: "मैथिली" },
+  { code: "mni", label: "Manipuri", native: "মৈতৈলোন্" },
+  { code: "ne", label: "Nepali", native: "नेपाली" },
+  { code: "sa", label: "Sanskrit", native: "संस्कृतम्" },
+  { code: "sat", label: "Santali", native: "ᱥᱟᱱᱛᱟᱲᱤ" },
+  { code: "sd", label: "Sindhi", native: "سنڌي" },
 ];
 
 const STORAGE_KEY = "vidyaganit_lang";
@@ -884,7 +945,31 @@ const te: Dict = {
   "chat.badgeUnlocked": "🎉 బ్యాడ్జ్ అన్‌లాక్ అయింది!",
 };
 
-const DICTS: Record<Language, Dict> = { en, ta, hi, te };
+const DICTS: Record<Language, Dict> = {
+  en,
+  hi,
+  bn,
+  mr,
+  te,
+  ta,
+  gu,
+  ur,
+  kn,
+  ml,
+  pa,
+  or,
+  as,
+  brx,
+  doi,
+  ks,
+  kok,
+  mai,
+  mni,
+  ne,
+  sa,
+  sat,
+  sd,
+};
 
 type LanguageContextValue = {
   lang: Language;
@@ -896,7 +981,10 @@ type LanguageContextValue = {
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 function isLanguage(value: unknown): value is Language {
-  return value === "en" || value === "ta" || value === "hi" || value === "te";
+  return (
+    typeof value === "string" &&
+    LANGUAGES.some((entry) => entry.code === value)
+  );
 }
 
 function readStored(): Language {

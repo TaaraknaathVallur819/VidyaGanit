@@ -100,9 +100,28 @@ export type UserProfileLanguage = typeof UserProfileLanguage[keyof typeof UserPr
 
 export const UserProfileLanguage = {
   en: 'en',
-  ta: 'ta',
   hi: 'hi',
+  bn: 'bn',
+  mr: 'mr',
   te: 'te',
+  ta: 'ta',
+  gu: 'gu',
+  ur: 'ur',
+  kn: 'kn',
+  ml: 'ml',
+  pa: 'pa',
+  or: 'or',
+  as: 'as',
+  brx: 'brx',
+  doi: 'doi',
+  ks: 'ks',
+  kok: 'kok',
+  mai: 'mai',
+  mni: 'mni',
+  ne: 'ne',
+  sa: 'sa',
+  sat: 'sat',
+  sd: 'sd',
 } as const;
 
 export interface UserProfile {
@@ -137,9 +156,28 @@ export type ProfileUpdateLanguage = typeof ProfileUpdateLanguage[keyof typeof Pr
 
 export const ProfileUpdateLanguage = {
   en: 'en',
-  ta: 'ta',
   hi: 'hi',
+  bn: 'bn',
+  mr: 'mr',
   te: 'te',
+  ta: 'ta',
+  gu: 'gu',
+  ur: 'ur',
+  kn: 'kn',
+  ml: 'ml',
+  pa: 'pa',
+  or: 'or',
+  as: 'as',
+  brx: 'brx',
+  doi: 'doi',
+  ks: 'ks',
+  kok: 'kok',
+  mai: 'mai',
+  mni: 'mni',
+  ne: 'ne',
+  sa: 'sa',
+  sat: 'sat',
+  sd: 'sd',
 } as const;
 
 export interface ProfileUpdate {
@@ -166,9 +204,28 @@ export type ChatMessageInputLanguage = typeof ChatMessageInputLanguage[keyof typ
 
 export const ChatMessageInputLanguage = {
   en: 'en',
-  ta: 'ta',
   hi: 'hi',
+  bn: 'bn',
+  mr: 'mr',
   te: 'te',
+  ta: 'ta',
+  gu: 'gu',
+  ur: 'ur',
+  kn: 'kn',
+  ml: 'ml',
+  pa: 'pa',
+  or: 'or',
+  as: 'as',
+  brx: 'brx',
+  doi: 'doi',
+  ks: 'ks',
+  kok: 'kok',
+  mai: 'mai',
+  mni: 'mni',
+  ne: 'ne',
+  sa: 'sa',
+  sat: 'sat',
+  sd: 'sd',
 } as const;
 
 export type ChatHistoryItemRole = typeof ChatHistoryItemRole[keyof typeof ChatHistoryItemRole];
@@ -318,9 +375,28 @@ export type ConsultantMessageInputLanguage = typeof ConsultantMessageInputLangua
 
 export const ConsultantMessageInputLanguage = {
   en: 'en',
-  ta: 'ta',
   hi: 'hi',
+  bn: 'bn',
+  mr: 'mr',
   te: 'te',
+  ta: 'ta',
+  gu: 'gu',
+  ur: 'ur',
+  kn: 'kn',
+  ml: 'ml',
+  pa: 'pa',
+  or: 'or',
+  as: 'as',
+  brx: 'brx',
+  doi: 'doi',
+  ks: 'ks',
+  kok: 'kok',
+  mai: 'mai',
+  mni: 'mni',
+  ne: 'ne',
+  sa: 'sa',
+  sat: 'sat',
+  sd: 'sd',
 } as const;
 
 export interface ConsultantMessageInput {
@@ -338,9 +414,28 @@ export type ConsultantAudioInputLanguage = typeof ConsultantAudioInputLanguage[k
 
 export const ConsultantAudioInputLanguage = {
   en: 'en',
-  ta: 'ta',
   hi: 'hi',
+  bn: 'bn',
+  mr: 'mr',
   te: 'te',
+  ta: 'ta',
+  gu: 'gu',
+  ur: 'ur',
+  kn: 'kn',
+  ml: 'ml',
+  pa: 'pa',
+  or: 'or',
+  as: 'as',
+  brx: 'brx',
+  doi: 'doi',
+  ks: 'ks',
+  kok: 'kok',
+  mai: 'mai',
+  mni: 'mni',
+  ne: 'ne',
+  sa: 'sa',
+  sat: 'sat',
+  sd: 'sd',
 } as const;
 
 export interface ConsultantAudioInput {

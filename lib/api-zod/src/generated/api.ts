@@ -56,7 +56,7 @@ export const LoginUserResponse = zod.object({
   "board": zod.string().nullish(),
   "parentType": zod.string().nullish(),
   "contact": zod.string().nullish(),
-  "language": zod.union([zod.literal('en'),zod.literal('ta'),zod.literal('hi'),zod.literal('te'),zod.literal(null)]).nullish(),
+  "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
   "xp": zod.number().default(loginUserResponseXpDefault),
   "badges": zod.array(zod.string())
 })
@@ -80,7 +80,7 @@ export const GetProfileResponse = zod.object({
   "board": zod.string().nullish(),
   "parentType": zod.string().nullish(),
   "contact": zod.string().nullish(),
-  "language": zod.union([zod.literal('en'),zod.literal('ta'),zod.literal('hi'),zod.literal('te'),zod.literal(null)]).nullish(),
+  "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
   "xp": zod.number().default(getProfileResponseXpDefault),
   "badges": zod.array(zod.string())
 })
@@ -100,7 +100,7 @@ export const UpdateProfileBody = zod.object({
   "name": zod.string().min(1).optional(),
   "gender": zod.enum(['male', 'female']).optional(),
   "contact": zod.string().nullish(),
-  "language": zod.enum(['en', 'ta', 'hi', 'te']).optional()
+  "language": zod.enum(['en', 'hi', 'bn', 'mr', 'te', 'ta', 'gu', 'ur', 'kn', 'ml', 'pa', 'or', 'as', 'brx', 'doi', 'ks', 'kok', 'mai', 'mni', 'ne', 'sa', 'sat', 'sd']).optional()
 })
 
 export const updateProfileResponseXpDefault = 0;
@@ -114,7 +114,7 @@ export const UpdateProfileResponse = zod.object({
   "board": zod.string().nullish(),
   "parentType": zod.string().nullish(),
   "contact": zod.string().nullish(),
-  "language": zod.union([zod.literal('en'),zod.literal('ta'),zod.literal('hi'),zod.literal('te'),zod.literal(null)]).nullish(),
+  "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
   "xp": zod.number().default(updateProfileResponseXpDefault),
   "badges": zod.array(zod.string())
 })
@@ -199,7 +199,7 @@ export const SendChatMessageBody = zod.object({
   "vidyaId": zod.string(),
   "message": zod.string(),
   "sessionId": zod.string().optional(),
-  "language": zod.enum(['en', 'ta', 'hi', 'te']).optional(),
+  "language": zod.enum(['en', 'hi', 'bn', 'mr', 'te', 'ta', 'gu', 'ur', 'kn', 'ml', 'pa', 'or', 'as', 'brx', 'doi', 'ks', 'kok', 'mai', 'mni', 'ne', 'sa', 'sat', 'sd']).optional(),
   "history": zod.array(zod.object({
   "role": zod.enum(['user', 'assistant']),
   "content": zod.string()
@@ -342,7 +342,7 @@ export const SendConsultantMessageBody = zod.object({
   "message": zod.string().optional(),
   "sessionId": zod.string().optional(),
   "studentVidyaId": zod.string().nullish(),
-  "language": zod.enum(['en', 'ta', 'hi', 'te']).optional(),
+  "language": zod.enum(['en', 'hi', 'bn', 'mr', 'te', 'ta', 'gu', 'ur', 'kn', 'ml', 'pa', 'or', 'as', 'brx', 'doi', 'ks', 'kok', 'mai', 'mni', 'ne', 'sa', 'sat', 'sd']).optional(),
   "history": zod.array(zod.object({
   "role": zod.enum(['user', 'assistant']),
   "content": zod.string()
@@ -365,7 +365,7 @@ export const TranscribeConsultantAudioParams = zod.object({
 export const TranscribeConsultantAudioBody = zod.object({
   "audio": zod.string().describe('Base64 data URL of recorded audio (data:<mime>;base64,...)'),
   "mimeType": zod.string(),
-  "language": zod.enum(['en', 'ta', 'hi', 'te']).optional()
+  "language": zod.enum(['en', 'hi', 'bn', 'mr', 'te', 'ta', 'gu', 'ur', 'kn', 'ml', 'pa', 'or', 'as', 'brx', 'doi', 'ks', 'kok', 'mai', 'mni', 'ne', 'sa', 'sat', 'sd']).optional()
 })
 
 export const TranscribeConsultantAudioResponse = zod.object({

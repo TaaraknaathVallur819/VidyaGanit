@@ -1,1 +1,2 @@
 - [AI tutor chat](ai-tutor-chat.md) — SSE chat contract, gpt-5.4/gpt-image-1, [[DRAW]] marker stripping, vidyaId-trust caveat
+- [i18n language set](i18n-language-set.md) — 23-code UI language set must stay synced across i18n.tsx, counselor.ts, and 5 openapi.yaml enums (then regen codegen)

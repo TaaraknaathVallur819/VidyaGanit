@@ -1,14 +1,56 @@
-export type CounselorLanguage = "en" | "ta" | "hi" | "te";
+export type CounselorLanguage =
+  | "en"
+  | "hi"
+  | "bn"
+  | "mr"
+  | "te"
+  | "ta"
+  | "gu"
+  | "ur"
+  | "kn"
+  | "ml"
+  | "pa"
+  | "or"
+  | "as"
+  | "brx"
+  | "doi"
+  | "ks"
+  | "kok"
+  | "mai"
+  | "mni"
+  | "ne"
+  | "sa"
+  | "sat"
+  | "sd";
 
 export const LANGUAGE_NAMES: Record<CounselorLanguage, string> = {
   en: "English",
-  ta: "Tamil",
   hi: "Hindi",
+  bn: "Bengali",
+  mr: "Marathi",
   te: "Telugu",
+  ta: "Tamil",
+  gu: "Gujarati",
+  ur: "Urdu",
+  kn: "Kannada",
+  ml: "Malayalam",
+  pa: "Punjabi",
+  or: "Odia",
+  as: "Assamese",
+  brx: "Bodo",
+  doi: "Dogri",
+  ks: "Kashmiri",
+  kok: "Konkani",
+  mai: "Maithili",
+  mni: "Manipuri (Meitei)",
+  ne: "Nepali",
+  sa: "Sanskrit",
+  sat: "Santali",
+  sd: "Sindhi",
 };
 
 export function normalizeLanguage(lang: string | null | undefined): CounselorLanguage {
-  return lang === "ta" || lang === "hi" || lang === "te" ? lang : "en";
+  return lang != null && lang in LANGUAGE_NAMES ? (lang as CounselorLanguage) : "en";
 }
 
 export type CounselorTopicSummary = {
