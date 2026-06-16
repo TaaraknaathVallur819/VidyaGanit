@@ -9,7 +9,7 @@ The chat endpoint `POST /api/chat/message` (in `artifacts/api-server`) streams S
 
 ## Models / integration
 - Uses Replit AI Integrations (managed OpenAI) via `@workspace/integrations-openai-ai-server`. Requires env `AI_INTEGRATIONS_OPENAI_BASE_URL` + `AI_INTEGRATIONS_OPENAI_API_KEY` (provisioned via the integration, not user-supplied).
-- Chat: `gpt-5.4` (`chat.completions.create`, `stream:true`, `max_completion_tokens`, NO `temperature` — gpt-5 family rejects it).
+- Chat: `gpt-5-mini` (`chat.completions.create`, `stream:true`, `max_completion_tokens`, NO `temperature` — gpt-5 family rejects it). **Why mini:** chosen for low chat latency for kids + credit conservation while keeping Socratic quality. Do NOT switch to `gpt-4o-mini` (flagged legacy in the ai-integrations-openai skill) or Gemini (not available through this OpenAI integration). `gpt-5-nano` is the faster/cheaper fallback if even more speed is needed; `gpt-5.4` is the higher-quality but slower option.
 - Images: `gpt-image-1` via `generateImageBuffer` (gpt-4o image gen is legacy per the ai-integrations-openai skill).
 
 ## SSE contract (keep backward compatible)
@@ -36,6 +36,9 @@ Every tutor turn is persisted append-only to `chat_messages` (sessionId, student
 
 ## Topical guardrail
 `buildTutorSystemPrompt` (`lib/tutor.ts`) has a strict "TOPIC GUARDRAIL" block: refuse all non-maths queries (movies, games, stories, code, etc.) and playfully redirect to maths. This is prompt-only; there is no server-side topic classifier.
+
+## No-spoon-feeding rule
+`buildTutorSystemPrompt` also has a "NO SPOON-FEEDING" block as strict as the Golden Rule: when working the student's OWN problem the coach must never write the fraction for them, never state the numerator/denominator value, and never give the exact divisor/HCF — it must ask open questions so the student produces each number. It MAY still teach with a different illustrative example using other numbers. (Added after live testing showed the AI handing over "4/8" and "divide by 4".)
 
 ## Frontend input sanitizer
 `validateStudentInput` in `SocraticChat.tsx` intercepts gibberish/emoji-spam BEFORE calling the API and shows a friendly nudge. **Must stay Unicode-aware:** the "has meaning" check uses `/[\p{L}\p{N}]/u` (+ maths operators), NOT `[a-zA-Z0-9]` — an ASCII-only check wrongly blocks Hindi/Tamil/Devanagari input, a real break for this Indian-student app. Repeated-char/keyboard-mash heuristics are intentionally ASCII-only so they don't false-positive on Indic scripts.
