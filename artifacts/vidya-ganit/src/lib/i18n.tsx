@@ -101,6 +101,15 @@ const en: Dict = {
   "header.logout": "Log Out",
   "header.switchRole": "Switch Role",
 
+  // Home
+  "home.badge": "The Socratic Math Companion",
+  "home.title1": "Math tutoring that",
+  "home.title2": "makes sense.",
+  "home.subtitle":
+    "Rigorous curriculum for parents' peace of mind. Engaging, conversational lessons that kids actually look forward to. Classes 4–7.",
+  "home.createAccount": "Create a New Account",
+  "home.login": "Log In to Existing Account",
+
   // Common
   "common.class": "Class",
   "strength.label": "Password Strength:",
@@ -312,6 +321,14 @@ const ta: Dict = {
   "header.logout": "வெளியேறு",
   "header.switchRole": "பங்கை மாற்று",
 
+  "home.badge": "சாக்ரடிக் கணித துணை",
+  "home.title1": "கணிதப் பயிற்சி",
+  "home.title2": "புரியும் வகையில்.",
+  "home.subtitle":
+    "பெற்றோரின் மன அமைதிக்கான வலுவான பாடத்திட்டம். குழந்தைகள் ஆர்வத்துடன் எதிர்பார்க்கும் உரையாடல் பாடங்கள். வகுப்புகள் 4–7.",
+  "home.createAccount": "புதிய கணக்கை உருவாக்கு",
+  "home.login": "ஏற்கனவே உள்ள கணக்கில் உள்நுழை",
+
   "common.class": "வகுப்பு",
   "strength.label": "கடவுச்சொல் வலிமை:",
   "strength.weak": "பலவீனம்",
@@ -519,6 +536,14 @@ const hi: Dict = {
   "header.logout": "लॉग आउट",
   "header.switchRole": "भूमिका बदलें",
 
+  "home.badge": "सॉक्रेटिक गणित साथी",
+  "home.title1": "गणित ट्यूशन जो",
+  "home.title2": "समझ में आए।",
+  "home.subtitle":
+    "माता-पिता की निश्चिंतता के लिए सशक्त पाठ्यक्रम। ऐसे संवादात्मक पाठ जिनका बच्चे सचमुच इंतज़ार करते हैं। कक्षा 4–7।",
+  "home.createAccount": "नया खाता बनाएं",
+  "home.login": "मौजूदा खाते में लॉग इन करें",
+
   "common.class": "कक्षा",
   "strength.label": "पासवर्ड की मजबूती:",
   "strength.weak": "कमज़ोर",
@@ -725,6 +750,14 @@ const te: Dict = {
   "header.hi": "నమస్తే",
   "header.logout": "లాగ్ అవుట్",
   "header.switchRole": "పాత్ర మార్చు",
+
+  "home.badge": "సోక్రటిక్ గణిత సహచరుడు",
+  "home.title1": "అర్థమయ్యే",
+  "home.title2": "గణిత ట్యూషన్.",
+  "home.subtitle":
+    "తల్లిదండ్రుల ప్రశాంతత కోసం పటిష్ఠమైన పాఠ్యాంశం. పిల్లలు నిజంగా ఎదురుచూసే సంభాషణాత్మక పాఠాలు. తరగతులు 4–7.",
+  "home.createAccount": "కొత్త ఖాతా సృష్టించండి",
+  "home.login": "ఉన్న ఖాతాలోకి లాగిన్ అవ్వండి",
 
   "common.class": "తరగతి",
   "strength.label": "పాస్‌వర్డ్ బలం:",

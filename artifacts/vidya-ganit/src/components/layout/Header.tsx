@@ -20,6 +20,8 @@ export default function Header() {
     if (user) {
       logout();
       setLocation("/");
+    } else {
+      setLocation("/auth");
     }
   };
 
