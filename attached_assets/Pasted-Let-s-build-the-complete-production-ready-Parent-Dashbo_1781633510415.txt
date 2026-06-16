@@ -1,0 +1,24 @@
+Let's build the complete, production-ready Parent Dashboard (/parent/dashboard) to act as the premium control center for VidyaGanit. This is our final structural implementation. Please execute this full-stack feature carefully without breaking any existing login states, user session authentication, or database schemas:
+
+1. DASHBOARD NAVIGATION & LAYOUT:
+- Create a modern, interactive multi-tab layout inside the parent panel view:
+  * Tab A: Progress Analytics (Visual mastery bars for Fractions, Decimals, Long Division, mapped to the student's selected class and school board context).
+  * Tab B: Saved Socratic History (Chronological timeline fetching and displaying expandable text transcripts of past student-coach chat sessions from the database).
+  * Tab C: Ask Strategy AI (A clean chat pane to interact with the Parent AI Consultant).
+
+2. PARENT AI INTEGRATION & INDIAN LANGUAGE TRANSLATION:
+- Connect the Parent AI Strategy Consultant chat pane using Replit AI Integrations using a fast, multilingual model (like gpt-4o-mini).
+- The AI must act as a mature, professional Educational Counselor analyzing student metrics.
+- IMPLEMENT A NATIVE LANGUAGE SELECTOR: Add a dropdown menu on the dashboard (Options: English, தமிழ், हिंदी, తెలుగు). When changed, use the AI integration or a localization hook to automatically translate all dashboard UI elements, metrics text, and the AI chatbot responses into the selected language natively.
+
+3. MULTIMEDIA CHAT INPUT HOOKS (MIC, CAMERA, ATTACHMENTS):
+- In the Parent AI chat window input field, add three distinct interactive action buttons:
+  * [Clip Icon] - Attach Files: Allow uploading PDF reports or worksheets, passing them securely to the backend.
+  * [Camera Icon] - Camera Access: Trigger standard browser/device camera access to capture a image file of a physical textbook problem.
+  * [Microphone Icon] - Voice Mic: Set up a basic web audio recorder hook to capture voice inputs, utilizing Replit-managed audio transcription endpoints (like gpt-4o-transcribe) to translate the spoken question into text inside the chat field.
+
+4. SYSTEM SECURING & PERSISTENCE:
+- Ensure all uploaded files, media strings, and interactive parent chat histories are securely stored in the relational database tied strictly to the authenticated Parent ID session.
+- Double-check that our backend rate-limiters and login authentication blocks are applied rigorously across all newly generated parent API routes.
+
+Run a thorough end-to-end background compilation to guarantee all tabs render flawlessly with zero terminal errors!
