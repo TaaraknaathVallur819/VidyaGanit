@@ -28,7 +28,17 @@ app.use(
 );
 app.use(cors());
 app.use(cookieParser());
-app.use(express.json());
+
+// The chat endpoint accepts file attachments as base64 data URLs (up to ~8MB,
+// i.e. ~11.5MB encoded), so it needs a larger JSON body limit. Every other
+// route keeps the small default limit to limit abuse. The route handler still
+// enforces its own attachment size cap as a second line of defense.
+const largeJson = express.json({ limit: "12mb" });
+const defaultJson = express.json();
+app.use((req, res, next) => {
+  if (req.path === "/api/chat/message") return largeJson(req, res, next);
+  return defaultJson(req, res, next);
+});
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);

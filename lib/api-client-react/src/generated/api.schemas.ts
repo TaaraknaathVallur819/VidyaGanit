@@ -148,11 +148,19 @@ export interface ChatHistoryItem {
   content: string;
 }
 
+export interface ChatAttachment {
+  name: string;
+  mimeType: string;
+  /** Base64 data URL of the attached file (data:<mime>;base64,...) */
+  dataUrl: string;
+}
+
 export interface ChatMessageInput {
   vidyaId: string;
   message: string;
   sessionId?: string;
   history?: ChatHistoryItem[];
+  attachment?: ChatAttachment;
 }
 
 export interface LinkStudentInput {

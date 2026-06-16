@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { ChatAttachment } from './chatAttachment';
 import type { ChatHistoryItem } from './chatHistoryItem';
 
 export interface ChatMessageInput {
@@ -12,4 +13,5 @@ export interface ChatMessageInput {
   message: string;
   sessionId?: string;
   history?: ChatHistoryItem[];
+  attachment?: ChatAttachment;
 }

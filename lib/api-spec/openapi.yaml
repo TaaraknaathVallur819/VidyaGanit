@@ -450,6 +450,20 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ChatHistoryItem"
+        attachment:
+          $ref: "#/components/schemas/ChatAttachment"
+
+    ChatAttachment:
+      type: object
+      required: [name, mimeType, dataUrl]
+      properties:
+        name:
+          type: string
+        mimeType:
+          type: string
+        dataUrl:
+          type: string
+          description: Base64 data URL of the attached file (data:<mime>;base64,...)
 
     ChatHistoryItem:
       type: object

@@ -198,7 +198,12 @@ export const SendChatMessageBody = zod.object({
   "history": zod.array(zod.object({
   "role": zod.enum(['user', 'assistant']),
   "content": zod.string()
-})).optional()
+})).optional(),
+  "attachment": zod.object({
+  "name": zod.string(),
+  "mimeType": zod.string(),
+  "dataUrl": zod.string().describe('Base64 data URL of the attached file (data:<mime>;base64,...)')
+}).optional()
 })
 
 

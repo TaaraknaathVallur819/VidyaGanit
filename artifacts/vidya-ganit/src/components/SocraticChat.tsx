@@ -1,6 +1,17 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Camera, Paperclip, SendHorizonal, RefreshCw, Zap } from "lucide-react";
+import {
+  Mic,
+  Camera,
+  Paperclip,
+  SendHorizonal,
+  RefreshCw,
+  Zap,
+  FileText,
+  X,
+} from "lucide-react";
+
+const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 MB
 
 export const BADGE_CATALOG: { id: string; emoji: string; name: string }[] = [
   { id: "first_step", emoji: "🌟", name: "First Step" },
@@ -13,6 +24,13 @@ export const BADGE_CATALOG: { id: string; emoji: string; name: string }[] = [
   { id: "century_club", emoji: "🏆", name: "Century Club" },
 ];
 
+type Attachment = {
+  name: string;
+  mimeType: string;
+  dataUrl: string;
+  isImage: boolean;
+};
+
 type Message = {
   id: string;
   role: "user" | "tutor";
@@ -21,7 +39,17 @@ type Message = {
   isDrawing?: boolean;
   imageUrl?: string;
   imageAlt?: string;
+  attachment?: Attachment;
 };
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error("Could not read file"));
+    reader.readAsDataURL(file);
+  });
+}
 
 class ChatError extends Error {}
 
@@ -135,9 +163,11 @@ function TutorBubble({
 function StudentBubble({
   content,
   initial,
+  attachment,
 }: {
   content: string;
   initial: string;
+  attachment?: Attachment;
 }) {
   return (
     <div className="flex items-start gap-2.5 max-w-[88%] ml-auto flex-row-reverse">
@@ -145,7 +175,24 @@ function StudentBubble({
         {initial}
       </div>
       <div className="bg-white text-foreground rounded-2xl rounded-tr-sm px-4 py-3 text-sm leading-relaxed shadow-sm border border-indigo-100 max-w-full">
-        <span className="whitespace-pre-wrap break-words">{content}</span>
+        {attachment &&
+          (attachment.isImage ? (
+            <img
+              src={attachment.dataUrl}
+              alt={attachment.name}
+              className="mb-2 rounded-xl w-full max-w-[240px] border border-indigo-100"
+            />
+          ) : (
+            <div className="mb-2 flex items-center gap-2 rounded-xl bg-indigo-50 border border-indigo-100 px-3 py-2 max-w-[240px]">
+              <FileText className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-xs font-medium text-foreground truncate">
+                {attachment.name}
+              </span>
+            </div>
+          ))}
+        {content && (
+          <span className="whitespace-pre-wrap break-words">{content}</span>
+        )}
       </div>
     </div>
   );
@@ -180,10 +227,14 @@ export default function SocraticChat({
   const [isStreaming, setIsStreaming] = useState(false);
   const [xpToasts, setXpToasts] = useState<XpToast[]>([]);
   const [badgeToasts, setBadgeToasts] = useState<BadgeToast[]>([]);
+  const [attachment, setAttachment] = useState<Attachment | null>(null);
+  const [attachError, setAttachError] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const sessionIdRef = useRef<string>(crypto.randomUUID());
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -212,23 +263,53 @@ export default function SocraticChat({
     );
   };
 
+  const handleFilePicked = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ): Promise<void> => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-picking the same file
+    if (!file) return;
+    setAttachError(null);
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      setAttachError("That file is too big! 😅 Please pick one under 8 MB.");
+      return;
+    }
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      setAttachment({
+        name: file.name || "attachment",
+        mimeType: file.type || "application/octet-stream",
+        dataUrl,
+        isImage: file.type.startsWith("image/"),
+      });
+    } catch {
+      setAttachError("Hmm, I couldn't read that file. Please try another one!");
+    }
+  };
+
   const sendMessage = async (text?: string) => {
     const msg = (text ?? input).trim();
-    if (!msg || isStreaming) return;
+    const currentAttachment = attachment;
+    if ((!msg && !currentAttachment) || isStreaming) return;
 
-    const validationError = validateStudentInput(msg);
-    if (validationError) {
-      setInput("");
-      if (textareaRef.current) textareaRef.current.style.height = "auto";
-      setMessages((prev) => [
-        ...prev,
-        { id: `u-${Date.now()}`, role: "user", content: msg },
-        { id: `t-${Date.now()}`, role: "tutor", content: validationError },
-      ]);
-      return;
+    // Only gibberish-check typed text; an attachment is meaningful on its own.
+    if (msg && !currentAttachment) {
+      const validationError = validateStudentInput(msg);
+      if (validationError) {
+        setInput("");
+        if (textareaRef.current) textareaRef.current.style.height = "auto";
+        setMessages((prev) => [
+          ...prev,
+          { id: `u-${Date.now()}`, role: "user", content: msg },
+          { id: `t-${Date.now()}`, role: "tutor", content: validationError },
+        ]);
+        return;
+      }
     }
 
     setInput("");
+    setAttachment(null);
+    setAttachError(null);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
 
     const userMsgId = `u-${Date.now()}`;
@@ -236,7 +317,12 @@ export default function SocraticChat({
 
     setMessages((prev) => [
       ...prev,
-      { id: userMsgId, role: "user", content: msg },
+      {
+        id: userMsgId,
+        role: "user",
+        content: msg,
+        attachment: currentAttachment ?? undefined,
+      },
       { id: tutorMsgId, role: "tutor", content: "", isStreaming: true },
     ]);
     setIsStreaming(true);
@@ -251,6 +337,15 @@ export default function SocraticChat({
           message: msg,
           sessionId: sessionIdRef.current,
           history,
+          ...(currentAttachment
+            ? {
+                attachment: {
+                  name: currentAttachment.name,
+                  mimeType: currentAttachment.mimeType,
+                  dataUrl: currentAttachment.dataUrl,
+                },
+              }
+            : {}),
         }),
       });
 
@@ -397,6 +492,8 @@ export default function SocraticChat({
     setMessages([]);
     setHistory([]);
     setInput("");
+    setAttachment(null);
+    setAttachError(null);
     sessionIdRef.current = crypto.randomUUID();
   };
 
@@ -449,7 +546,11 @@ export default function SocraticChat({
               transition={{ duration: 0.25 }}
             >
               {msg.role === "user" ? (
-                <StudentBubble content={msg.content} initial={initial} />
+                <StudentBubble
+                  content={msg.content}
+                  initial={initial}
+                  attachment={msg.attachment}
+                />
               ) : (
                 <TutorBubble
                   content={msg.content}
@@ -494,19 +595,70 @@ export default function SocraticChat({
 
       {/* Input bar */}
       <div className="px-4 py-3 bg-white border-t border-indigo-100 shrink-0">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="*/*"
+          className="hidden"
+          onChange={handleFilePicked}
+        />
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={handleFilePicked}
+        />
+
+        {attachment && (
+          <div className="mb-2 flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-xl px-2.5 py-2">
+            {attachment.isImage ? (
+              <img
+                src={attachment.dataUrl}
+                alt={attachment.name}
+                className="w-10 h-10 rounded-lg object-cover border border-indigo-100 shrink-0"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-lg bg-white border border-indigo-100 flex items-center justify-center shrink-0">
+                <FileText className="w-5 h-5 text-primary" />
+              </div>
+            )}
+            <span className="flex-1 text-xs font-medium text-foreground truncate">
+              {attachment.name}
+            </span>
+            <button
+              type="button"
+              onClick={() => setAttachment(null)}
+              className="p-1 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-white transition-colors shrink-0"
+              title="Remove attachment"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {attachError && (
+          <p className="mb-2 text-[11px] font-medium text-red-500">{attachError}</p>
+        )}
+
         <div className="flex items-end gap-2 bg-gray-50 rounded-2xl border border-gray-200 px-3 py-2 focus-within:border-indigo-300 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
           <div className="flex items-center gap-0.5 pb-0.5">
             <button
               type="button"
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-indigo-50 transition-colors"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isStreaming}
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-indigo-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               title="Attach file"
             >
               <Paperclip className="w-4 h-4" />
             </button>
             <button
               type="button"
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-indigo-50 transition-colors"
-              title="Camera"
+              onClick={() => cameraInputRef.current?.click()}
+              disabled={isStreaming}
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-indigo-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              title="Take a photo"
             >
               <Camera className="w-4 h-4" />
             </button>
@@ -538,7 +690,7 @@ export default function SocraticChat({
           <button
             type="button"
             onClick={() => sendMessage()}
-            disabled={!input.trim() || isStreaming}
+            disabled={(!input.trim() && !attachment) || isStreaming}
             className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white disabled:opacity-35 disabled:cursor-not-allowed hover:opacity-90 transition-opacity shadow-sm shrink-0 mb-0.5"
           >
             {isStreaming ? (

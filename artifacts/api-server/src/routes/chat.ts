@@ -19,6 +19,29 @@ const DRAW_MARKER_START = "[[DRAW:";
 const MAX_MESSAGE_LEN = 1500;
 const MAX_HISTORY_ENTRIES = 20;
 const MAX_HISTORY_ENTRY_LEN = 2000;
+// ~8 MB binary → ~10.7M base64 chars; cap the whole data URL a little above that.
+const MAX_ATTACHMENT_DATAURL_LEN = 11_500_000;
+const MAX_ATTACHMENT_TEXT_LEN = 8000;
+
+/**
+ * Decode the text content of a non-image attachment when it is something we can
+ * read (plain text, csv, json, markdown, etc.). Returns null for binary files
+ * (pdf, docx, images handled elsewhere) we can't meaningfully inline.
+ */
+function decodeTextAttachment(mimeType: string, dataUrl: string): string | null {
+  const readableMime =
+    mimeType.startsWith("text/") ||
+    /^application\/(json|xml|x-yaml|yaml|javascript|csv)$/.test(mimeType);
+  if (!readableMime) return null;
+  const idx = dataUrl.indexOf("base64,");
+  if (idx === -1) return null;
+  try {
+    const text = Buffer.from(dataUrl.slice(idx + 7), "base64").toString("utf8");
+    return text.slice(0, MAX_ATTACHMENT_TEXT_LEN);
+  } catch {
+    return null;
+  }
+}
 
 router.post(
   "/chat/message",
@@ -39,13 +62,32 @@ router.post(
 
     // Identity comes from the verified session cookie, never the request body.
     const vidyaId = req.vidyaId as string;
-    const { message } = parsed.data;
+    const { message, attachment } = parsed.data;
 
     if (message.length > MAX_MESSAGE_LEN) {
       res
         .status(400)
         .json({ error: "That message is a bit too long — try asking in a shorter way! 😊" });
       return;
+    }
+
+    if (attachment) {
+      if (
+        typeof attachment.dataUrl !== "string" ||
+        !attachment.dataUrl.startsWith("data:")
+      ) {
+        res
+          .status(400)
+          .json({ error: "Hmm, that file didn't upload correctly. Please try attaching it again! 😊" });
+        return;
+      }
+      if (attachment.dataUrl.length > MAX_ATTACHMENT_DATAURL_LEN) {
+        res.status(400).json({
+          error:
+            "That file is a bit too big for me! 😅 Please attach something smaller (under ~8 MB).",
+        });
+        return;
+      }
     }
 
     const history = (parsed.data.history ?? [])
@@ -67,12 +109,16 @@ router.post(
   const sessionId = parsed.data.sessionId?.slice(0, 100) || randomUUID();
 
   // Compliance: append-only log of the student's message, tied to their ID.
+  // Note any attachment by name so the Parent Dashboard record stays meaningful.
+  const loggedContent = attachment
+    ? `${message}${message ? "\n" : ""}[Attached ${attachment.mimeType.startsWith("image/") ? "image" : "file"}: ${attachment.name}]`
+    : message;
   try {
     await db.insert(chatMessagesTable).values({
       sessionId,
       studentVidyaId: vidyaId,
       role: "user",
-      content: message,
+      content: loggedContent,
     });
   } catch (err) {
     req.log.error({ err }, "failed to persist student chat message");
@@ -131,6 +177,29 @@ router.post(
     }
   };
 
+  // Build the latest user turn. Images go to the vision model directly; readable
+  // text files are inlined; anything else is described so the coach can ask the
+  // student to photograph or retype the problem instead.
+  let userContent: OpenAI.Chat.Completions.ChatCompletionUserMessageParam["content"];
+  if (attachment && attachment.mimeType.startsWith("image/")) {
+    userContent = [
+      {
+        type: "text",
+        text:
+          message ||
+          "I've attached a picture of my maths problem. Please help me solve it step by step using questions — don't just give me the answer.",
+      },
+      { type: "image_url", image_url: { url: attachment.dataUrl } },
+    ];
+  } else if (attachment) {
+    const fileText = decodeTextAttachment(attachment.mimeType, attachment.dataUrl);
+    userContent = fileText
+      ? `${message || "Please help me with this maths problem."}\n\n[The student attached a file named "${attachment.name}". Its contents are:]\n${fileText}`
+      : `${message || "I tried to attach a file."}\n\n[The student attached a file named "${attachment.name}" (type ${attachment.mimeType}), but it is not an image or readable text file, so its contents cannot be seen. Gently let them know and ask them to upload a clear photo of the problem or type it out.]`;
+  } else {
+    userContent = message;
+  }
+
   const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
     { role: "system", content: buildTutorSystemPrompt(context) },
     ...chatHistory.map(
@@ -139,7 +208,7 @@ router.post(
           ? { role: "assistant", content: h.content }
           : { role: "user", content: h.content },
     ),
-    { role: "user", content: message },
+    { role: "user", content: userContent },
   ];
 
   try {
