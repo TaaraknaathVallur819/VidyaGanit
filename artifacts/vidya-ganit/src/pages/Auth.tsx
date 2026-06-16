@@ -126,8 +126,9 @@ export default function Auth() {
 
   const isRegisterValid =
     !nameError &&
+    regName.trim().length >= 2 &&
     regPassword &&
-    strength.level === 3 &&
+    strength.level >= 2 &&
     gender !== null &&
     (role === "student"
       ? studentClass !== null && resolvedBoard.length > 0
@@ -390,7 +391,7 @@ export default function Auth() {
                     id="reg-name"
                     data-testid="input-register-name"
                     value={regName}
-                    onChange={(e) => setRegName(e.target.value)}
+                    onChange={(e) => { setRegName(e.target.value); setNameError(""); }}
                     placeholder="e.g. Rohan Sharma"
                     className={`h-12 text-lg px-4 bg-gray-50 ${nameError ? "border-red-500 focus-visible:ring-red-500" : "border-gray-200"}`}
                     required
@@ -452,9 +453,9 @@ export default function Auth() {
                   )}
                 </div>
 
-                {regPassword && strength.level < 3 && (
+                {regPassword && strength.level < 2 && (
                   <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg text-sm text-orange-800 leading-relaxed">
-                    To keep your VidyaGanit account completely safe, your password needs to be a bit stronger! Please try a different password using letters, numbers, and symbols.
+                    Password too weak! Use at least 8 characters with a mix of letters and numbers (e.g. <span className="font-semibold">Rohan2025</span>).
                   </div>
                 )}
 
