@@ -595,6 +595,9 @@ components:
           type: ["string", "null"]
         contact:
           type: ["string", "null"]
+        language:
+          type: ["string", "null"]
+          enum: [en, ta, hi, te, null]
         xp:
           type: integer
           default: 0
@@ -614,6 +617,9 @@ components:
           enum: [male, female]
         contact:
           type: ["string", "null"]
+        language:
+          type: string
+          enum: [en, ta, hi, te]
 
     ChangePasswordInput:
       type: object

@@ -8,13 +8,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/lib/auth";
-import { useLanguage, LANGUAGES } from "@/lib/i18n";
+import { useLanguage, LANGUAGES, type Language } from "@/lib/i18n";
+import { useUpdateProfile } from "@workspace/api-client-react";
 import { LogOut, Languages } from "lucide-react";
 
 export default function Header() {
-  const { user, logout } = useAuth();
+  const { user, setUser, logout } = useAuth();
   const { t, lang, setLang } = useLanguage();
   const [, setLocation] = useLocation();
+  const updateProfile = useUpdateProfile();
+
+  const handleLanguageChange = (next: Language) => {
+    setLang(next);
+    if (user) {
+      // Persist to the account so the choice follows the family across devices.
+      updateProfile.mutate(
+        { vidyaId: user.vidyaId, data: { language: next } },
+        { onSuccess: (updated) => setUser(updated) },
+      );
+    }
+  };
 
   const handleSwitchRole = () => {
     if (user) {
@@ -40,7 +53,7 @@ export default function Header() {
             {t("header.hi")}, {user.name}
           </span>
         )}
-        <Select value={lang} onValueChange={(v) => setLang(v as typeof lang)}>
+        <Select value={lang} onValueChange={(v) => handleLanguageChange(v as Language)}>
           <SelectTrigger
             className="w-auto gap-2 h-9 rounded-full border-border bg-gray-50"
             aria-label={t("language.label")}

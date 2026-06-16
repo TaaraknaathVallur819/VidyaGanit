@@ -14,6 +14,7 @@ export const usersTable = pgTable("users", {
   board: text("board"),
   parentType: text("parent_type"),
   contact: text("contact"),
+  language: text("language"),
   xp: integer("xp").notNull().default(0),
   badges: text("badges").array().notNull().default(sql`ARRAY[]::text[]`),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

@@ -33,6 +33,7 @@ function toProfile(user: typeof usersTable.$inferSelect) {
     board: user.board ?? null,
     parentType: user.parentType ?? null,
     contact: user.contact ?? null,
+    language: user.language ?? null,
     xp: user.xp ?? 0,
     badges: user.badges ?? [],
   };
@@ -75,6 +76,7 @@ router.patch("/profile/:vidyaId", requireAuth, requireSelf, async (req, res): Pr
   if (body.data.name !== undefined) updates.name = body.data.name;
   if (body.data.gender !== undefined) updates.gender = body.data.gender;
   if (body.data.contact !== undefined) updates.contact = body.data.contact ?? null;
+  if (body.data.language !== undefined) updates.language = body.data.language;
 
   if (Object.keys(updates).length === 0) {
     res.status(400).json({ error: "No fields to update" });

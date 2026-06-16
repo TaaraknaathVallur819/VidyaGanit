@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { UserProfileGender } from './userProfileGender';
+import type { UserProfileLanguage } from './userProfileLanguage';
 import type { UserProfileRole } from './userProfileRole';
 
 export interface UserProfile {
@@ -21,6 +22,8 @@ export interface UserProfile {
   parentType?: string | null;
   /** @nullable */
   contact?: string | null;
+  /** @nullable */
+  language?: UserProfileLanguage;
   xp: number;
   badges: string[];
 }

@@ -92,6 +92,19 @@ export const UserProfileGender = {
   female: 'female',
 } as const;
 
+/**
+ * @nullable
+ */
+export type UserProfileLanguage = typeof UserProfileLanguage[keyof typeof UserProfileLanguage] | null;
+
+
+export const UserProfileLanguage = {
+  en: 'en',
+  ta: 'ta',
+  hi: 'hi',
+  te: 'te',
+} as const;
+
 export interface UserProfile {
   vidyaId: string;
   name: string;
@@ -105,6 +118,8 @@ export interface UserProfile {
   parentType?: string | null;
   /** @nullable */
   contact?: string | null;
+  /** @nullable */
+  language?: UserProfileLanguage;
   xp: number;
   badges: string[];
 }
@@ -117,12 +132,23 @@ export const ProfileUpdateGender = {
   female: 'female',
 } as const;
 
+export type ProfileUpdateLanguage = typeof ProfileUpdateLanguage[keyof typeof ProfileUpdateLanguage];
+
+
+export const ProfileUpdateLanguage = {
+  en: 'en',
+  ta: 'ta',
+  hi: 'hi',
+  te: 'te',
+} as const;
+
 export interface ProfileUpdate {
   /** @minLength 1 */
   name?: string;
   gender?: ProfileUpdateGender;
   /** @nullable */
   contact?: string | null;
+  language?: ProfileUpdateLanguage;
 }
 
 export interface ChangePasswordInput {

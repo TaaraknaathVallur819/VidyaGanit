@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ProfileUpdateGender } from './profileUpdateGender';
+import type { ProfileUpdateLanguage } from './profileUpdateLanguage';
 
 export interface ProfileUpdate {
   /** @minLength 1 */
@@ -13,4 +14,5 @@ export interface ProfileUpdate {
   gender?: ProfileUpdateGender;
   /** @nullable */
   contact?: string | null;
+  language?: ProfileUpdateLanguage;
 }

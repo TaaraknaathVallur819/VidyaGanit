@@ -889,15 +889,20 @@ const DICTS: Record<Language, Dict> = { en, ta, hi, te };
 type LanguageContextValue = {
   lang: Language;
   setLang: (lang: Language) => void;
+  syncFromAccount: (lang: Language | null | undefined) => void;
   t: (key: string) => string;
 };
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
+function isLanguage(value: unknown): value is Language {
+  return value === "en" || value === "ta" || value === "hi" || value === "te";
+}
+
 function readStored(): Language {
   if (typeof window === "undefined") return "en";
   const stored = window.localStorage.getItem(STORAGE_KEY);
-  if (stored === "en" || stored === "ta" || stored === "hi" || stored === "te") return stored;
+  if (isLanguage(stored)) return stored;
   return "en";
 }
 
@@ -913,13 +918,23 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Initialize the language from the account (e.g. after login on a new device).
+  // Falls back to the existing localStorage / English value when the account has
+  // no saved preference.
+  const syncFromAccount = useCallback(
+    (next: Language | null | undefined) => {
+      if (isLanguage(next)) setLang(next);
+    },
+    [setLang],
+  );
+
   const t = useCallback(
     (key: string): string => DICTS[lang][key] ?? en[key] ?? key,
     [lang],
   );
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t }}>
+    <LanguageContext.Provider value={{ lang, setLang, syncFromAccount, t }}>
       {children}
     </LanguageContext.Provider>
   );

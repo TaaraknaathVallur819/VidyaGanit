@@ -56,6 +56,7 @@ export const LoginUserResponse = zod.object({
   "board": zod.string().nullish(),
   "parentType": zod.string().nullish(),
   "contact": zod.string().nullish(),
+  "language": zod.union([zod.literal('en'),zod.literal('ta'),zod.literal('hi'),zod.literal('te'),zod.literal(null)]).nullish(),
   "xp": zod.number().default(loginUserResponseXpDefault),
   "badges": zod.array(zod.string())
 })
@@ -79,6 +80,7 @@ export const GetProfileResponse = zod.object({
   "board": zod.string().nullish(),
   "parentType": zod.string().nullish(),
   "contact": zod.string().nullish(),
+  "language": zod.union([zod.literal('en'),zod.literal('ta'),zod.literal('hi'),zod.literal('te'),zod.literal(null)]).nullish(),
   "xp": zod.number().default(getProfileResponseXpDefault),
   "badges": zod.array(zod.string())
 })
@@ -97,7 +99,8 @@ export const UpdateProfileParams = zod.object({
 export const UpdateProfileBody = zod.object({
   "name": zod.string().min(1).optional(),
   "gender": zod.enum(['male', 'female']).optional(),
-  "contact": zod.string().nullish()
+  "contact": zod.string().nullish(),
+  "language": zod.enum(['en', 'ta', 'hi', 'te']).optional()
 })
 
 export const updateProfileResponseXpDefault = 0;
@@ -111,6 +114,7 @@ export const UpdateProfileResponse = zod.object({
   "board": zod.string().nullish(),
   "parentType": zod.string().nullish(),
   "contact": zod.string().nullish(),
+  "language": zod.union([zod.literal('en'),zod.literal('ta'),zod.literal('hi'),zod.literal('te'),zod.literal(null)]).nullish(),
   "xp": zod.number().default(updateProfileResponseXpDefault),
   "badges": zod.array(zod.string())
 })

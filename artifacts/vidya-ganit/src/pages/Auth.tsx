@@ -73,7 +73,7 @@ function TileButton({
 export default function Auth() {
   const [, setLocation] = useLocation();
   const { setUser } = useAuth();
-  const { t } = useLanguage();
+  const { t, syncFromAccount } = useLanguage();
   const searchParams = new URLSearchParams(window.location.search);
   const initialMode = (searchParams.get("mode") as Mode) || "login";
 
@@ -144,6 +144,7 @@ export default function Auth() {
       {
         onSuccess: (user) => {
           setUser(user);
+          syncFromAccount(user.language);
           setLocation(`/dashboard/${user.role}`);
         },
         onError: (err) => {
@@ -175,6 +176,7 @@ export default function Auth() {
       {
         onSuccess: (user) => {
           setUser(user);
+          syncFromAccount(user.language);
           setLocation(`/success?id=${user.vidyaId}&role=${user.role}`);
         },
         onError: (err) => {
