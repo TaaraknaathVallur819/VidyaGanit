@@ -30,7 +30,15 @@ _Populate as you build — non-obvious choices a reader couldn't infer from the 
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+VidyaGanit is a Socratic math tuition web app for Indian school kids (Classes 4–7). The core feature is a live AI "Math Coach" chatbot that never gives the final answer — it guides students one step at a time with playful, India-flavoured hints (pizza/cricket/rupees), tailored to the student's Class & Board. When a picture would help, the coach draws an illustration inline in the chat. Students earn XP and badges as they work.
+
+## AI tutor chat
+
+- Endpoint: `POST /api/chat/message` in `artifacts/api-server` — a Server-Sent Events stream (not in the OpenAPI spec; hand-written SSE + raw `fetch` on the client in `artifacts/vidya-ganit/src/components/SocraticChat.tsx`).
+- Uses Replit AI Integrations (managed OpenAI) via `@workspace/integrations-openai-ai-server`. Chat model `gpt-5.4`; image model `gpt-image-1`.
+- Persona/curriculum prompt is built in `artifacts/api-server/src/lib/tutor.ts` (`buildTutorSystemPrompt`), pulling `studentClass`/`board` from `usersTable`.
+- The model appends a `[[DRAW: ...]]` marker to request an illustration; the server strips it from the streamed text and emits the image as a base64 data-URL SSE event.
+- Required env (provisioned by the integration): `AI_INTEGRATIONS_OPENAI_BASE_URL`, `AI_INTEGRATIONS_OPENAI_API_KEY`.
 
 ## User preferences
 

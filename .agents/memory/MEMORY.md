@@ -1,1 +1,1 @@
-- [Socratic Chat Architecture](socratic-chat.md) — rule-based tutor engine, SSE streaming, ready for OpenAI swap
+- [AI tutor chat](ai-tutor-chat.md) — SSE chat contract, gpt-5.4/gpt-image-1, [[DRAW]] marker stripping, vidyaId-trust caveat

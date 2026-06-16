@@ -18,6 +18,9 @@ type Message = {
   role: "user" | "tutor";
   content: string;
   isStreaming?: boolean;
+  isDrawing?: boolean;
+  imageUrl?: string;
+  imageAlt?: string;
 };
 
 type HistoryEntry = {
@@ -53,9 +56,15 @@ function TypingDots() {
 function TutorBubble({
   content,
   isStreaming,
+  isDrawing,
+  imageUrl,
+  imageAlt,
 }: {
   content: string;
   isStreaming?: boolean;
+  isDrawing?: boolean;
+  imageUrl?: string;
+  imageAlt?: string;
 }) {
   return (
     <div className="flex items-start gap-2.5 max-w-[88%]">
@@ -66,10 +75,23 @@ function TutorBubble({
         {content ? (
           <span className="whitespace-pre-wrap break-words">{content}</span>
         ) : (
-          isStreaming && <TypingDots />
+          isStreaming && !isDrawing && <TypingDots />
         )}
-        {isStreaming && content && (
+        {isStreaming && content && !isDrawing && (
           <span className="inline-block w-0.5 h-[14px] bg-white/60 ml-0.5 animate-pulse align-middle rounded-full" />
+        )}
+        {imageUrl && (
+          <img
+            src={imageUrl}
+            alt={imageAlt ?? "Illustration"}
+            className="mt-2.5 rounded-xl w-full max-w-[280px] bg-white shadow-sm"
+          />
+        )}
+        {isDrawing && !imageUrl && (
+          <div className="mt-2.5 flex items-center gap-2 text-white/90 text-xs">
+            <span className="inline-block w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+            <span>Drawing a picture for you… 🎨</span>
+          </div>
         )}
       </div>
     </div>
@@ -202,6 +224,10 @@ export default function SocraticChat({
               done?: boolean;
               xpAwarded?: number;
               newBadges?: string[];
+              drawing?: boolean;
+              image?: string;
+              imageAlt?: string;
+              imageError?: boolean;
             };
 
             if (typeof data.chunk === "string") {
@@ -209,6 +235,34 @@ export default function SocraticChat({
               setMessages((prev) =>
                 prev.map((m) =>
                   m.id === tutorMsgId ? { ...m, content: fullContent } : m,
+                ),
+              );
+            }
+
+            if (data.drawing) {
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === tutorMsgId ? { ...m, isDrawing: true } : m,
+                ),
+              );
+            }
+
+            if (typeof data.image === "string") {
+              const imageUrl = data.image;
+              const imageAlt = data.imageAlt;
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === tutorMsgId
+                    ? { ...m, isDrawing: false, imageUrl, imageAlt }
+                    : m,
+                ),
+              );
+            }
+
+            if (data.imageError) {
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === tutorMsgId ? { ...m, isDrawing: false } : m,
                 ),
               );
             }
@@ -324,7 +378,13 @@ export default function SocraticChat({
               {msg.role === "user" ? (
                 <StudentBubble content={msg.content} initial={initial} />
               ) : (
-                <TutorBubble content={msg.content} isStreaming={msg.isStreaming} />
+                <TutorBubble
+                  content={msg.content}
+                  isStreaming={msg.isStreaming}
+                  isDrawing={msg.isDrawing}
+                  imageUrl={msg.imageUrl}
+                  imageAlt={msg.imageAlt}
+                />
               )}
             </motion.div>
           ))}
