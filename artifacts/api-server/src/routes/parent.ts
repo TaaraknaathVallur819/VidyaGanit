@@ -1,0 +1,554 @@
+import { Router, type IRouter } from "express";
+import { randomUUID } from "node:crypto";
+import { and, asc, eq } from "drizzle-orm";
+import type OpenAI from "openai";
+import {
+  db,
+  usersTable,
+  parentStudentLinksTable,
+  chatMessagesTable,
+  parentChatMessagesTable,
+} from "@workspace/db";
+import {
+  GetStudentAnalyticsParams,
+  GetStudentAnalyticsResponse,
+  GetStudentHistoryParams,
+  GetStudentHistoryResponse,
+  GetConsultantHistoryParams,
+  GetConsultantHistoryResponse,
+  SendConsultantMessageParams,
+  SendConsultantMessageBody,
+  TranscribeConsultantAudioParams,
+  TranscribeConsultantAudioBody,
+  TranscribeConsultantAudioResponse,
+} from "@workspace/api-zod";
+import { detectTopic } from "../lib/tutor";
+import {
+  buildCounselorSystemPrompt,
+  normalizeLanguage,
+  type CounselorTopicSummary,
+} from "../lib/counselor";
+import { openai } from "@workspace/integrations-openai-ai-server";
+import { speechToText, ensureCompatibleFormat } from "@workspace/integrations-openai-ai-server/audio";
+import { requireAuth, requireSelf } from "../middlewares/auth";
+import { rateLimit } from "../middlewares/rateLimit";
+
+const router: IRouter = Router();
+
+const MAX_MESSAGE_LEN = 4000;
+const MAX_HISTORY_ENTRIES = 20;
+const MAX_HISTORY_ENTRY_LEN = 4000;
+const MAX_ATTACHMENT_DATAURL_LEN = 11_500_000;
+const MAX_ATTACHMENT_TEXT_LEN = 8000;
+// Audio data URL: ~30s of webm/opus is well under this; cap generously.
+const MAX_AUDIO_DATAURL_LEN = 11_500_000;
+
+// The three curriculum focus areas surfaced on the Progress Analytics tab.
+const ANALYTICS_TOPICS: { key: "fraction" | "decimal" | "divide"; label: string }[] = [
+  { key: "fraction", label: "Fractions" },
+  { key: "decimal", label: "Decimals" },
+  { key: "divide", label: "Long Division" },
+];
+
+function decodeTextAttachment(mimeType: string, dataUrl: string): string | null {
+  const readableMime =
+    mimeType.startsWith("text/") ||
+    /^application\/(json|xml|x-yaml|yaml|javascript|csv)$/.test(mimeType);
+  if (!readableMime) return null;
+  const idx = dataUrl.indexOf("base64,");
+  if (idx === -1) return null;
+  try {
+    const text = Buffer.from(dataUrl.slice(idx + 7), "base64").toString("utf8");
+    return text.slice(0, MAX_ATTACHMENT_TEXT_LEN);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Confirms the given student is actually linked to the authenticated parent.
+ * Returns the student row, or null when not linked / not found. This is the
+ * authorization gate for every per-student parent endpoint — a parent can only
+ * ever see data for children connected to their own account.
+ */
+async function getLinkedStudent(parentVidyaId: string, studentVidyaId: string) {
+  const [row] = await db
+    .select({
+      vidyaId: usersTable.vidyaId,
+      name: usersTable.name,
+      studentClass: usersTable.studentClass,
+      board: usersTable.board,
+    })
+    .from(parentStudentLinksTable)
+    .innerJoin(usersTable, eq(usersTable.vidyaId, parentStudentLinksTable.studentVidyaId))
+    .where(
+      and(
+        eq(parentStudentLinksTable.parentVidyaId, parentVidyaId),
+        eq(parentStudentLinksTable.studentVidyaId, studentVidyaId),
+      ),
+    );
+  return row ?? null;
+}
+
+// ── Progress Analytics ──────────────────────────────────────────────
+router.get(
+  "/parent/:vidyaId/students/:studentVidyaId/analytics",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = GetStudentAnalyticsParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+
+    const student = await getLinkedStudent(params.data.vidyaId, params.data.studentVidyaId);
+    if (!student) {
+      res.status(403).json({ error: "This student is not linked to your account." });
+      return;
+    }
+
+    const rows = await db
+      .select({
+        sessionId: chatMessagesTable.sessionId,
+        content: chatMessagesTable.content,
+      })
+      .from(chatMessagesTable)
+      .where(
+        and(
+          eq(chatMessagesTable.studentVidyaId, student.vidyaId),
+          eq(chatMessagesTable.role, "user"),
+        ),
+      );
+
+    const allSessions = new Set<string>();
+    const perTopic = new Map<string, { count: number; sessions: Set<string> }>();
+    for (const t of ANALYTICS_TOPICS) {
+      perTopic.set(t.key, { count: 0, sessions: new Set() });
+    }
+
+    for (const row of rows) {
+      allSessions.add(row.sessionId);
+      const topic = detectTopic(row.content);
+      const bucket = perTopic.get(topic);
+      if (bucket) {
+        bucket.count += 1;
+        bucket.sessions.add(row.sessionId);
+      }
+    }
+
+    const topics = ANALYTICS_TOPICS.map((t) => {
+      const bucket = perTopic.get(t.key)!;
+      // Honest, activity-based estimate: each practised question contributes
+      // toward an 8-question "confident" baseline, capped at 100%.
+      const mastery = Math.min(100, Math.round(bucket.count * 12.5));
+      return {
+        key: t.key,
+        label: t.label,
+        questionsPracticed: bucket.count,
+        sessions: bucket.sessions.size,
+        mastery,
+      };
+    });
+
+    res.json(
+      GetStudentAnalyticsResponse.parse({
+        studentVidyaId: student.vidyaId,
+        name: student.name,
+        studentClass: student.studentClass ?? null,
+        board: student.board ?? null,
+        totalSessions: allSessions.size,
+        totalMessages: rows.length,
+        topics,
+      }),
+    );
+  },
+);
+
+// ── Saved Socratic History ──────────────────────────────────────────
+router.get(
+  "/parent/:vidyaId/students/:studentVidyaId/history",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = GetStudentHistoryParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+
+    const student = await getLinkedStudent(params.data.vidyaId, params.data.studentVidyaId);
+    if (!student) {
+      res.status(403).json({ error: "This student is not linked to your account." });
+      return;
+    }
+
+    const rows = await db
+      .select({
+        sessionId: chatMessagesTable.sessionId,
+        role: chatMessagesTable.role,
+        content: chatMessagesTable.content,
+        createdAt: chatMessagesTable.createdAt,
+      })
+      .from(chatMessagesTable)
+      .where(eq(chatMessagesTable.studentVidyaId, student.vidyaId))
+      .orderBy(asc(chatMessagesTable.createdAt));
+
+    const order: string[] = [];
+    const grouped = new Map<
+      string,
+      { startedAt: Date; messages: { role: "user" | "assistant"; content: string; createdAt: Date }[] }
+    >();
+    for (const row of rows) {
+      let g = grouped.get(row.sessionId);
+      if (!g) {
+        g = { startedAt: row.createdAt, messages: [] };
+        grouped.set(row.sessionId, g);
+        order.push(row.sessionId);
+      }
+      g.messages.push({
+        role: row.role === "assistant" ? "assistant" : "user",
+        content: row.content,
+        createdAt: row.createdAt,
+      });
+    }
+
+    // Newest conversation first.
+    const sessions = order
+      .map((sessionId) => {
+        const g = grouped.get(sessionId)!;
+        return {
+          sessionId,
+          startedAt: g.startedAt.toISOString(),
+          messageCount: g.messages.length,
+          messages: g.messages.map((m) => ({
+            role: m.role,
+            content: m.content,
+            createdAt: m.createdAt.toISOString(),
+          })),
+        };
+      })
+      .reverse();
+
+    res.json(
+      GetStudentHistoryResponse.parse({
+        studentVidyaId: student.vidyaId,
+        name: student.name,
+        sessions,
+      }),
+    );
+  },
+);
+
+// ── Ask Strategy AI: load saved conversation ────────────────────────
+router.get(
+  "/parent/:vidyaId/consultant/messages",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = GetConsultantHistoryParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+
+    const rows = await db
+      .select()
+      .from(parentChatMessagesTable)
+      .where(eq(parentChatMessagesTable.parentVidyaId, params.data.vidyaId))
+      .orderBy(asc(parentChatMessagesTable.createdAt));
+
+    const sessionId = rows.length > 0 ? rows[rows.length - 1].sessionId : randomUUID();
+
+    res.json(
+      GetConsultantHistoryResponse.parse({
+        sessionId,
+        messages: rows.map((r) => ({
+          role: r.role === "assistant" ? "assistant" : "user",
+          content: r.content,
+          createdAt: r.createdAt.toISOString(),
+          attachmentName: r.attachmentName ?? null,
+          attachmentType: r.attachmentType ?? null,
+        })),
+      }),
+    );
+  },
+);
+
+// ── Ask Strategy AI: transcribe recorded audio ──────────────────────
+router.post(
+  "/parent/:vidyaId/consultant/transcribe",
+  requireAuth,
+  requireSelf,
+  rateLimit({ windowMs: 60_000, max: 30, keyPrefix: "parent-transcribe" }),
+  async (req, res): Promise<void> => {
+    const params = TranscribeConsultantAudioParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+    const body = TranscribeConsultantAudioBody.safeParse(req.body);
+    if (!body.success) {
+      res.status(400).json({ error: body.error.message });
+      return;
+    }
+
+    const { audio } = body.data;
+    if (typeof audio !== "string" || !audio.startsWith("data:")) {
+      res.status(400).json({ error: "That recording didn't upload correctly. Please try again." });
+      return;
+    }
+    if (audio.length > MAX_AUDIO_DATAURL_LEN) {
+      res.status(400).json({ error: "That recording is too long. Please keep it under a minute." });
+      return;
+    }
+
+    const idx = audio.indexOf("base64,");
+    if (idx === -1) {
+      res.status(400).json({ error: "That recording didn't upload correctly. Please try again." });
+      return;
+    }
+
+    try {
+      const raw = Buffer.from(audio.slice(idx + 7), "base64");
+      const { buffer, format } = await ensureCompatibleFormat(raw);
+      const text = await speechToText(buffer, format);
+      res.json(TranscribeConsultantAudioResponse.parse({ text: text.trim() }));
+    } catch (err) {
+      req.log.error({ err }, "parent audio transcription failed");
+      res.status(500).json({ error: "Sorry, I couldn't understand that recording. Please try again." });
+    }
+  },
+);
+
+// ── Ask Strategy AI: streamed counselor reply ───────────────────────
+router.post(
+  "/parent/:vidyaId/consultant/message",
+  requireAuth,
+  requireSelf,
+  rateLimit({ windowMs: 60_000, max: 20, keyPrefix: "parent-consult-minute" }),
+  rateLimit({
+    windowMs: 60 * 60_000,
+    max: 200,
+    keyPrefix: "parent-consult-hour",
+    message: "You've asked a lot of questions today. Please take a break and come back in a little while.",
+  }),
+  async (req, res): Promise<void> => {
+    const params = SendConsultantMessageParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+    const parsed = SendConsultantMessageBody.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.message });
+      return;
+    }
+
+    const parentVidyaId = req.vidyaId as string;
+    const message = (parsed.data.message ?? "").trim();
+    const attachment = parsed.data.attachment;
+
+    if (!message && !attachment) {
+      res.status(400).json({ error: "Please type a question or attach a file." });
+      return;
+    }
+    if (message.length > MAX_MESSAGE_LEN) {
+      res.status(400).json({ error: "That message is a bit too long — please shorten it." });
+      return;
+    }
+    if (attachment) {
+      if (typeof attachment.dataUrl !== "string" || !attachment.dataUrl.startsWith("data:")) {
+        res.status(400).json({ error: "That file didn't upload correctly. Please try again." });
+        return;
+      }
+      if (attachment.dataUrl.length > MAX_ATTACHMENT_DATAURL_LEN) {
+        res.status(400).json({ error: "That file is a bit too big. Please attach something under ~8 MB." });
+        return;
+      }
+    }
+
+    const language = normalizeLanguage(parsed.data.language);
+
+    const [parent] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.vidyaId, parentVidyaId));
+    if (!parent) {
+      res.status(404).json({ error: "Account not found" });
+      return;
+    }
+
+    // If a child is referenced, verify the link and pull their analytics so the
+    // counselor's advice is grounded in real activity data.
+    let studentSummary: {
+      name: string;
+      studentClass: string | null;
+      board: string | null;
+      totalSessions: number;
+      totalMessages: number;
+      topics: CounselorTopicSummary[];
+    } | null = null;
+    let linkedStudentVidyaId: string | null = null;
+
+    const requestedStudent = parsed.data.studentVidyaId?.trim();
+    if (requestedStudent) {
+      const student = await getLinkedStudent(parentVidyaId, requestedStudent);
+      if (!student) {
+        res.status(403).json({ error: "This student is not linked to your account." });
+        return;
+      }
+      linkedStudentVidyaId = student.vidyaId;
+      const rows = await db
+        .select({
+          sessionId: chatMessagesTable.sessionId,
+          content: chatMessagesTable.content,
+        })
+        .from(chatMessagesTable)
+        .where(
+          and(
+            eq(chatMessagesTable.studentVidyaId, student.vidyaId),
+            eq(chatMessagesTable.role, "user"),
+          ),
+        );
+      const allSessions = new Set<string>();
+      const counts = new Map<string, number>();
+      for (const row of rows) {
+        allSessions.add(row.sessionId);
+        const topic = detectTopic(row.content);
+        counts.set(topic, (counts.get(topic) ?? 0) + 1);
+      }
+      studentSummary = {
+        name: student.name,
+        studentClass: student.studentClass ?? null,
+        board: student.board ?? null,
+        totalSessions: allSessions.size,
+        totalMessages: rows.length,
+        topics: ANALYTICS_TOPICS.map((t) => {
+          const count = counts.get(t.key) ?? 0;
+          return {
+            label: t.label,
+            questionsPracticed: count,
+            mastery: Math.min(100, Math.round(count * 12.5)),
+          };
+        }),
+      };
+    }
+
+    const sessionId = parsed.data.sessionId?.slice(0, 100) || randomUUID();
+
+    const history = (parsed.data.history ?? [])
+      .slice(-MAX_HISTORY_ENTRIES)
+      .map((h) => ({
+        role: h.role === "assistant" ? ("assistant" as const) : ("user" as const),
+        content: h.content.slice(0, MAX_HISTORY_ENTRY_LEN),
+      }));
+
+    // Persist the parent's turn (append-only), noting any attachment by name.
+    const loggedUser = attachment
+      ? `${message}${message ? "\n" : ""}[Attached ${attachment.mimeType.startsWith("image/") ? "image" : "file"}: ${attachment.name}]`
+      : message;
+    try {
+      await db.insert(parentChatMessagesTable).values({
+        parentVidyaId,
+        sessionId,
+        studentVidyaId: linkedStudentVidyaId,
+        role: "user",
+        content: loggedUser,
+        attachmentName: attachment?.name ?? null,
+        attachmentType: attachment?.mimeType ?? null,
+      });
+    } catch (err) {
+      req.log.error({ err }, "failed to persist parent consultant message");
+    }
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
+
+    const send = (obj: unknown): void => {
+      res.write(`data: ${JSON.stringify(obj)}\n\n`);
+    };
+
+    let userContent: OpenAI.Chat.Completions.ChatCompletionUserMessageParam["content"];
+    if (attachment && attachment.mimeType.startsWith("image/")) {
+      userContent = [
+        {
+          type: "text",
+          text: message || "I've attached an image. Please take a look and advise me.",
+        },
+        { type: "image_url", image_url: { url: attachment.dataUrl } },
+      ];
+    } else if (attachment) {
+      const fileText = decodeTextAttachment(attachment.mimeType, attachment.dataUrl);
+      userContent = fileText
+        ? `${message || "Please look at this file and advise me."}\n\n[The parent attached a file named "${attachment.name}". Its contents are:]\n${fileText}`
+        : `${message || "I tried to attach a file."}\n\n[The parent attached a file named "${attachment.name}" (type ${attachment.mimeType}) that can't be read here. Acknowledge it and ask them to describe it or paste the text.]`;
+    } else {
+      userContent = message;
+    }
+
+    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+      {
+        role: "system",
+        content: buildCounselorSystemPrompt({
+          parentName: parent.name,
+          language,
+          student: studentSummary,
+        }),
+      },
+      ...history.map(
+        (h): OpenAI.Chat.Completions.ChatCompletionMessageParam =>
+          h.role === "assistant"
+            ? { role: "assistant", content: h.content }
+            : { role: "user", content: h.content },
+      ),
+      { role: "user", content: userContent },
+    ];
+
+    let full = "";
+    let fallbackText: string | null = null;
+    try {
+      const stream = await openai.chat.completions.create({
+        model: "gpt-5-mini",
+        max_completion_tokens: 8192,
+        stream: true,
+        messages,
+      });
+      for await (const part of stream) {
+        const content = part.choices[0]?.delta?.content;
+        if (content) {
+          full += content;
+          send({ chunk: content });
+        }
+      }
+    } catch (err) {
+      req.log.error({ err }, "parent consultant completion failed");
+      if (full.length === 0) {
+        fallbackText = "Sorry, I had trouble answering just now. Please try asking again.";
+        send({ chunk: fallbackText });
+      }
+    }
+
+    const assistantText = full.trim() || (fallbackText ?? "");
+    if (assistantText) {
+      try {
+        await db.insert(parentChatMessagesTable).values({
+          parentVidyaId,
+          sessionId,
+          studentVidyaId: linkedStudentVidyaId,
+          role: "assistant",
+          content: assistantText,
+        });
+      } catch (err) {
+        req.log.error({ err }, "failed to persist parent consultant reply");
+      }
+    }
+
+    send({ done: true, sessionId });
+    res.end();
+  },
+);
+
+export default router;

@@ -220,3 +220,113 @@ export const ForgotPasswordResponse = zod.object({
 })
 
 
+/**
+ * @summary Per-topic practice analytics for a linked student
+ */
+export const GetStudentAnalyticsParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "studentVidyaId": zod.coerce.string()
+})
+
+export const GetStudentAnalyticsResponse = zod.object({
+  "studentVidyaId": zod.string(),
+  "name": zod.string(),
+  "studentClass": zod.string().nullable(),
+  "board": zod.string().nullable(),
+  "totalSessions": zod.number(),
+  "totalMessages": zod.number(),
+  "topics": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string(),
+  "questionsPracticed": zod.number(),
+  "sessions": zod.number(),
+  "mastery": zod.number().describe('Activity-based mastery estimate (0-100), derived from practice volume.')
+}))
+})
+
+
+/**
+ * @summary Saved Socratic chat history for a linked student
+ */
+export const GetStudentHistoryParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "studentVidyaId": zod.coerce.string()
+})
+
+export const GetStudentHistoryResponse = zod.object({
+  "studentVidyaId": zod.string(),
+  "name": zod.string(),
+  "sessions": zod.array(zod.object({
+  "sessionId": zod.string(),
+  "startedAt": zod.coerce.date(),
+  "messageCount": zod.number(),
+  "messages": zod.array(zod.object({
+  "role": zod.enum(['user', 'assistant']),
+  "content": zod.string(),
+  "createdAt": zod.coerce.date()
+}))
+}))
+})
+
+
+/**
+ * @summary Load the parent's saved strategy-AI conversation
+ */
+export const GetConsultantHistoryParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetConsultantHistoryResponse = zod.object({
+  "sessionId": zod.string(),
+  "messages": zod.array(zod.object({
+  "role": zod.enum(['user', 'assistant']),
+  "content": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "attachmentName": zod.string().nullish(),
+  "attachmentType": zod.string().nullish()
+}))
+})
+
+
+/**
+ * @summary Ask the parent strategy AI (SSE stream)
+ */
+export const SendConsultantMessageParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const SendConsultantMessageBody = zod.object({
+  "message": zod.string().optional(),
+  "sessionId": zod.string().optional(),
+  "studentVidyaId": zod.string().nullish(),
+  "language": zod.enum(['en', 'ta', 'hi', 'te']).optional(),
+  "history": zod.array(zod.object({
+  "role": zod.enum(['user', 'assistant']),
+  "content": zod.string()
+})).optional(),
+  "attachment": zod.object({
+  "name": zod.string(),
+  "mimeType": zod.string(),
+  "dataUrl": zod.string().describe('Base64 data URL of the attached file (data:<mime>;base64,...)')
+}).optional()
+})
+
+
+/**
+ * @summary Transcribe recorded parent audio to text
+ */
+export const TranscribeConsultantAudioParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const TranscribeConsultantAudioBody = zod.object({
+  "audio": zod.string().describe('Base64 data URL of recorded audio (data:<mime>;base64,...)'),
+  "mimeType": zod.string(),
+  "language": zod.enum(['en', 'ta', 'hi', 'te']).optional()
+})
+
+export const TranscribeConsultantAudioResponse = zod.object({
+  "text": zod.string()
+})
+
+

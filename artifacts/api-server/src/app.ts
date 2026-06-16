@@ -35,8 +35,10 @@ app.use(cookieParser());
 // enforces its own attachment size cap as a second line of defense.
 const largeJson = express.json({ limit: "12mb" });
 const defaultJson = express.json();
+const PARENT_LARGE_BODY_RE = /^\/api\/parent\/[^/]+\/consultant\/(message|transcribe)$/;
 app.use((req, res, next) => {
-  if (req.path === "/api/chat/message") return largeJson(req, res, next);
+  if (req.path === "/api/chat/message" || PARENT_LARGE_BODY_RE.test(req.path))
+    return largeJson(req, res, next);
   return defaultJson(req, res, next);
 });
 app.use(express.urlencoded({ extended: true }));

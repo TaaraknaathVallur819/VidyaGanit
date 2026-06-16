@@ -22,6 +22,9 @@ import type {
 import type {
   ChangePasswordInput,
   ChatMessageInput,
+  ConsultantAudioInput,
+  ConsultantHistoryResponse,
+  ConsultantMessageInput,
   ErrorResponse,
   ForgotPasswordInput,
   HealthStatus,
@@ -31,6 +34,9 @@ import type {
   LoginInput,
   MessageResponse,
   ProfileUpdate,
+  StudentAnalytics,
+  StudentHistoryResponse,
+  TranscriptionResponse,
   UserProfile,
   UserRegistrationInput
 } from './api.schemas';
@@ -849,5 +855,390 @@ export const useForgotPassword = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getForgotPasswordMutationOptions(options));
+    }
+
+export const getGetStudentAnalyticsUrl = (vidyaId: string,
+    studentVidyaId: string,) => {
+
+
+
+
+  return `/api/parent/${vidyaId}/students/${studentVidyaId}/analytics`
+}
+
+/**
+ * @summary Per-topic practice analytics for a linked student
+ */
+export const getStudentAnalytics = async (vidyaId: string,
+    studentVidyaId: string, options?: RequestInit): Promise<StudentAnalytics> => {
+
+  return customFetch<StudentAnalytics>(getGetStudentAnalyticsUrl(vidyaId,studentVidyaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStudentAnalyticsQueryKey = (vidyaId: string,
+    studentVidyaId: string,) => {
+    return [
+    `/api/parent/${vidyaId}/students/${studentVidyaId}/analytics`
+    ] as const;
+    }
+
+
+export const getGetStudentAnalyticsQueryOptions = <TData = Awaited<ReturnType<typeof getStudentAnalytics>>, TError = ErrorType<ErrorResponse>>(vidyaId: string,
+    studentVidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentAnalytics>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentAnalyticsQueryKey(vidyaId,studentVidyaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentAnalytics>>> = ({ signal }) => getStudentAnalytics(vidyaId,studentVidyaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId && studentVidyaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStudentAnalytics>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStudentAnalyticsQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentAnalytics>>>
+export type GetStudentAnalyticsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Per-topic practice analytics for a linked student
+ */
+
+export function useGetStudentAnalytics<TData = Awaited<ReturnType<typeof getStudentAnalytics>>, TError = ErrorType<ErrorResponse>>(
+ vidyaId: string,
+    studentVidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentAnalytics>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStudentAnalyticsQueryOptions(vidyaId,studentVidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetStudentHistoryUrl = (vidyaId: string,
+    studentVidyaId: string,) => {
+
+
+
+
+  return `/api/parent/${vidyaId}/students/${studentVidyaId}/history`
+}
+
+/**
+ * @summary Saved Socratic chat history for a linked student
+ */
+export const getStudentHistory = async (vidyaId: string,
+    studentVidyaId: string, options?: RequestInit): Promise<StudentHistoryResponse> => {
+
+  return customFetch<StudentHistoryResponse>(getGetStudentHistoryUrl(vidyaId,studentVidyaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStudentHistoryQueryKey = (vidyaId: string,
+    studentVidyaId: string,) => {
+    return [
+    `/api/parent/${vidyaId}/students/${studentVidyaId}/history`
+    ] as const;
+    }
+
+
+export const getGetStudentHistoryQueryOptions = <TData = Awaited<ReturnType<typeof getStudentHistory>>, TError = ErrorType<ErrorResponse>>(vidyaId: string,
+    studentVidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentHistory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentHistoryQueryKey(vidyaId,studentVidyaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentHistory>>> = ({ signal }) => getStudentHistory(vidyaId,studentVidyaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId && studentVidyaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStudentHistory>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStudentHistoryQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentHistory>>>
+export type GetStudentHistoryQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Saved Socratic chat history for a linked student
+ */
+
+export function useGetStudentHistory<TData = Awaited<ReturnType<typeof getStudentHistory>>, TError = ErrorType<ErrorResponse>>(
+ vidyaId: string,
+    studentVidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentHistory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStudentHistoryQueryOptions(vidyaId,studentVidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetConsultantHistoryUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/parent/${vidyaId}/consultant/messages`
+}
+
+/**
+ * @summary Load the parent's saved strategy-AI conversation
+ */
+export const getConsultantHistory = async (vidyaId: string, options?: RequestInit): Promise<ConsultantHistoryResponse> => {
+
+  return customFetch<ConsultantHistoryResponse>(getGetConsultantHistoryUrl(vidyaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetConsultantHistoryQueryKey = (vidyaId: string,) => {
+    return [
+    `/api/parent/${vidyaId}/consultant/messages`
+    ] as const;
+    }
+
+
+export const getGetConsultantHistoryQueryOptions = <TData = Awaited<ReturnType<typeof getConsultantHistory>>, TError = ErrorType<unknown>>(vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConsultantHistory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetConsultantHistoryQueryKey(vidyaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getConsultantHistory>>> = ({ signal }) => getConsultantHistory(vidyaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getConsultantHistory>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetConsultantHistoryQueryResult = NonNullable<Awaited<ReturnType<typeof getConsultantHistory>>>
+export type GetConsultantHistoryQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Load the parent's saved strategy-AI conversation
+ */
+
+export function useGetConsultantHistory<TData = Awaited<ReturnType<typeof getConsultantHistory>>, TError = ErrorType<unknown>>(
+ vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConsultantHistory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetConsultantHistoryQueryOptions(vidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getSendConsultantMessageUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/parent/${vidyaId}/consultant/message`
+}
+
+/**
+ * @summary Ask the parent strategy AI (SSE stream)
+ */
+export const sendConsultantMessage = async (vidyaId: string,
+    consultantMessageInput: ConsultantMessageInput, options?: RequestInit): Promise<unknown> => {
+
+  return customFetch<unknown>(getSendConsultantMessageUrl(vidyaId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      consultantMessageInput,)
+  }
+);}
+
+
+
+
+export const getSendConsultantMessageMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendConsultantMessage>>, TError,{vidyaId: string;data: BodyType<ConsultantMessageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof sendConsultantMessage>>, TError,{vidyaId: string;data: BodyType<ConsultantMessageInput>}, TContext> => {
+
+const mutationKey = ['sendConsultantMessage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendConsultantMessage>>, {vidyaId: string;data: BodyType<ConsultantMessageInput>}> = (props) => {
+          const {vidyaId,data} = props ?? {};
+
+          return  sendConsultantMessage(vidyaId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SendConsultantMessageMutationResult = NonNullable<Awaited<ReturnType<typeof sendConsultantMessage>>>
+    export type SendConsultantMessageMutationBody = BodyType<ConsultantMessageInput>
+    export type SendConsultantMessageMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Ask the parent strategy AI (SSE stream)
+ */
+export const useSendConsultantMessage = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendConsultantMessage>>, TError,{vidyaId: string;data: BodyType<ConsultantMessageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof sendConsultantMessage>>,
+        TError,
+        {vidyaId: string;data: BodyType<ConsultantMessageInput>},
+        TContext
+      > => {
+      return useMutation(getSendConsultantMessageMutationOptions(options));
+    }
+
+export const getTranscribeConsultantAudioUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/parent/${vidyaId}/consultant/transcribe`
+}
+
+/**
+ * @summary Transcribe recorded parent audio to text
+ */
+export const transcribeConsultantAudio = async (vidyaId: string,
+    consultantAudioInput: ConsultantAudioInput, options?: RequestInit): Promise<TranscriptionResponse> => {
+
+  return customFetch<TranscriptionResponse>(getTranscribeConsultantAudioUrl(vidyaId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      consultantAudioInput,)
+  }
+);}
+
+
+
+
+export const getTranscribeConsultantAudioMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof transcribeConsultantAudio>>, TError,{vidyaId: string;data: BodyType<ConsultantAudioInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof transcribeConsultantAudio>>, TError,{vidyaId: string;data: BodyType<ConsultantAudioInput>}, TContext> => {
+
+const mutationKey = ['transcribeConsultantAudio'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof transcribeConsultantAudio>>, {vidyaId: string;data: BodyType<ConsultantAudioInput>}> = (props) => {
+          const {vidyaId,data} = props ?? {};
+
+          return  transcribeConsultantAudio(vidyaId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TranscribeConsultantAudioMutationResult = NonNullable<Awaited<ReturnType<typeof transcribeConsultantAudio>>>
+    export type TranscribeConsultantAudioMutationBody = BodyType<ConsultantAudioInput>
+    export type TranscribeConsultantAudioMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Transcribe recorded parent audio to text
+ */
+export const useTranscribeConsultantAudio = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof transcribeConsultantAudio>>, TError,{vidyaId: string;data: BodyType<ConsultantAudioInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof transcribeConsultantAudio>>,
+        TError,
+        {vidyaId: string;data: BodyType<ConsultantAudioInput>},
+        TContext
+      > => {
+      return useMutation(getTranscribeConsultantAudioMutationOptions(options));
     }
 

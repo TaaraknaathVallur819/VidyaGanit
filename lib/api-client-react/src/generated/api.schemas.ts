@@ -193,3 +193,115 @@ export interface ErrorResponse {
   error: string;
 }
 
+export interface TopicMastery {
+  key: string;
+  label: string;
+  questionsPracticed: number;
+  sessions: number;
+  /** Activity-based mastery estimate (0-100), derived from practice volume. */
+  mastery: number;
+}
+
+export interface StudentAnalytics {
+  studentVidyaId: string;
+  name: string;
+  /** @nullable */
+  studentClass: string | null;
+  /** @nullable */
+  board: string | null;
+  totalSessions: number;
+  totalMessages: number;
+  topics: TopicMastery[];
+}
+
+export type HistoryMessageRole = typeof HistoryMessageRole[keyof typeof HistoryMessageRole];
+
+
+export const HistoryMessageRole = {
+  user: 'user',
+  assistant: 'assistant',
+} as const;
+
+export interface HistoryMessage {
+  role: HistoryMessageRole;
+  content: string;
+  createdAt: string;
+}
+
+export interface HistorySession {
+  sessionId: string;
+  startedAt: string;
+  messageCount: number;
+  messages: HistoryMessage[];
+}
+
+export interface StudentHistoryResponse {
+  studentVidyaId: string;
+  name: string;
+  sessions: HistorySession[];
+}
+
+export type ConsultantMessageRole = typeof ConsultantMessageRole[keyof typeof ConsultantMessageRole];
+
+
+export const ConsultantMessageRole = {
+  user: 'user',
+  assistant: 'assistant',
+} as const;
+
+export interface ConsultantMessage {
+  role: ConsultantMessageRole;
+  content: string;
+  createdAt: string;
+  /** @nullable */
+  attachmentName?: string | null;
+  /** @nullable */
+  attachmentType?: string | null;
+}
+
+export interface ConsultantHistoryResponse {
+  sessionId: string;
+  messages: ConsultantMessage[];
+}
+
+export type ConsultantMessageInputLanguage = typeof ConsultantMessageInputLanguage[keyof typeof ConsultantMessageInputLanguage];
+
+
+export const ConsultantMessageInputLanguage = {
+  en: 'en',
+  ta: 'ta',
+  hi: 'hi',
+  te: 'te',
+} as const;
+
+export interface ConsultantMessageInput {
+  message?: string;
+  sessionId?: string;
+  /** @nullable */
+  studentVidyaId?: string | null;
+  language?: ConsultantMessageInputLanguage;
+  history?: ChatHistoryItem[];
+  attachment?: ChatAttachment;
+}
+
+export type ConsultantAudioInputLanguage = typeof ConsultantAudioInputLanguage[keyof typeof ConsultantAudioInputLanguage];
+
+
+export const ConsultantAudioInputLanguage = {
+  en: 'en',
+  ta: 'ta',
+  hi: 'hi',
+  te: 'te',
+} as const;
+
+export interface ConsultantAudioInput {
+  /** Base64 data URL of recorded audio (data:<mime>;base64,...) */
+  audio: string;
+  mimeType: string;
+  language?: ConsultantAudioInputLanguage;
+}
+
+export interface TranscriptionResponse {
+  text: string;
+}
+

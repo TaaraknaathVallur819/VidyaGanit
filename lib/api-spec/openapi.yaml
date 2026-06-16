@@ -14,6 +14,8 @@ tags:
     description: Authentication operations
   - name: chat
     description: Socratic math tutor chat
+  - name: parent
+    description: Parent dashboard analytics, history, and strategy AI
 paths:
   /healthz:
     get:
@@ -322,6 +324,157 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /parent/{vidyaId}/students/{studentVidyaId}/analytics:
+    get:
+      operationId: getStudentAnalytics
+      tags: [parent]
+      summary: Per-topic practice analytics for a linked student
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: studentVidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Student analytics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentAnalytics"
+        "403":
+          description: Student not linked to this parent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Student not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /parent/{vidyaId}/students/{studentVidyaId}/history:
+    get:
+      operationId: getStudentHistory
+      tags: [parent]
+      summary: Saved Socratic chat history for a linked student
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: studentVidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Student chat history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentHistoryResponse"
+        "403":
+          description: Student not linked to this parent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Student not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /parent/{vidyaId}/consultant/messages:
+    get:
+      operationId: getConsultantHistory
+      tags: [parent]
+      summary: Load the parent's saved strategy-AI conversation
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Saved consultant messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConsultantHistoryResponse"
+
+  /parent/{vidyaId}/consultant/message:
+    post:
+      operationId: sendConsultantMessage
+      tags: [parent]
+      summary: Ask the parent strategy AI (SSE stream)
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConsultantMessageInput"
+      responses:
+        "200":
+          description: SSE stream of assistant response chunks
+          content:
+            text/event-stream: {}
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /parent/{vidyaId}/consultant/transcribe:
+    post:
+      operationId: transcribeConsultantAudio
+      tags: [parent]
+      summary: Transcribe recorded parent audio to text
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConsultantAudioInput"
+      responses:
+        "200":
+          description: Transcribed text
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TranscriptionResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -512,4 +665,159 @@ components:
       required: [error]
       properties:
         error:
+          type: string
+
+    TopicMastery:
+      type: object
+      required: [key, label, questionsPracticed, sessions, mastery]
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        questionsPracticed:
+          type: integer
+        sessions:
+          type: integer
+        mastery:
+          type: integer
+          description: Activity-based mastery estimate (0-100), derived from practice volume.
+
+    StudentAnalytics:
+      type: object
+      required:
+        [
+          studentVidyaId,
+          name,
+          studentClass,
+          board,
+          totalSessions,
+          totalMessages,
+          topics,
+        ]
+      properties:
+        studentVidyaId:
+          type: string
+        name:
+          type: string
+        studentClass:
+          type: ["string", "null"]
+        board:
+          type: ["string", "null"]
+        totalSessions:
+          type: integer
+        totalMessages:
+          type: integer
+        topics:
+          type: array
+          items:
+            $ref: "#/components/schemas/TopicMastery"
+
+    HistoryMessage:
+      type: object
+      required: [role, content, createdAt]
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    HistorySession:
+      type: object
+      required: [sessionId, startedAt, messageCount, messages]
+      properties:
+        sessionId:
+          type: string
+        startedAt:
+          type: string
+          format: date-time
+        messageCount:
+          type: integer
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/HistoryMessage"
+
+    StudentHistoryResponse:
+      type: object
+      required: [studentVidyaId, name, sessions]
+      properties:
+        studentVidyaId:
+          type: string
+        name:
+          type: string
+        sessions:
+          type: array
+          items:
+            $ref: "#/components/schemas/HistorySession"
+
+    ConsultantMessage:
+      type: object
+      required: [role, content, createdAt]
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        attachmentName:
+          type: ["string", "null"]
+        attachmentType:
+          type: ["string", "null"]
+
+    ConsultantHistoryResponse:
+      type: object
+      required: [sessionId, messages]
+      properties:
+        sessionId:
+          type: string
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConsultantMessage"
+
+    ConsultantMessageInput:
+      type: object
+      properties:
+        message:
+          type: string
+        sessionId:
+          type: string
+        studentVidyaId:
+          type: ["string", "null"]
+        language:
+          type: string
+          enum: [en, ta, hi, te]
+        history:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatHistoryItem"
+        attachment:
+          $ref: "#/components/schemas/ChatAttachment"
+
+    ConsultantAudioInput:
+      type: object
+      required: [audio, mimeType]
+      properties:
+        audio:
+          type: string
+          description: Base64 data URL of recorded audio (data:<mime>;base64,...)
+        mimeType:
+          type: string
+        language:
+          type: string
+          enum: [en, ta, hi, te]
+
+    TranscriptionResponse:
+      type: object
+      required: [text]
+      properties:
+        text:
           type: string

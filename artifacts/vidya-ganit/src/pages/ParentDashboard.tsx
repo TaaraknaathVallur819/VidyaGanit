@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,12 +6,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth";
+import { LanguageProvider, useLanguage, LANGUAGES } from "@/lib/i18n";
+import ProgressAnalytics from "@/components/parent/ProgressAnalytics";
+import SavedHistory from "@/components/parent/SavedHistory";
+import ParentConsultantChat from "@/components/parent/ParentConsultantChat";
 import {
   useGetProfile,
   getGetProfileQueryKey,
@@ -28,13 +39,16 @@ import {
   Lock,
   Phone,
   Users,
-  LayoutDashboard,
   CheckCircle2,
   UserPlus,
   X,
   BookOpen,
   GraduationCap,
   Loader2,
+  Languages,
+  TrendingUp,
+  History as HistoryIcon,
+  Sparkles,
 } from "lucide-react";
 
 function getPasswordStrength(pwd: string) {
@@ -51,8 +65,19 @@ function getPasswordStrength(pwd: string) {
 }
 
 export default function ParentDashboard() {
+  return (
+    <LanguageProvider>
+      <ParentDashboardInner />
+    </LanguageProvider>
+  );
+}
+
+function ParentDashboardInner() {
   const { user, setUser } = useAuth();
+  const { t, lang, setLang } = useLanguage();
   const vidyaId = user?.vidyaId ?? "";
+
+  const [activeTab, setActiveTab] = useState("profile");
 
   const { data: profile, refetch } = useGetProfile(vidyaId, {
     query: { enabled: !!vidyaId, queryKey: getGetProfileQueryKey(vidyaId) },
@@ -66,6 +91,21 @@ export default function ParentDashboard() {
     query: { enabled: !!vidyaId, queryKey: getGetLinkedStudentsQueryKey(vidyaId) },
   });
   const students = linkedData?.students ?? [];
+
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+
+  // Default the picker to the first linked student, and keep it valid as the
+  // list changes (e.g. after unlinking).
+  useEffect(() => {
+    if (students.length === 0) {
+      if (selectedStudentId !== null) setSelectedStudentId(null);
+      return;
+    }
+    const stillValid = students.some((s) => s.vidyaId === selectedStudentId);
+    if (!stillValid) setSelectedStudentId(students[0].vidyaId);
+  }, [students, selectedStudentId]);
+
+  const selectedStudent = students.find((s) => s.vidyaId === selectedStudentId) ?? null;
 
   const [linkInput, setLinkInput] = useState("");
   const [linkError, setLinkError] = useState("");
@@ -198,30 +238,86 @@ export default function ParentDashboard() {
 
   if (!displayed) return null;
 
-  const relationship = displayed.parentType === "father" ? "Father" : "Mother";
+  const relationship =
+    displayed.parentType === "father" ? t("profile.father") : t("profile.mother");
+
+  const tabTriggerClass =
+    "px-0 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none bg-transparent font-semibold gap-1.5";
+
+  const needsStudent = activeTab === "progress" || activeTab === "history";
 
   return (
     <div className="flex-1 bg-gray-50/50 min-h-full">
-      <Tabs defaultValue="profile" className="h-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
         <div className="border-b bg-white px-6 pt-4">
           <div className="max-w-3xl mx-auto">
-            <h1 className="text-2xl font-bold text-foreground mb-3">Parent Dashboard</h1>
-            <TabsList className="bg-transparent p-0 gap-6 border-b-0">
-              <TabsTrigger
-                value="profile"
-                className="px-0 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none bg-transparent font-semibold"
-              >
-                My Profile
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <h1 className="text-2xl font-bold text-foreground">{t("dashboard.title")}</h1>
+              <Select value={lang} onValueChange={(v) => setLang(v as typeof lang)}>
+                <SelectTrigger
+                  className="w-auto gap-2 h-9 rounded-full border-indigo-100"
+                  aria-label={t("language.label")}
+                  data-testid="select-language"
+                >
+                  <Languages className="w-4 h-4 text-primary" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {LANGUAGES.map((l) => (
+                    <SelectItem key={l.code} value={l.code} data-testid={`lang-${l.code}`}>
+                      {l.native}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <TabsList className="bg-transparent p-0 gap-6 border-b-0 h-auto flex-wrap justify-start">
+              <TabsTrigger value="profile" className={tabTriggerClass}>
+                <User className="w-4 h-4" />
+                {t("tab.profile")}
               </TabsTrigger>
-              <TabsTrigger
-                value="dashboard"
-                className="px-0 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none bg-transparent font-semibold"
-              >
-                Dashboard
+              <TabsTrigger value="progress" className={tabTriggerClass}>
+                <TrendingUp className="w-4 h-4" />
+                {t("tab.progress")}
+              </TabsTrigger>
+              <TabsTrigger value="history" className={tabTriggerClass}>
+                <HistoryIcon className="w-4 h-4" />
+                {t("tab.history")}
+              </TabsTrigger>
+              <TabsTrigger value="strategy" className={tabTriggerClass}>
+                <Sparkles className="w-4 h-4" />
+                {t("tab.strategy")}
               </TabsTrigger>
             </TabsList>
           </div>
         </div>
+
+        {/* Shared student picker for progress/history tabs */}
+        {needsStudent && students.length > 0 && (
+          <div className="bg-white border-b px-6 py-3">
+            <div className="max-w-3xl mx-auto flex items-center gap-3">
+              <span className="text-sm font-medium text-muted-foreground shrink-0">
+                {t("picker.label")}
+              </span>
+              <Select
+                value={selectedStudentId ?? undefined}
+                onValueChange={setSelectedStudentId}
+              >
+                <SelectTrigger className="w-full max-w-xs h-9 rounded-xl" data-testid="select-student">
+                  <SelectValue placeholder={t("picker.placeholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {students.map((s) => (
+                    <SelectItem key={s.vidyaId} value={s.vidyaId}>
+                      {s.name}
+                      {s.studentClass ? ` · ${t("profile.class")} ${s.studentClass}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
 
         {/* ── My Profile Tab ── */}
         <TabsContent value="profile" className="mt-0 p-6">
@@ -249,7 +345,7 @@ export default function ParentDashboard() {
                         className="gap-1.5 rounded-full"
                       >
                         <Pencil className="w-3.5 h-3.5" />
-                        Edit Profile
+                        {t("profile.edit")}
                       </Button>
                       <Button
                         variant="outline"
@@ -259,7 +355,7 @@ export default function ParentDashboard() {
                         className="gap-1.5 rounded-full"
                       >
                         <Lock className="w-3.5 h-3.5" />
-                        Change Password
+                        {t("profile.changePassword")}
                       </Button>
                     </div>
                   </div>
@@ -268,11 +364,14 @@ export default function ParentDashboard() {
                   <p className="text-sm text-muted-foreground mt-0.5 font-mono tracking-wide">{displayed.vidyaId}</p>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-5">
-                    <InfoChip label="Relationship" value={relationship} icon={<User className="w-3.5 h-3.5" />} />
-                    <InfoChip label="Gender" value={displayed.gender === "male" ? "Male" : "Female"} />
+                    <InfoChip label={t("profile.relationship")} value={relationship} icon={<User className="w-3.5 h-3.5" />} />
                     <InfoChip
-                      label="Contact"
-                      value={displayed.contact ?? "Not provided"}
+                      label={t("profile.gender")}
+                      value={displayed.gender === "male" ? t("profile.male") : t("profile.female")}
+                    />
+                    <InfoChip
+                      label={t("profile.contact")}
+                      value={displayed.contact ?? t("profile.notProvided")}
                       icon={<Phone className="w-3.5 h-3.5" />}
                     />
                   </div>
@@ -290,10 +389,10 @@ export default function ParentDashboard() {
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-5">
                     <UserPlus className="w-5 h-5 text-primary" />
-                    <h3 className="font-bold text-lg text-foreground">Connected Students</h3>
+                    <h3 className="font-bold text-lg text-foreground">{t("profile.connectedStudents")}</h3>
                     {students.length > 0 && (
                       <span className="ml-auto text-xs font-semibold bg-primary/10 text-primary px-2.5 py-1 rounded-full">
-                        {students.length} linked
+                        {students.length} {t("profile.linked")}
                       </span>
                     )}
                   </div>
@@ -307,7 +406,7 @@ export default function ParentDashboard() {
                         setLinkError("");
                         setLinkSuccess("");
                       }}
-                      placeholder="Enter student's VidyaGanit ID (e.g. VG-STU-12345)"
+                      placeholder={t("profile.linkPlaceholder")}
                       className="h-10 flex-1 font-mono text-sm"
                     />
                     <Button
@@ -321,7 +420,7 @@ export default function ParentDashboard() {
                       ) : (
                         <UserPlus className="w-4 h-4" />
                       )}
-                      Link
+                      {t("profile.link")}
                     </Button>
                   </form>
 
@@ -346,9 +445,9 @@ export default function ParentDashboard() {
                       <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
                         <User className="w-6 h-6 text-gray-400" />
                       </div>
-                      <p className="text-sm font-semibold text-muted-foreground">No linked students yet</p>
+                      <p className="text-sm font-semibold text-muted-foreground">{t("profile.noStudentsTitle")}</p>
                       <p className="text-xs text-muted-foreground max-w-xs">
-                        Enter your child's VidyaGanit ID above to connect their account.
+                        {t("profile.noStudentsHint")}
                       </p>
                     </div>
                   ) : (
@@ -368,7 +467,7 @@ export default function ParentDashboard() {
                               {s.studentClass && (
                                 <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                                   <BookOpen className="w-3 h-3" />
-                                  Class {s.studentClass}
+                                  {t("profile.class")} {s.studentClass}
                                 </span>
                               )}
                               {s.board && (
@@ -381,7 +480,7 @@ export default function ParentDashboard() {
                             onClick={() => handleUnlink(s.vidyaId, s.name)}
                             disabled={unlinkMutation.isPending}
                             className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors shrink-0"
-                            title="Remove student"
+                            title={t("profile.removeStudent")}
                           >
                             <X className="w-4 h-4" />
                           </button>
@@ -395,16 +494,43 @@ export default function ParentDashboard() {
           </div>
         </TabsContent>
 
-        {/* ── Dashboard Tab ── */}
-        <TabsContent value="dashboard" className="mt-0 p-6">
-          <div className="max-w-3xl mx-auto flex items-center justify-center min-h-[400px]">
-            <div className="text-center space-y-3">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto">
-                <LayoutDashboard className="w-8 h-8 text-primary" />
-              </div>
-              <h2 className="text-2xl font-bold text-foreground">Future Parent Dashboard</h2>
-              <p className="text-muted-foreground max-w-sm">Track your child's progress, view insights, and manage settings here. Coming soon!</p>
-            </div>
+        {/* ── Progress Tab ── */}
+        <TabsContent value="progress" className="mt-0 p-6">
+          <div className="max-w-3xl mx-auto">
+            {selectedStudent ? (
+              <ProgressAnalytics vidyaId={vidyaId} studentVidyaId={selectedStudent.vidyaId} />
+            ) : (
+              <NoStudentState
+                title={t("picker.empty.title")}
+                hint={t("picker.empty.hint")}
+              />
+            )}
+          </div>
+        </TabsContent>
+
+        {/* ── History Tab ── */}
+        <TabsContent value="history" className="mt-0 p-6">
+          <div className="max-w-3xl mx-auto">
+            {selectedStudent ? (
+              <SavedHistory vidyaId={vidyaId} studentVidyaId={selectedStudent.vidyaId} />
+            ) : (
+              <NoStudentState
+                title={t("picker.empty.title")}
+                hint={t("picker.empty.hint")}
+              />
+            )}
+          </div>
+        </TabsContent>
+
+        {/* ── Strategy AI Tab ── */}
+        <TabsContent value="strategy" className="mt-0 p-6">
+          <div className="max-w-3xl mx-auto">
+            <ParentConsultantChat
+              vidyaId={vidyaId}
+              parentName={displayed.name}
+              selectedStudentId={selectedStudent?.vidyaId ?? null}
+              selectedStudentName={selectedStudent?.name ?? null}
+            />
           </div>
         </TabsContent>
       </Tabs>
@@ -414,7 +540,7 @@ export default function ParentDashboard() {
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Pencil className="w-4 h-4" /> Edit Profile
+              <Pencil className="w-4 h-4" /> {t("profile.edit")}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleEditSave} className="space-y-4 mt-2">
@@ -430,7 +556,7 @@ export default function ParentDashboard() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Gender</Label>
+              <Label>{t("profile.gender")}</Label>
               <div className="flex gap-3">
                 {(["male", "female"] as const).map((g) => (
                   <button
@@ -444,7 +570,7 @@ export default function ParentDashboard() {
                         : "border-muted text-muted-foreground hover:border-primary/30"
                     }`}
                   >
-                    {g === "male" ? "Male" : "Female"}
+                    {g === "male" ? t("profile.male") : t("profile.female")}
                   </button>
                 ))}
               </div>
@@ -480,7 +606,7 @@ export default function ParentDashboard() {
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Lock className="w-4 h-4" /> Change Password
+              <Lock className="w-4 h-4" /> {t("profile.changePassword")}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleChangePw} className="space-y-4 mt-2">
@@ -546,6 +672,18 @@ export default function ParentDashboard() {
           </form>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function NoStudentState({ title, hint }: { title: string; hint: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center space-y-3">
+      <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center">
+        <GraduationCap className="w-8 h-8 text-primary" />
+      </div>
+      <h2 className="text-xl font-bold text-foreground">{title}</h2>
+      <p className="text-muted-foreground max-w-sm text-sm">{hint}</p>
     </div>
   );
 }

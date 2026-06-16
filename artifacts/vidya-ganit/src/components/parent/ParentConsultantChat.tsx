@@ -1,0 +1,593 @@
+import { useState, useRef, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Mic,
+  Camera,
+  Paperclip,
+  SendHorizonal,
+  RefreshCw,
+  FileText,
+  X,
+  Square,
+  Loader2,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
+import {
+  useGetConsultantHistory,
+  getGetConsultantHistoryQueryKey,
+} from "@workspace/api-client-react";
+import { useLanguage } from "@/lib/i18n";
+
+const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 MB
+
+type Attachment = {
+  name: string;
+  mimeType: string;
+  dataUrl: string;
+  isImage: boolean;
+};
+
+type Message = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  isStreaming?: boolean;
+  attachment?: Attachment;
+  attachmentName?: string | null;
+  attachmentType?: string | null;
+};
+
+type HistoryEntry = { role: "user" | "assistant"; content: string };
+
+class ChatError extends Error {}
+
+function readFileAsDataUrl(file: File | Blob, name = "file"): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error(`Could not read ${name}`));
+    reader.readAsDataURL(file);
+  });
+}
+
+function pickAudioMime(): string {
+  const candidates = ["audio/webm", "audio/mp4", "audio/ogg"];
+  if (typeof MediaRecorder === "undefined") return "";
+  for (const c of candidates) {
+    if (MediaRecorder.isTypeSupported(c)) return c;
+  }
+  return "";
+}
+
+export default function ParentConsultantChat({
+  vidyaId,
+  parentName,
+  selectedStudentId,
+  selectedStudentName,
+}: {
+  vidyaId: string;
+  parentName: string;
+  selectedStudentId: string | null;
+  selectedStudentName: string | null;
+}) {
+  const { t, lang } = useLanguage();
+
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [input, setInput] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [attachment, setAttachment] = useState<Attachment | null>(null);
+  const [statusError, setStatusError] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const sessionIdRef = useRef<string>(crypto.randomUUID());
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  // Load any previously saved counselor conversation once.
+  const { data: savedData } = useGetConsultantHistory(vidyaId, {
+    query: {
+      enabled: !!vidyaId,
+      queryKey: getGetConsultantHistoryQueryKey(vidyaId),
+      staleTime: Infinity,
+    },
+  });
+
+  const savedKeyRef = useRef(false);
+  useEffect(() => {
+    if (savedKeyRef.current || !savedData) return;
+    savedKeyRef.current = true;
+    if (savedData.sessionId) sessionIdRef.current = savedData.sessionId;
+    if (savedData.messages.length > 0) {
+      setMessages(
+        savedData.messages.map((m, i) => ({
+          id: `saved-${i}`,
+          role: m.role,
+          content: m.content,
+          attachmentName: m.attachmentName,
+          attachmentType: m.attachmentType,
+        })),
+      );
+      setHistory(
+        savedData.messages.map((m) => ({ role: m.role, content: m.content })),
+      );
+    }
+  }, [savedData]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const adjustTextarea = useCallback(() => {
+    const ta = textareaRef.current;
+    if (ta) {
+      ta.style.height = "auto";
+      ta.style.height = Math.min(ta.scrollHeight, 120) + "px";
+    }
+  }, []);
+
+  const handleFilePicked = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setStatusError(null);
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      setStatusError(t("strategy.fileTooBig"));
+      return;
+    }
+    try {
+      const dataUrl = await readFileAsDataUrl(file, file.name);
+      setAttachment({
+        name: file.name || "attachment",
+        mimeType: file.type || "application/octet-stream",
+        dataUrl,
+        isImage: file.type.startsWith("image/"),
+      });
+    } catch {
+      setStatusError(t("strategy.error"));
+    }
+  };
+
+  const stopRecording = useCallback(() => {
+    mediaRecorderRef.current?.stop();
+  }, []);
+
+  const transcribeBlob = useCallback(
+    async (blob: Blob, mimeType: string) => {
+      setIsTranscribing(true);
+      setStatusError(null);
+      try {
+        const dataUrl = await readFileAsDataUrl(blob, "recording");
+        const res = await fetch(`/api/parent/${vidyaId}/consultant/transcribe`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ audio: dataUrl, mimeType, language: lang }),
+        });
+        if (!res.ok) throw new Error("transcription failed");
+        const data = (await res.json()) as { text?: string };
+        if (data.text) {
+          setInput((prev) => (prev ? prev.trim() + " " : "") + data.text);
+          requestAnimationFrame(adjustTextarea);
+        }
+      } catch {
+        setStatusError(t("strategy.error"));
+      } finally {
+        setIsTranscribing(false);
+      }
+    },
+    [vidyaId, lang, adjustTextarea, t],
+  );
+
+  const toggleRecording = useCallback(async () => {
+    if (isRecording) {
+      stopRecording();
+      return;
+    }
+    const mimeType = pickAudioMime();
+    if (!mimeType || typeof navigator === "undefined" || !navigator.mediaDevices) {
+      setStatusError(t("strategy.micUnsupported"));
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const recorder = new MediaRecorder(stream, { mimeType });
+      audioChunksRef.current = [];
+      recorder.ondataavailable = (ev) => {
+        if (ev.data.size > 0) audioChunksRef.current.push(ev.data);
+      };
+      recorder.onstop = () => {
+        setIsRecording(false);
+        streamRef.current?.getTracks().forEach((tr) => tr.stop());
+        streamRef.current = null;
+        const blob = new Blob(audioChunksRef.current, { type: mimeType });
+        mediaRecorderRef.current = null;
+        if (blob.size > 0) void transcribeBlob(blob, mimeType);
+      };
+      mediaRecorderRef.current = recorder;
+      recorder.start();
+      setIsRecording(true);
+      setStatusError(null);
+    } catch {
+      setStatusError(t("strategy.micUnsupported"));
+    }
+  }, [isRecording, stopRecording, transcribeBlob, t]);
+
+  useEffect(() => {
+    return () => {
+      mediaRecorderRef.current?.stop();
+      streamRef.current?.getTracks().forEach((tr) => tr.stop());
+    };
+  }, []);
+
+  const sendMessage = async () => {
+    const msg = input.trim();
+    const currentAttachment = attachment;
+    if ((!msg && !currentAttachment) || isStreaming) return;
+
+    setInput("");
+    setAttachment(null);
+    setStatusError(null);
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
+
+    const userMsgId = `u-${Date.now()}`;
+    const aiMsgId = `a-${Date.now()}`;
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: userMsgId,
+        role: "user",
+        content: msg,
+        attachment: currentAttachment ?? undefined,
+      },
+      { id: aiMsgId, role: "assistant", content: "", isStreaming: true },
+    ]);
+    setIsStreaming(true);
+
+    try {
+      const response = await fetch(`/api/parent/${vidyaId}/consultant/message`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          message: msg,
+          sessionId: sessionIdRef.current,
+          studentVidyaId: selectedStudentId,
+          language: lang,
+          history,
+          ...(currentAttachment
+            ? {
+                attachment: {
+                  name: currentAttachment.name,
+                  mimeType: currentAttachment.mimeType,
+                  dataUrl: currentAttachment.dataUrl,
+                },
+              }
+            : {}),
+        }),
+      });
+
+      if (response.status === 401) {
+        throw new ChatError(t("strategy.error"));
+      }
+      if (response.status === 429 || response.status === 403) {
+        let friendlyMsg = t("strategy.error");
+        try {
+          const body = (await response.json()) as { error?: string };
+          if (body?.error) friendlyMsg = body.error;
+        } catch {
+          // keep default
+        }
+        throw new ChatError(friendlyMsg);
+      }
+      if (!response.ok || !response.body) throw new Error("Request failed");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let fullContent = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split("\n\n");
+        buffer = parts.pop() ?? "";
+
+        for (const part of parts) {
+          const line = part.trim();
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const data = JSON.parse(line.slice(6)) as {
+              chunk?: string;
+              done?: boolean;
+              sessionId?: string;
+            };
+            if (typeof data.chunk === "string") {
+              fullContent += data.chunk;
+              setMessages((prev) =>
+                prev.map((m) => (m.id === aiMsgId ? { ...m, content: fullContent } : m)),
+              );
+            }
+            if (data.done) {
+              if (data.sessionId) sessionIdRef.current = data.sessionId;
+              setMessages((prev) =>
+                prev.map((m) => (m.id === aiMsgId ? { ...m, isStreaming: false } : m)),
+              );
+              setHistory((prev) => [
+                ...prev,
+                { role: "user", content: msg },
+                { role: "assistant", content: fullContent },
+              ]);
+              setIsStreaming(false);
+            }
+          } catch {
+            // ignore malformed SSE line
+          }
+        }
+      }
+    } catch (err) {
+      const friendly = err instanceof ChatError ? err.message : t("strategy.error");
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === aiMsgId ? { ...m, content: friendly, isStreaming: false } : m,
+        ),
+      );
+      setIsStreaming(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      void sendMessage();
+    }
+  };
+
+  const clearChat = () => {
+    setMessages([]);
+    setHistory([]);
+    setInput("");
+    setAttachment(null);
+    setStatusError(null);
+    sessionIdRef.current = crypto.randomUUID();
+  };
+
+  return (
+    <div className="flex flex-col h-[calc(100vh-220px)] min-h-[420px] bg-white rounded-2xl shadow-md border border-indigo-50 overflow-hidden">
+      {/* Header */}
+      <div className="px-4 py-3 bg-white border-b border-indigo-100 flex items-center gap-3 shrink-0">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shrink-0 shadow-sm">
+          <Sparkles className="w-5 h-5" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-bold text-sm text-foreground">{t("strategy.title")}</p>
+          <p className="text-xs text-muted-foreground truncate">
+            {selectedStudentName
+              ? `${t("strategy.about")}: ${selectedStudentName}`
+              : t("strategy.general")}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={clearChat}
+          disabled={messages.length === 0}
+          className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-indigo-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          title={t("strategy.clear")}
+        >
+          <RefreshCw className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 min-h-0 bg-[#F7FAF9]">
+        {messages.length === 0 && (
+          <div className="flex items-start gap-2.5 max-w-[90%]">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shrink-0 mt-0.5">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div className="bg-white border border-emerald-100 text-foreground rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed shadow-sm">
+              <span className="whitespace-pre-wrap break-words">
+                {t("strategy.welcome").replace("{parent}", parentName)}
+              </span>
+            </div>
+          </div>
+        )}
+
+        <AnimatePresence initial={false}>
+          {messages.map((msg) => (
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              {msg.role === "user" ? (
+                <div className="flex items-start gap-2.5 max-w-[90%] ml-auto flex-row-reverse">
+                  <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-white shrink-0 mt-0.5">
+                    <UserRound className="w-4 h-4" />
+                  </div>
+                  <div className="bg-white text-foreground rounded-2xl rounded-tr-sm px-4 py-3 text-sm leading-relaxed shadow-sm border border-indigo-100 max-w-full">
+                    {msg.attachment ? (
+                      msg.attachment.isImage ? (
+                        <img
+                          src={msg.attachment.dataUrl}
+                          alt={msg.attachment.name}
+                          className="mb-2 rounded-xl w-full max-w-[240px] border border-indigo-100"
+                        />
+                      ) : (
+                        <div className="mb-2 flex items-center gap-2 rounded-xl bg-indigo-50 border border-indigo-100 px-3 py-2 max-w-[240px]">
+                          <FileText className="w-4 h-4 text-primary shrink-0" />
+                          <span className="text-xs font-medium truncate">
+                            {msg.attachment.name}
+                          </span>
+                        </div>
+                      )
+                    ) : msg.attachmentName ? (
+                      <div className="mb-2 flex items-center gap-2 rounded-xl bg-indigo-50 border border-indigo-100 px-3 py-2 max-w-[240px]">
+                        <FileText className="w-4 h-4 text-primary shrink-0" />
+                        <span className="text-xs font-medium truncate">{msg.attachmentName}</span>
+                      </div>
+                    ) : null}
+                    {msg.content && (
+                      <span className="whitespace-pre-wrap break-words">{msg.content}</span>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-start gap-2.5 max-w-[90%]">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shrink-0 mt-0.5">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div className="bg-white border border-emerald-100 text-foreground rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed shadow-sm max-w-full">
+                    {msg.content ? (
+                      <span className="whitespace-pre-wrap break-words">{msg.content}</span>
+                    ) : (
+                      msg.isStreaming && (
+                        <span className="inline-flex items-center gap-1 py-0.5">
+                          {[0, 1, 2].map((i) => (
+                            <span
+                              key={i}
+                              className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce"
+                              style={{ animationDelay: `${i * 0.18}s` }}
+                            />
+                          ))}
+                        </span>
+                      )
+                    )}
+                    {msg.isStreaming && msg.content && (
+                      <span className="inline-block w-0.5 h-[14px] bg-emerald-400/60 ml-0.5 animate-pulse align-middle rounded-full" />
+                    )}
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          ))}
+        </AnimatePresence>
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input bar */}
+      <div className="px-4 py-3 bg-white border-t border-indigo-100 shrink-0">
+        <input ref={fileInputRef} type="file" accept="*/*" className="hidden" onChange={handleFilePicked} />
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={handleFilePicked}
+        />
+
+        {attachment && (
+          <div className="mb-2 flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-xl px-2.5 py-2">
+            {attachment.isImage ? (
+              <img
+                src={attachment.dataUrl}
+                alt={attachment.name}
+                className="w-10 h-10 rounded-lg object-cover border border-indigo-100 shrink-0"
+              />
+            ) : (
+              <FileText className="w-5 h-5 text-primary shrink-0" />
+            )}
+            <span className="text-xs font-medium text-foreground truncate flex-1">
+              {attachment.name}
+            </span>
+            <button
+              type="button"
+              onClick={() => setAttachment(null)}
+              className="p-1 rounded-md text-muted-foreground hover:text-red-500 hover:bg-red-50"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {statusError && (
+          <p className="text-xs text-red-500 font-medium mb-2">{statusError}</p>
+        )}
+        {(isRecording || isTranscribing) && (
+          <p className="text-xs text-emerald-600 font-medium mb-2 flex items-center gap-1.5">
+            {isTranscribing ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" /> {t("strategy.transcribing")}
+              </>
+            ) : (
+              <>
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                {t("strategy.recording")}
+              </>
+            )}
+          </p>
+        )}
+
+        <div className="flex items-end gap-1.5">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isStreaming}
+            className="p-2.5 rounded-xl text-muted-foreground hover:text-primary hover:bg-indigo-50 transition-colors disabled:opacity-40 shrink-0"
+            title={t("strategy.attach")}
+          >
+            <Paperclip className="w-5 h-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => cameraInputRef.current?.click()}
+            disabled={isStreaming}
+            className="p-2.5 rounded-xl text-muted-foreground hover:text-primary hover:bg-indigo-50 transition-colors disabled:opacity-40 shrink-0"
+            title={t("strategy.camera")}
+          >
+            <Camera className="w-5 h-5" />
+          </button>
+          <button
+            type="button"
+            onClick={toggleRecording}
+            disabled={isStreaming || isTranscribing}
+            className={`p-2.5 rounded-xl transition-colors disabled:opacity-40 shrink-0 ${
+              isRecording
+                ? "bg-red-500 text-white hover:bg-red-600"
+                : "text-muted-foreground hover:text-primary hover:bg-indigo-50"
+            }`}
+            title="Voice"
+          >
+            {isRecording ? <Square className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+          </button>
+
+          <textarea
+            ref={textareaRef}
+            value={input}
+            onChange={(e) => {
+              setInput(e.target.value);
+              adjustTextarea();
+            }}
+            onKeyDown={handleKeyDown}
+            rows={1}
+            placeholder={t("strategy.placeholder")}
+            disabled={isStreaming}
+            className="flex-1 resize-none rounded-2xl border border-indigo-100 bg-gray-50 px-4 py-2.5 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 disabled:opacity-60 max-h-[120px]"
+          />
+
+          <button
+            type="button"
+            onClick={() => void sendMessage()}
+            disabled={(!input.trim() && !attachment) || isStreaming}
+            className="p-2.5 rounded-xl bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-40 shrink-0"
+            title={t("strategy.send")}
+          >
+            <SendHorizonal className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
