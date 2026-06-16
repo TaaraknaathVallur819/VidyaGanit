@@ -444,6 +444,8 @@ components:
           type: string
         message:
           type: string
+        sessionId:
+          type: string
         history:
           type: array
           items:

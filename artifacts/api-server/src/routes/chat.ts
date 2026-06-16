@@ -1,7 +1,8 @@
 import { Router, type IRouter } from "express";
+import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import type OpenAI from "openai";
-import { db, usersTable } from "@workspace/db";
+import { db, usersTable, chatMessagesTable } from "@workspace/db";
 import { SendChatMessageBody } from "@workspace/api-zod";
 import { detectTopic, buildTutorSystemPrompt, type ChatEntry } from "../lib/tutor";
 import { computeXpAndBadges } from "../lib/xp";
@@ -61,6 +62,22 @@ router.post(
       return;
     }
 
+  // One conversation = one sessionId (client-supplied, regenerated when the
+  // student clears the chat). Falls back to a fresh id if absent.
+  const sessionId = parsed.data.sessionId?.slice(0, 100) || randomUUID();
+
+  // Compliance: append-only log of the student's message, tied to their ID.
+  try {
+    await db.insert(chatMessagesTable).values({
+      sessionId,
+      studentVidyaId: vidyaId,
+      role: "user",
+      content: message,
+    });
+  } catch (err) {
+    req.log.error({ err }, "failed to persist student chat message");
+  }
+
   const context = {
     name: user.name,
     studentClass: user.studentClass ?? null,
@@ -87,6 +104,7 @@ router.post(
   let full = "";
   let sent = 0;
   let imagePrompt: string | null = null;
+  let fallbackText: string | null = null;
 
   const streamFlush = (): void => {
     let safeEnd: number;
@@ -153,10 +171,9 @@ router.post(
   } catch (err) {
     req.log.error({ err }, "AI chat completion failed");
     if (sent === 0) {
-      send({
-        chunk:
-          "Oops! My thinking cap slipped for a second. 😅 Could you ask me that again?",
-      });
+      fallbackText =
+        "Oops! My thinking cap slipped for a second. 😅 Could you ask me that again?";
+      send({ chunk: fallbackText });
     }
   }
 
@@ -174,6 +191,22 @@ router.post(
     } catch (err) {
       req.log.error({ err }, "AI image generation failed");
       send({ imageError: true });
+    }
+  }
+
+  // Compliance: append-only log of the tutor's reply (marker stripped). Falls
+  // back to the error message actually shown to the child if the AI call failed.
+  const assistantText = full.replace(DRAW_MARKER_RE, "").trim() || (fallbackText ?? "");
+  if (assistantText) {
+    try {
+      await db.insert(chatMessagesTable).values({
+        sessionId,
+        studentVidyaId: vidyaId,
+        role: "assistant",
+        content: assistantText,
+      });
+    } catch (err) {
+      req.log.error({ err }, "failed to persist tutor chat message");
     }
   }
 

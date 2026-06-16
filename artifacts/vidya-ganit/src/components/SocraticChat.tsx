@@ -33,6 +33,38 @@ type HistoryEntry = {
 type XpToast = { id: string; amount: number };
 type BadgeToast = { id: string; emoji: string; name: string };
 
+const EMOJI_RE = /\p{Extended_Pictographic}/gu;
+
+/**
+ * Frontend gatekeeper for child input. Returns a friendly nudge string when the
+ * message is pure gibberish or emoji spam, otherwise null (safe to send).
+ */
+function validateStudentInput(msg: string): string | null {
+  const emojiCount = (msg.match(EMOJI_RE) ?? []).length;
+  const withoutEmoji = msg.replace(EMOJI_RE, "");
+  // Unicode-aware: accept any script's letters/numbers (Hindi, Tamil, etc.)
+  // or common maths operators. Only pure punctuation/symbols count as "no meaning".
+  const hasMeaning =
+    /[\p{L}\p{N}]/u.test(withoutEmoji) || /[+\-×÷*/=%<>]/.test(withoutEmoji);
+
+  if (!hasMeaning) {
+    return "Oops, I couldn't spot any words or numbers there! ✏️ Try asking your maths question using clear words or numbers.";
+  }
+  if (emojiCount >= 6) {
+    return "Whoa, that's a LOT of emojis! 😄 Let's use words and numbers so I can help with your maths.";
+  }
+  if (/([a-zA-Z])\1{7,}/.test(msg) || /([!?.,@#%^&*~])\1{5,}/.test(msg)) {
+    return "Hmm, that looks like a keyboard wiggle! 😅 Try typing your maths question in clear words or numbers.";
+  }
+  const looksMashed = msg
+    .split(/\s+/)
+    .some((w) => w.length >= 15 && /^[a-z]+$/i.test(w) && !/[aeiou]/i.test(w));
+  if (looksMashed) {
+    return "That looks a bit jumbled! 😄 Could you ask your maths question using clear words or numbers?";
+  }
+  return null;
+}
+
 type Props = {
   vidyaId: string;
   studentName: string;
@@ -151,6 +183,7 @@ export default function SocraticChat({
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const sessionIdRef = useRef<string>(crypto.randomUUID());
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -183,6 +216,18 @@ export default function SocraticChat({
     const msg = (text ?? input).trim();
     if (!msg || isStreaming) return;
 
+    const validationError = validateStudentInput(msg);
+    if (validationError) {
+      setInput("");
+      if (textareaRef.current) textareaRef.current.style.height = "auto";
+      setMessages((prev) => [
+        ...prev,
+        { id: `u-${Date.now()}`, role: "user", content: msg },
+        { id: `t-${Date.now()}`, role: "tutor", content: validationError },
+      ]);
+      return;
+    }
+
     setInput("");
     if (textareaRef.current) textareaRef.current.style.height = "auto";
 
@@ -201,7 +246,12 @@ export default function SocraticChat({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ vidyaId, message: msg, history }),
+        body: JSON.stringify({
+          vidyaId,
+          message: msg,
+          sessionId: sessionIdRef.current,
+          history,
+        }),
       });
 
       if (response.status === 401) {
@@ -347,6 +397,7 @@ export default function SocraticChat({
     setMessages([]);
     setHistory([]);
     setInput("");
+    sessionIdRef.current = crypto.randomUUID();
   };
 
   const quickStarters = [
@@ -475,8 +526,12 @@ export default function SocraticChat({
               adjustTextarea();
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Type your maths question… (Enter to send)"
-            className="flex-1 bg-transparent resize-none text-sm text-foreground placeholder:text-muted-foreground outline-none min-h-[38px] max-h-[120px] py-1.5 leading-relaxed"
+            placeholder={
+              isStreaming
+                ? "Coach is calculating… ✏️"
+                : "Type your maths question… (Enter to send)"
+            }
+            className="flex-1 bg-transparent resize-none text-sm text-foreground placeholder:text-muted-foreground outline-none min-h-[38px] max-h-[120px] py-1.5 leading-relaxed disabled:cursor-not-allowed"
             rows={1}
             disabled={isStreaming}
           />
@@ -486,11 +541,24 @@ export default function SocraticChat({
             disabled={!input.trim() || isStreaming}
             className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white disabled:opacity-35 disabled:cursor-not-allowed hover:opacity-90 transition-opacity shadow-sm shrink-0 mb-0.5"
           >
-            <SendHorizonal className="w-4 h-4" />
+            {isStreaming ? (
+              <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+            ) : (
+              <SendHorizonal className="w-4 h-4" />
+            )}
           </button>
         </div>
-        <p className="text-[10px] text-muted-foreground text-center mt-1.5 select-none">
-          Enter → send &nbsp;·&nbsp; Shift+Enter → new line &nbsp;·&nbsp; Every question earns XP! 🌟
+        <p className="text-[10px] text-center mt-1.5 select-none">
+          {isStreaming ? (
+            <span className="inline-flex items-center gap-1.5 justify-center text-primary font-semibold">
+              <span className="inline-block w-3 h-3 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+              Coach is calculating…
+            </span>
+          ) : (
+            <span className="text-muted-foreground">
+              Enter → send &nbsp;·&nbsp; Shift+Enter → new line &nbsp;·&nbsp; Every question earns XP! 🌟
+            </span>
+          )}
         </p>
       </div>
 

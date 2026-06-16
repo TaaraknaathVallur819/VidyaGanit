@@ -151,6 +151,7 @@ export interface ChatHistoryItem {
 export interface ChatMessageInput {
   vidyaId: string;
   message: string;
+  sessionId?: string;
   history?: ChatHistoryItem[];
 }
 

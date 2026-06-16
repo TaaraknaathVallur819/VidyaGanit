@@ -30,3 +30,12 @@ Rate limiting is backed by a shared Postgres table `rate_limit_buckets` (fixed-w
 **Note:** the chat body Zod schema still *requires* `vidyaId`, but the value is IGNORED for identity (cookie wins). The frontend still sends it; don't rely on it server-side.
 
 **Caveat:** users logged in BEFORE cookies existed (localStorage-only) get 401 on chat until they log in once more.
+
+## Compliance logging (Parent Dashboard groundwork)
+Every tutor turn is persisted append-only to `chat_messages` (sessionId, studentVidyaId→users.vidyaId, role, content, createdAt). Keyed by the cookie-derived `vidyaId`, never the body. The client sends a `sessionId` (added as optional to OpenAPI `ChatMessageInput`) generated per conversation and regenerated on "clear chat". Inserts are best-effort (wrapped in try/catch + `req.log.error`) so a logging failure never breaks the live chat. The AI-failure fallback message shown to the child is also persisted (so the audit log matches what was displayed). NOT persisted: client-only input-sanitizer nudges (they never reach the server — deliberate scope choice).
+
+## Topical guardrail
+`buildTutorSystemPrompt` (`lib/tutor.ts`) has a strict "TOPIC GUARDRAIL" block: refuse all non-maths queries (movies, games, stories, code, etc.) and playfully redirect to maths. This is prompt-only; there is no server-side topic classifier.
+
+## Frontend input sanitizer
+`validateStudentInput` in `SocraticChat.tsx` intercepts gibberish/emoji-spam BEFORE calling the API and shows a friendly nudge. **Must stay Unicode-aware:** the "has meaning" check uses `/[\p{L}\p{N}]/u` (+ maths operators), NOT `[a-zA-Z0-9]` — an ASCII-only check wrongly blocks Hindi/Tamil/Devanagari input, a real break for this Indian-student app. Repeated-char/keyboard-mash heuristics are intentionally ASCII-only so they don't false-positive on Indic scripts.
