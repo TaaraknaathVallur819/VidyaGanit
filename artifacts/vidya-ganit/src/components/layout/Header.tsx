@@ -1,10 +1,19 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAuth } from "@/lib/auth";
-import { LogOut } from "lucide-react";
+import { useLanguage, LANGUAGES } from "@/lib/i18n";
+import { LogOut, Languages } from "lucide-react";
 
 export default function Header() {
   const { user, logout } = useAuth();
+  const { t, lang, setLang } = useLanguage();
   const [, setLocation] = useLocation();
 
   const handleSwitchRole = () => {
@@ -26,12 +35,26 @@ export default function Header() {
       <div className="flex items-center gap-4">
         {user && (
           <span className="hidden sm:block text-sm text-muted-foreground font-medium">
-            Hi, {user.name}
+            {t("header.hi")}, {user.name}
           </span>
         )}
-        <div className="hidden sm:flex text-sm text-muted-foreground font-medium border border-border rounded-full px-3 py-1 cursor-default bg-gray-50">
-          English / हिंदी / தமிழ்
-        </div>
+        <Select value={lang} onValueChange={(v) => setLang(v as typeof lang)}>
+          <SelectTrigger
+            className="w-auto gap-2 h-9 rounded-full border-border bg-gray-50"
+            aria-label={t("language.label")}
+            data-testid="select-language"
+          >
+            <Languages className="w-4 h-4 text-primary" />
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {LANGUAGES.map((l) => (
+              <SelectItem key={l.code} value={l.code} data-testid={`lang-${l.code}`}>
+                {l.native}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Button
           variant="outline"
           size="sm"
@@ -42,10 +65,10 @@ export default function Header() {
           {user ? (
             <>
               <LogOut className="w-4 h-4" />
-              Log Out
+              {t("header.logout")}
             </>
           ) : (
-            "Switch Role"
+            t("header.switchRole")
           )}
         </Button>
       </div>

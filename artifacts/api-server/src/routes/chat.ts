@@ -5,6 +5,7 @@ import type OpenAI from "openai";
 import { db, usersTable, chatMessagesTable } from "@workspace/db";
 import { SendChatMessageBody } from "@workspace/api-zod";
 import { detectTopic, buildTutorSystemPrompt, type ChatEntry } from "../lib/tutor";
+import { normalizeLanguage } from "../lib/counselor";
 import { computeXpAndBadges } from "../lib/xp";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { generateImageBuffer } from "@workspace/integrations-openai-ai-server/image";
@@ -63,6 +64,7 @@ router.post(
     // Identity comes from the verified session cookie, never the request body.
     const vidyaId = req.vidyaId as string;
     const { message, attachment } = parsed.data;
+    const language = normalizeLanguage(parsed.data.language);
 
     if (message.length > MAX_MESSAGE_LEN) {
       res
@@ -201,7 +203,7 @@ router.post(
   }
 
   const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-    { role: "system", content: buildTutorSystemPrompt(context) },
+    { role: "system", content: buildTutorSystemPrompt(context, language) },
     ...chatHistory.map(
       (h): OpenAI.Chat.Completions.ChatCompletionMessageParam =>
         h.role === "assistant"

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { BADGE_CATALOG } from "@/lib/badges";
+import { useLanguage } from "@/lib/i18n";
 
 const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 MB
 
@@ -67,19 +68,19 @@ function validateStudentInput(msg: string): string | null {
     /[\p{L}\p{N}]/u.test(withoutEmoji) || /[+\-×÷*/=%<>]/.test(withoutEmoji);
 
   if (!hasMeaning) {
-    return "Oops, I couldn't spot any words or numbers there! ✏️ Try asking your maths question using clear words or numbers.";
+    return "chat.err.noMeaning";
   }
   if (emojiCount >= 6) {
-    return "Whoa, that's a LOT of emojis! 😄 Let's use words and numbers so I can help with your maths.";
+    return "chat.err.tooManyEmojis";
   }
   if (/([a-zA-Z])\1{7,}/.test(msg) || /([!?.,@#%^&*~])\1{5,}/.test(msg)) {
-    return "Hmm, that looks like a keyboard wiggle! 😅 Try typing your maths question in clear words or numbers.";
+    return "chat.err.keyboardWiggle";
   }
   const looksMashed = msg
     .split(/\s+/)
     .some((w) => w.length >= 15 && /^[a-z]+$/i.test(w) && !/[aeiou]/i.test(w));
   if (looksMashed) {
-    return "That looks a bit jumbled! 😄 Could you ask your maths question using clear words or numbers?";
+    return "chat.err.jumbled";
   }
   return null;
 }
@@ -112,12 +113,14 @@ function TutorBubble({
   isDrawing,
   imageUrl,
   imageAlt,
+  drawingLabel,
 }: {
   content: string;
   isStreaming?: boolean;
   isDrawing?: boolean;
   imageUrl?: string;
   imageAlt?: string;
+  drawingLabel: string;
 }) {
   return (
     <div className="flex items-start gap-2.5 max-w-[88%]">
@@ -143,7 +146,7 @@ function TutorBubble({
         {isDrawing && !imageUrl && (
           <div className="mt-2.5 flex items-center gap-2 text-white/90 text-xs">
             <span className="inline-block w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-            <span>Drawing a picture for you… 🎨</span>
+            <span>{drawingLabel}</span>
           </div>
         )}
       </div>
@@ -189,17 +192,20 @@ function StudentBubble({
   );
 }
 
-const WELCOME = (name: string, cls: string | null, board: string | null) => {
+const buildWelcome = (
+  t: (key: string) => string,
+  name: string,
+  cls: string | null,
+  board: string | null,
+) => {
   const fn = name.split(" ")[0];
-  const info = [cls ? `Class ${cls}` : "", board ?? ""].filter(Boolean).join(" · ");
-  return (
-    `Hey ${fn}! 👋 I'm your VidyaGanit Maths Tutor! 🚀\n\n` +
-    `I won't hand you answers directly — but I WILL help you discover them yourself. ` +
-    `That makes them stick in your brain forever! 🧠✨\n\n` +
-    (info ? `I know your ${info} syllabus really well. ` : "") +
-    `Ask me any maths challenge — fractions, multiplication, geometry, percentages, equations — anything!\n\n` +
-    `Every question earns you XP and badges too! 🌟 What shall we tackle first?`
-  );
+  const info = [cls ? `${t("common.class")} ${cls}` : "", board ?? ""]
+    .filter(Boolean)
+    .join(" · ");
+  const syllabus = info
+    ? t("chat.welcomeSyllabus").replace("{info}", info)
+    : "";
+  return t("chat.welcome").replace("{name}", fn).replace("{info}", syllabus);
 };
 
 export default function SocraticChat({
@@ -209,6 +215,7 @@ export default function SocraticChat({
   board,
   onXpAwarded,
 }: Props) {
+  const { t, lang } = useLanguage();
   const fn = studentName.split(" ")[0];
   const initial = fn[0]?.toUpperCase() ?? "S";
 
@@ -269,9 +276,7 @@ export default function SocraticChat({
     const SpeechRecognitionCtor =
       window.SpeechRecognition ?? window.webkitSpeechRecognition;
     if (!SpeechRecognitionCtor) {
-      setAttachError(
-        "Oops! Your browser doesn't support voice input. 🎤 Please type your maths question instead!",
-      );
+      setAttachError(t("chat.err.voiceUnsupported"));
       return;
     }
     setAttachError(null);
@@ -292,11 +297,9 @@ export default function SocraticChat({
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       setIsListening(false);
       if (event.error === "not-allowed" || event.error === "service-not-allowed") {
-        setAttachError(
-          "I need permission to use the microphone. 🎤 Please allow it and try again!",
-        );
+        setAttachError(t("chat.err.micPermission"));
       } else if (event.error === "no-speech") {
-        setAttachError("I didn't catch that. 🎤 Try speaking your maths question again!");
+        setAttachError(t("chat.err.noSpeech"));
       }
     };
     recognition.onend = () => {
@@ -311,7 +314,7 @@ export default function SocraticChat({
     } catch {
       recognitionRef.current = null;
       setIsListening(false);
-      setAttachError("Couldn't start the microphone. 🎤 Please try again!");
+      setAttachError(t("chat.err.micStart"));
     }
   };
 
@@ -329,7 +332,7 @@ export default function SocraticChat({
     if (!file) return;
     setAttachError(null);
     if (file.size > MAX_ATTACHMENT_BYTES) {
-      setAttachError("That file is too big! 😅 Please pick one under 8 MB.");
+      setAttachError(t("chat.err.fileTooBig"));
       return;
     }
     try {
@@ -341,7 +344,7 @@ export default function SocraticChat({
         isImage: file.type.startsWith("image/"),
       });
     } catch {
-      setAttachError("Hmm, I couldn't read that file. Please try another one!");
+      setAttachError(t("chat.err.fileUnreadable"));
     }
   };
 
@@ -352,14 +355,14 @@ export default function SocraticChat({
 
     // Only gibberish-check typed text; an attachment is meaningful on its own.
     if (msg && !currentAttachment) {
-      const validationError = validateStudentInput(msg);
-      if (validationError) {
+      const validationErrorKey = validateStudentInput(msg);
+      if (validationErrorKey) {
         setInput("");
         if (textareaRef.current) textareaRef.current.style.height = "auto";
         setMessages((prev) => [
           ...prev,
           { id: `u-${Date.now()}`, role: "user", content: msg },
-          { id: `t-${Date.now()}`, role: "tutor", content: validationError },
+          { id: `t-${Date.now()}`, role: "tutor", content: t(validationErrorKey) },
         ]);
         return;
       }
@@ -395,6 +398,7 @@ export default function SocraticChat({
           message: msg,
           sessionId: sessionIdRef.current,
           history,
+          language: lang,
           ...(currentAttachment
             ? {
                 attachment: {
@@ -408,13 +412,10 @@ export default function SocraticChat({
       });
 
       if (response.status === 401) {
-        throw new ChatError(
-          "Hmm, I need you to log in again before we keep learning. 🔑 Please sign in once more!",
-        );
+        throw new ChatError(t("chat.err.loginAgain"));
       }
       if (response.status === 429) {
-        let msg429 =
-          "Whoa, slow down a little! 😅 Take a short breather and try again in a moment.";
+        let msg429 = t("chat.err.rateLimit");
         try {
           const body = (await response.json()) as { error?: string };
           if (body?.error) msg429 = body.error;
@@ -521,9 +522,7 @@ export default function SocraticChat({
       }
     } catch (err) {
       const friendly =
-        err instanceof ChatError
-          ? err.message
-          : "Oops! I had trouble connecting. 😅 Please try again!";
+        err instanceof ChatError ? err.message : t("chat.err.connect");
       setMessages((prev) =>
         prev.map((m) =>
           m.id === tutorMsgId
@@ -556,10 +555,10 @@ export default function SocraticChat({
   };
 
   const quickStarters = [
-    "What are fractions? 🍕",
-    "Help me multiply large numbers 🏏",
-    "How do I find the area? 📐",
-    "What are percentages? 🌟",
+    t("chat.quick.fractions"),
+    t("chat.quick.multiply"),
+    t("chat.quick.area"),
+    t("chat.quick.percentages"),
   ];
 
   return (
@@ -570,12 +569,12 @@ export default function SocraticChat({
           🚀
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-bold text-sm text-foreground">VidyaGanit Tutor</p>
+          <p className="font-bold text-sm text-foreground">{t("chat.tutorName")}</p>
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse shrink-0" />
             <p className="text-xs text-muted-foreground truncate">
-              Socratic Mode
-              {studentClass ? ` · Class ${studentClass}` : ""}
+              {t("chat.socraticMode")}
+              {studentClass ? ` · ${t("common.class")} ${studentClass}` : ""}
               {board ? ` · ${board}` : ""}
             </p>
           </div>
@@ -585,7 +584,7 @@ export default function SocraticChat({
           onClick={clearChat}
           disabled={messages.length === 0}
           className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-indigo-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-          title="Clear chat"
+          title={t("chat.clearChat")}
         >
           <RefreshCw className="w-4 h-4" />
         </button>
@@ -593,7 +592,10 @@ export default function SocraticChat({
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 min-h-0">
-        <TutorBubble content={WELCOME(studentName, studentClass, board)} />
+        <TutorBubble
+          content={buildWelcome(t, studentName, studentClass, board)}
+          drawingLabel={t("chat.drawing")}
+        />
 
         <AnimatePresence initial={false}>
           {messages.map((msg) => (
@@ -616,6 +618,7 @@ export default function SocraticChat({
                   isDrawing={msg.isDrawing}
                   imageUrl={msg.imageUrl}
                   imageAlt={msg.imageAlt}
+                  drawingLabel={t("chat.drawing")}
                 />
               )}
             </motion.div>
@@ -630,7 +633,7 @@ export default function SocraticChat({
             className="pt-2"
           >
             <p className="text-xs text-center text-muted-foreground font-medium mb-3">
-              Try one of these to get started 👇
+              {t("chat.tryToStart")}
             </p>
             <div className="grid grid-cols-2 gap-2">
               {quickStarters.map((qs) => (
@@ -689,7 +692,7 @@ export default function SocraticChat({
               type="button"
               onClick={() => setAttachment(null)}
               className="p-1 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-white transition-colors shrink-0"
-              title="Remove attachment"
+              title={t("chat.removeAttachment")}
             >
               <X className="w-4 h-4" />
             </button>
@@ -707,7 +710,7 @@ export default function SocraticChat({
               onClick={() => fileInputRef.current?.click()}
               disabled={isStreaming}
               className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-indigo-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              title="Attach file"
+              title={t("chat.attachFile")}
             >
               <Paperclip className="w-4 h-4" />
             </button>
@@ -716,7 +719,7 @@ export default function SocraticChat({
               onClick={() => cameraInputRef.current?.click()}
               disabled={isStreaming}
               className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-indigo-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              title="Take a photo"
+              title={t("chat.takePhoto")}
             >
               <Camera className="w-4 h-4" />
             </button>
@@ -729,7 +732,7 @@ export default function SocraticChat({
                   ? "text-red-500 bg-red-50 animate-pulse"
                   : "text-muted-foreground hover:text-primary hover:bg-indigo-50"
               }`}
-              title={isListening ? "Stop listening" : "Speak your maths question"}
+              title={isListening ? t("chat.stopListening") : t("chat.speak")}
             >
               <Mic className="w-4 h-4" />
             </button>
@@ -743,9 +746,7 @@ export default function SocraticChat({
             }}
             onKeyDown={handleKeyDown}
             placeholder={
-              isStreaming
-                ? "Coach is calculating… ✏️"
-                : "Type your maths question… (Enter to send)"
+              isStreaming ? t("chat.calculating") : t("chat.placeholder")
             }
             className="flex-1 bg-transparent resize-none text-sm text-foreground placeholder:text-muted-foreground outline-none min-h-[38px] max-h-[120px] py-1.5 leading-relaxed disabled:cursor-not-allowed"
             rows={1}
@@ -768,11 +769,11 @@ export default function SocraticChat({
           {isStreaming ? (
             <span className="inline-flex items-center gap-1.5 justify-center text-primary font-semibold">
               <span className="inline-block w-3 h-3 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-              Coach is calculating…
+              {t("chat.calculatingShort")}
             </span>
           ) : (
             <span className="text-muted-foreground">
-              Enter → send &nbsp;·&nbsp; Shift+Enter → new line &nbsp;·&nbsp; Every question earns XP! 🌟
+              {t("chat.footerHint")}
             </span>
           )}
         </p>
@@ -813,7 +814,7 @@ export default function SocraticChat({
               <span className="text-2xl shrink-0">{toast.emoji}</span>
               <div className="min-w-0">
                 <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wide">
-                  🎉 Badge Unlocked!
+                  {t("chat.badgeUnlocked")}
                 </p>
                 <p className="text-sm font-bold text-foreground truncate">
                   {toast.name}

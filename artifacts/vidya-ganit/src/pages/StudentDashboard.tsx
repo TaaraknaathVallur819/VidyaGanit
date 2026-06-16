@@ -31,14 +31,15 @@ import {
 } from "lucide-react";
 import SocraticChat from "@/components/SocraticChat";
 import { BADGE_CATALOG } from "@/lib/badges";
+import { useLanguage } from "@/lib/i18n";
 
 function getLevelInfo(xp: number) {
   const LEVELS = [
-    { level: 1, name: "Beginner", min: 0, nextMin: 100 },
-    { level: 2, name: "Explorer", min: 100, nextMin: 250 },
-    { level: 3, name: "Achiever", min: 250, nextMin: 500 },
-    { level: 4, name: "Champion", min: 500, nextMin: 1000 },
-    { level: 5, name: "Master", min: 1000, nextMin: Infinity },
+    { level: 1, min: 0, nextMin: 100 },
+    { level: 2, min: 100, nextMin: 250 },
+    { level: 3, min: 250, nextMin: 500 },
+    { level: 4, min: 500, nextMin: 1000 },
+    { level: 5, min: 1000, nextMin: Infinity },
   ];
   const lvl =
     [...LEVELS].reverse().find((l) => xp >= l.min) ?? LEVELS[0];
@@ -66,6 +67,7 @@ function getPasswordStrength(pwd: string) {
 
 export default function StudentDashboard() {
   const { user, setUser } = useAuth();
+  const { t } = useLanguage();
   const vidyaId = user?.vidyaId ?? "";
 
   const { data: profile, refetch } = useGetProfile(vidyaId, {
@@ -104,7 +106,7 @@ export default function StudentDashboard() {
         },
         onError: (err) => {
           setEditError(
-            (err as { data?: { error?: string } })?.data?.error ?? "Update failed.",
+            (err as { data?: { error?: string } })?.data?.error ?? t("student.updateFailed"),
           );
         },
       },
@@ -143,7 +145,7 @@ export default function StudentDashboard() {
         onError: (err) => {
           setPwError(
             (err as { data?: { error?: string } })?.data?.error ??
-              "Failed to change password.",
+              t("student.changePwFailed"),
           );
         },
       },
@@ -157,19 +159,19 @@ export default function StudentDashboard() {
       <Tabs defaultValue="workspace" className="flex flex-col flex-1 overflow-hidden">
         <div className="border-b bg-white px-6 pt-4">
           <div className="max-w-3xl mx-auto">
-            <h1 className="text-2xl font-bold text-foreground mb-3">Student Workspace</h1>
+            <h1 className="text-2xl font-bold text-foreground mb-3">{t("student.workspaceTitle")}</h1>
             <TabsList className="bg-transparent p-0 gap-6 border-b-0">
               <TabsTrigger
                 value="profile"
                 className="px-0 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none bg-transparent font-semibold"
               >
-                My Profile
+                {t("student.tab.profile")}
               </TabsTrigger>
               <TabsTrigger
                 value="workspace"
                 className="px-0 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none bg-transparent font-semibold"
               >
-                Workspace
+                {t("student.tab.workspace")}
               </TabsTrigger>
             </TabsList>
           </div>
@@ -201,7 +203,7 @@ export default function StudentDashboard() {
                         className="gap-1.5 rounded-full"
                       >
                         <Pencil className="w-3.5 h-3.5" />
-                        Edit Profile
+                        {t("student.editProfile")}
                       </Button>
                       <Button
                         variant="outline"
@@ -211,7 +213,7 @@ export default function StudentDashboard() {
                         className="gap-1.5 rounded-full"
                       >
                         <Lock className="w-3.5 h-3.5" />
-                        Change Password
+                        {t("student.changePassword")}
                       </Button>
                     </div>
                   </div>
@@ -220,9 +222,9 @@ export default function StudentDashboard() {
                   <p className="text-sm text-muted-foreground mt-0.5 font-mono tracking-wide">{displayed.vidyaId}</p>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-5">
-                    <InfoChip label="Gender" value={displayed.gender === "male" ? "Male" : "Female"} />
-                    <InfoChip label="Class" value={displayed.studentClass ? `Class ${displayed.studentClass}` : "—"} icon={<GraduationCap className="w-3.5 h-3.5" />} />
-                    <InfoChip label="Board" value={displayed.board ?? "—"} icon={<BookOpen className="w-3.5 h-3.5" />} />
+                    <InfoChip label={t("student.gender")} value={displayed.gender === "male" ? t("student.male") : t("student.female")} />
+                    <InfoChip label={t("student.class")} value={displayed.studentClass ? `${t("common.class")} ${displayed.studentClass}` : "—"} icon={<GraduationCap className="w-3.5 h-3.5" />} />
+                    <InfoChip label={t("student.board")} value={displayed.board ?? "—"} icon={<BookOpen className="w-3.5 h-3.5" />} />
                   </div>
                 </CardContent>
               </Card>
@@ -238,16 +240,16 @@ export default function StudentDashboard() {
                 <CardContent className="p-6 space-y-5">
                   <div className="flex items-center gap-2">
                     <Zap className="w-5 h-5 text-amber-500" />
-                    <h3 className="font-bold text-lg text-foreground">Math XP</h3>
+                    <h3 className="font-bold text-lg text-foreground">{t("student.mathXp")}</h3>
                     <Badge variant="secondary" className="ml-auto text-base font-bold px-3 py-1">{xp} XP</Badge>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-xs text-muted-foreground mb-1.5 font-medium">
-                      <span>Level {levelInfo.level} — {levelInfo.name}</span>
+                      <span>{t("student.level")} {levelInfo.level} — {t(`level.${levelInfo.level}`)}</span>
                       {levelInfo.nextMin === Infinity
-                        ? <span>Max Level! 🏆</span>
-                        : <span>{levelInfo.xpToNext} XP to Level {levelInfo.level + 1}</span>
+                        ? <span>{t("student.maxLevel")}</span>
+                        : <span>{t("student.xpToNext").replace("{xp}", String(levelInfo.xpToNext)).replace("{level}", String(levelInfo.level + 1))}</span>
                       }
                     </div>
                     <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
@@ -263,8 +265,8 @@ export default function StudentDashboard() {
                   <div>
                     <div className="flex items-center gap-2 mb-3">
                       <Star className="w-5 h-5 text-amber-400" />
-                      <h3 className="font-bold text-foreground">Badges Earned</h3>
-                      <span className="text-xs text-muted-foreground ml-auto">{earnedBadges.length} / {BADGE_CATALOG.length} earned</span>
+                      <h3 className="font-bold text-foreground">{t("student.badgesEarned")}</h3>
+                      <span className="text-xs text-muted-foreground ml-auto">{t("student.earnedCount").replace("{earned}", String(earnedBadges.length)).replace("{total}", String(BADGE_CATALOG.length))}</span>
                     </div>
                     <div className="grid grid-cols-4 gap-3">
                       {BADGE_CATALOG.map((badge) => {
@@ -280,7 +282,7 @@ export default function StudentDashboard() {
                                 ? "bg-amber-50 border-2 border-amber-200 shadow-sm"
                                 : "bg-gray-100 border-2 border-dashed border-gray-200"
                             }`}
-                            title={earned ? badge.name : "Keep learning to unlock!"}
+                            title={earned ? badge.name : t("student.keepLearningToUnlock")}
                           >
                             {earned ? (
                               <>
@@ -296,7 +298,7 @@ export default function StudentDashboard() {
                     </div>
                     {earnedBadges.length === 0 && (
                       <p className="text-xs text-muted-foreground mt-3 text-center">
-                        Ask any maths question in the Workspace to earn badges and XP! 🌟
+                        {t("student.noBadgesHint")}
                       </p>
                     )}
                   </div>
@@ -323,12 +325,12 @@ export default function StudentDashboard() {
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Pencil className="w-4 h-4" /> Edit Profile
+              <Pencil className="w-4 h-4" /> {t("student.editProfile")}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleEditSave} className="space-y-4 mt-2">
             <div className="space-y-2">
-              <Label htmlFor="edit-name">Full Name</Label>
+              <Label htmlFor="edit-name">{t("student.fullName")}</Label>
               <Input
                 id="edit-name"
                 data-testid="input-edit-name"
@@ -339,7 +341,7 @@ export default function StudentDashboard() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Gender</Label>
+              <Label>{t("student.gender")}</Label>
               <div className="flex gap-3">
                 {(["male", "female"] as const).map((g) => (
                   <button
@@ -353,7 +355,7 @@ export default function StudentDashboard() {
                         : "border-muted text-muted-foreground hover:border-primary/30"
                     }`}
                   >
-                    {g === "male" ? "Male" : "Female"}
+                    {g === "male" ? t("student.male") : t("student.female")}
                   </button>
                 ))}
               </div>
@@ -367,7 +369,7 @@ export default function StudentDashboard() {
               disabled={updateMutation.isPending}
               className="w-full h-11 rounded-xl font-semibold"
             >
-              {updateMutation.isPending ? "Saving..." : "Save Changes"}
+              {updateMutation.isPending ? t("student.saving") : t("student.saveChanges")}
             </Button>
           </form>
         </DialogContent>
@@ -378,12 +380,12 @@ export default function StudentDashboard() {
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Lock className="w-4 h-4" /> Change Password
+              <Lock className="w-4 h-4" /> {t("student.changePassword")}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleChangePw} className="space-y-4 mt-2">
             <div className="space-y-2">
-              <Label htmlFor="current-pw">Current Password</Label>
+              <Label htmlFor="current-pw">{t("student.currentPassword")}</Label>
               <Input
                 id="current-pw"
                 data-testid="input-current-password"
@@ -395,21 +397,21 @@ export default function StudentDashboard() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="new-pw">New Password</Label>
+              <Label htmlFor="new-pw">{t("student.newPassword")}</Label>
               <Input
                 id="new-pw"
                 data-testid="input-new-password"
                 type="password"
                 value={newPw}
                 onChange={(e) => setNewPw(e.target.value)}
-                placeholder="Use letters, numbers & symbols"
+                placeholder={t("student.passwordHint")}
                 className="h-11"
                 required
               />
               {newPw && (
                 <div className="space-y-1.5 mt-1">
                   <span data-testid="text-new-pw-strength" className={`text-sm font-medium ${strength.color}`}>
-                    Password Strength: {strength.label}
+                    {t("strength.label")} {strength.label}
                   </span>
                   <div className="flex gap-1 h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
                     <div className={`h-full transition-all ${strength.level >= 1 ? strength.barColor : "bg-transparent"}`} style={{ width: "33.33%" }} />
@@ -420,7 +422,7 @@ export default function StudentDashboard() {
               )}
               {newPw && strength.level < 3 && (
                 <p className="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded-lg p-2.5 leading-relaxed">
-                  Please use a mix of letters, numbers, and symbols to make your password stronger.
+                  {t("student.passwordMixHint")}
                 </p>
               )}
             </div>
@@ -439,7 +441,7 @@ export default function StudentDashboard() {
               disabled={!currentPw || strength.level < 3 || changePwMutation.isPending}
               className="w-full h-11 rounded-xl font-semibold"
             >
-              {changePwMutation.isPending ? "Updating..." : "Update Password"}
+              {changePwMutation.isPending ? t("student.updating") : t("student.updatePassword")}
             </Button>
           </form>
         </DialogContent>

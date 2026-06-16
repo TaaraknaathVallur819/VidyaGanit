@@ -195,6 +195,7 @@ export const SendChatMessageBody = zod.object({
   "vidyaId": zod.string(),
   "message": zod.string(),
   "sessionId": zod.string().optional(),
+  "language": zod.enum(['en', 'ta', 'hi', 'te']).optional(),
   "history": zod.array(zod.object({
   "role": zod.enum(['user', 'assistant']),
   "content": zod.string()

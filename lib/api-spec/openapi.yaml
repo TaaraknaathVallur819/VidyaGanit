@@ -599,6 +599,9 @@ components:
           type: string
         sessionId:
           type: string
+        language:
+          type: string
+          enum: [en, ta, hi, te]
         history:
           type: array
           items:

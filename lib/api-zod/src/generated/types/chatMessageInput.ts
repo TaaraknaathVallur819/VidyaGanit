@@ -7,11 +7,13 @@
  */
 import type { ChatAttachment } from './chatAttachment';
 import type { ChatHistoryItem } from './chatHistoryItem';
+import type { ChatMessageInputLanguage } from './chatMessageInputLanguage';
 
 export interface ChatMessageInput {
   vidyaId: string;
   message: string;
   sessionId?: string;
+  language?: ChatMessageInputLanguage;
   history?: ChatHistoryItem[];
   attachment?: ChatAttachment;
 }

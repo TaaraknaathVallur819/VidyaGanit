@@ -19,7 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth";
-import { LanguageProvider, useLanguage, LANGUAGES } from "@/lib/i18n";
+import { useLanguage, LANGUAGES } from "@/lib/i18n";
 import ProgressAnalytics from "@/components/parent/ProgressAnalytics";
 import SavedHistory from "@/components/parent/SavedHistory";
 import ParentConsultantChat from "@/components/parent/ParentConsultantChat";
@@ -65,14 +65,6 @@ function getPasswordStrength(pwd: string) {
 }
 
 export default function ParentDashboard() {
-  return (
-    <LanguageProvider>
-      <ParentDashboardInner />
-    </LanguageProvider>
-  );
-}
-
-function ParentDashboardInner() {
   const { user, setUser } = useAuth();
   const { t, lang, setLang } = useLanguage();
   const vidyaId = user?.vidyaId ?? "";

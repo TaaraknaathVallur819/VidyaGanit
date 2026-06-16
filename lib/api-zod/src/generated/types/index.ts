@@ -11,6 +11,7 @@ export * from './chatAttachment';
 export * from './chatHistoryItem';
 export * from './chatHistoryItemRole';
 export * from './chatMessageInput';
+export * from './chatMessageInputLanguage';
 export * from './consultantAudioInput';
 export * from './consultantAudioInputLanguage';
 export * from './consultantHistoryResponse';

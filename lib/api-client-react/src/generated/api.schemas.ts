@@ -135,6 +135,16 @@ export interface MessageResponse {
   message: string;
 }
 
+export type ChatMessageInputLanguage = typeof ChatMessageInputLanguage[keyof typeof ChatMessageInputLanguage];
+
+
+export const ChatMessageInputLanguage = {
+  en: 'en',
+  ta: 'ta',
+  hi: 'hi',
+  te: 'te',
+} as const;
+
 export type ChatHistoryItemRole = typeof ChatHistoryItemRole[keyof typeof ChatHistoryItemRole];
 
 
@@ -159,6 +169,7 @@ export interface ChatMessageInput {
   vidyaId: string;
   message: string;
   sessionId?: string;
+  language?: ChatMessageInputLanguage;
   history?: ChatHistoryItem[];
   attachment?: ChatAttachment;
 }

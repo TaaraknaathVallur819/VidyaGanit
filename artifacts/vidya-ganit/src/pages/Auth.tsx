@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { UserCircle, Users } from "lucide-react";
 import { useRegisterUser, useLoginUser } from "@workspace/api-client-react";
 import { useAuth } from "@/lib/auth";
+import { useLanguage } from "@/lib/i18n";
 import {
   Select,
   SelectContent,
@@ -72,6 +73,7 @@ function TileButton({
 export default function Auth() {
   const [, setLocation] = useLocation();
   const { setUser } = useAuth();
+  const { t } = useLanguage();
   const searchParams = new URLSearchParams(window.location.search);
   const initialMode = (searchParams.get("mode") as Mode) || "login";
 
@@ -147,7 +149,7 @@ export default function Auth() {
         onError: (err) => {
           const msg =
             (err as { data?: { error?: string } })?.data?.error ??
-            "Oops! That ID or password doesn't match our records. Please check and try again.";
+            t("auth.loginFailed");
           setLoginError(msg);
         },
       },
@@ -178,7 +180,7 @@ export default function Auth() {
         onError: (err) => {
           const msg =
             (err as { data?: { error?: string } })?.data?.error ??
-            "Something went wrong. Please try again.";
+            t("auth.genericError");
           setNameError(msg);
         },
       },
@@ -193,13 +195,13 @@ export default function Auth() {
             onClick={() => setMode("login")}
             className={`flex-1 py-3 text-sm font-semibold rounded-xl transition-all ${mode === "login" ? "bg-white text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
           >
-            Log In
+            {t("auth.login")}
           </button>
           <button
             onClick={() => setMode("register")}
             className={`flex-1 py-3 text-sm font-semibold rounded-xl transition-all ${mode === "register" ? "bg-white text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
           >
-            Create Account
+            {t("auth.createAccount")}
           </button>
         </div>
 
@@ -216,13 +218,13 @@ export default function Auth() {
                 className="space-y-6"
               >
                 <div className="text-center space-y-2 mb-8">
-                  <h2 className="text-2xl font-bold text-foreground">Welcome Back</h2>
-                  <p className="text-muted-foreground text-sm">Enter your VidyaGanit ID to continue learning.</p>
+                  <h2 className="text-2xl font-bold text-foreground">{t("auth.welcomeBack")}</h2>
+                  <p className="text-muted-foreground text-sm">{t("auth.welcomeBackSub")}</p>
                 </div>
 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-id" className="text-foreground font-medium">Unique VidyaGanit ID</Label>
+                    <Label htmlFor="login-id" className="text-foreground font-medium">{t("auth.uniqueId")}</Label>
                     <Input
                       id="login-id"
                       data-testid="input-login-id"
@@ -234,7 +236,7 @@ export default function Auth() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password" className="text-foreground font-medium">Password</Label>
+                    <Label htmlFor="login-password" className="text-foreground font-medium">{t("auth.password")}</Label>
                     <Input
                       id="login-password"
                       data-testid="input-login-password"
@@ -252,7 +254,7 @@ export default function Auth() {
                         onClick={() => setLocation("/forgot-password")}
                         className="text-sm text-primary hover:underline font-medium mt-1"
                       >
-                        Forgot Password?
+                        {t("auth.forgotPassword")}
                       </button>
                     </div>
                   </div>
@@ -275,7 +277,7 @@ export default function Auth() {
                   disabled={loginMutation.isPending}
                   className="w-full h-12 text-lg rounded-xl font-semibold mt-6 bg-primary hover:bg-primary/90 disabled:opacity-50"
                 >
-                  {loginMutation.isPending ? "Logging in..." : "Log In"}
+                  {loginMutation.isPending ? t("auth.loggingIn") : t("auth.login")}
                 </Button>
               </motion.form>
             ) : (
@@ -289,8 +291,8 @@ export default function Auth() {
                 className="space-y-5"
               >
                 <div className="text-center space-y-2 mb-6">
-                  <h2 className="text-2xl font-bold text-foreground">Join VidyaGanit</h2>
-                  <p className="text-muted-foreground text-sm">Select your role to get started.</p>
+                  <h2 className="text-2xl font-bold text-foreground">{t("auth.joinTitle")}</h2>
+                  <p className="text-muted-foreground text-sm">{t("auth.joinSub")}</p>
                 </div>
 
                 {/* Role tiles */}
@@ -302,7 +304,7 @@ export default function Auth() {
                     className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all gap-2 ${role === "student" ? "border-primary bg-primary/5 text-primary" : "border-muted bg-white text-muted-foreground hover:border-primary/30"}`}
                   >
                     <UserCircle className="w-8 h-8" />
-                    <span className="font-semibold">I am a Student</span>
+                    <span className="font-semibold">{t("auth.iAmStudent")}</span>
                   </button>
                   <button
                     type="button"
@@ -311,17 +313,17 @@ export default function Auth() {
                     className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all gap-2 ${role === "parent" ? "border-primary bg-primary/5 text-primary" : "border-muted bg-white text-muted-foreground hover:border-primary/30"}`}
                   >
                     <Users className="w-8 h-8" />
-                    <span className="font-semibold">I am a Parent</span>
+                    <span className="font-semibold">{t("auth.iAmParent")}</span>
                   </button>
                 </div>
 
                 {/* Parent type: Father / Mother */}
                 {role === "parent" && (
                   <div className="space-y-2">
-                    <Label className="text-foreground font-medium">I am a</Label>
+                    <Label className="text-foreground font-medium">{t("auth.iAmA")}</Label>
                     <div className="flex gap-3">
-                      <TileButton selected={parentType === "father"} onClick={() => setParentType("father")} testId="tile-parent-father">Father</TileButton>
-                      <TileButton selected={parentType === "mother"} onClick={() => setParentType("mother")} testId="tile-parent-mother">Mother</TileButton>
+                      <TileButton selected={parentType === "father"} onClick={() => setParentType("father")} testId="tile-parent-father">{t("auth.father")}</TileButton>
+                      <TileButton selected={parentType === "mother"} onClick={() => setParentType("mother")} testId="tile-parent-mother">{t("auth.mother")}</TileButton>
                     </div>
                   </div>
                 )}
@@ -329,11 +331,11 @@ export default function Auth() {
                 {/* Student class selection */}
                 {role === "student" && (
                   <div className="space-y-2">
-                    <Label className="text-foreground font-medium">My Class</Label>
+                    <Label className="text-foreground font-medium">{t("auth.myClass")}</Label>
                     <div className="flex gap-3">
                       {(["4", "5", "6", "7"] as StudentClass[]).map((cls) => (
                         <TileButton key={cls} selected={studentClass === cls} onClick={() => setStudentClass(cls)} testId={`tile-class-${cls}`}>
-                          Class {cls}
+                          {t("common.class")} {cls}
                         </TileButton>
                       ))}
                     </div>
@@ -343,7 +345,7 @@ export default function Auth() {
                 {/* Board selection — students only */}
                 {role === "student" && (
                   <div className="space-y-2">
-                    <Label className="text-foreground font-medium">My Board</Label>
+                    <Label className="text-foreground font-medium">{t("auth.myBoard")}</Label>
                     <Select
                       value={boardSelection}
                       onValueChange={(val) => {
@@ -355,7 +357,7 @@ export default function Auth() {
                         data-testid="select-board"
                         className="h-12 text-base px-4 bg-gray-50 border-gray-200"
                       >
-                        <SelectValue placeholder="Select your school board" />
+                        <SelectValue placeholder={t("auth.selectBoard")} />
                       </SelectTrigger>
                       <SelectContent>
                         {MAJOR_BOARDS.map((b) => (
@@ -376,7 +378,7 @@ export default function Auth() {
                           data-testid="input-custom-board"
                           value={customBoard}
                           onChange={(e) => setCustomBoard(e.target.value)}
-                          placeholder="Type your board name here"
+                          placeholder={t("auth.typeBoard")}
                           className="h-12 text-base px-4 bg-gray-50 border-gray-200 mt-2"
                         />
                       </motion.div>
@@ -386,13 +388,13 @@ export default function Auth() {
 
                 {/* Name */}
                 <div className="space-y-2">
-                  <Label htmlFor="reg-name" className="text-foreground font-medium">Full Name</Label>
+                  <Label htmlFor="reg-name" className="text-foreground font-medium">{t("auth.fullName")}</Label>
                   <Input
                     id="reg-name"
                     data-testid="input-register-name"
                     value={regName}
                     onChange={(e) => { setRegName(e.target.value); setNameError(""); }}
-                    placeholder="e.g. Rohan Sharma"
+                    placeholder={t("auth.namePlaceholder")}
                     className={`h-12 text-lg px-4 bg-gray-50 ${nameError ? "border-red-500 focus-visible:ring-red-500" : "border-gray-200"}`}
                     required
                   />
@@ -403,23 +405,23 @@ export default function Auth() {
 
                 {/* Gender */}
                 <div className="space-y-2">
-                  <Label className="text-foreground font-medium">Gender</Label>
+                  <Label className="text-foreground font-medium">{t("auth.gender")}</Label>
                   <div className="flex gap-3">
-                    <TileButton selected={gender === "male"} onClick={() => setGender("male")} testId="tile-gender-male">Male</TileButton>
-                    <TileButton selected={gender === "female"} onClick={() => setGender("female")} testId="tile-gender-female">Female</TileButton>
+                    <TileButton selected={gender === "male"} onClick={() => setGender("male")} testId="tile-gender-male">{t("auth.male")}</TileButton>
+                    <TileButton selected={gender === "female"} onClick={() => setGender("female")} testId="tile-gender-female">{t("auth.female")}</TileButton>
                   </div>
                 </div>
 
                 {/* Parent contact */}
                 {role === "parent" && (
                   <div className="space-y-2">
-                    <Label htmlFor="reg-contact" className="text-foreground font-medium">Email or Phone</Label>
+                    <Label htmlFor="reg-contact" className="text-foreground font-medium">{t("auth.emailOrPhone")}</Label>
                     <Input
                       id="reg-contact"
                       data-testid="input-register-contact"
                       value={regContact}
                       onChange={(e) => setRegContact(e.target.value)}
-                      placeholder="Email or Phone"
+                      placeholder={t("auth.emailOrPhone")}
                       className="h-12 text-lg px-4 bg-gray-50 border-gray-200"
                       required
                     />
@@ -428,21 +430,21 @@ export default function Auth() {
 
                 {/* Password */}
                 <div className="space-y-2">
-                  <Label htmlFor="reg-password" className="text-foreground font-medium">Create Password</Label>
+                  <Label htmlFor="reg-password" className="text-foreground font-medium">{t("auth.createPassword")}</Label>
                   <Input
                     id="reg-password"
                     data-testid="input-register-password"
                     type="password"
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
-                    placeholder="Use letters, numbers & symbols"
+                    placeholder={t("auth.passwordHint")}
                     className="h-12 text-lg px-4 bg-gray-50 border-gray-200"
                     required
                   />
                   {regPassword && (
                     <div className="mt-2 space-y-2">
                       <span data-testid="text-password-strength" className={`text-sm font-medium ${strength.color}`}>
-                        Password Strength: {strength.label}
+                        {t("strength.label")} {strength.label}
                       </span>
                       <div className="flex gap-1 h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
                         <div className={`h-full transition-all duration-300 ${strength.level >= 1 ? strength.barColor : "bg-transparent"}`} style={{ width: "33.33%" }} />
@@ -455,7 +457,16 @@ export default function Auth() {
 
                 {regPassword && strength.level < 2 && (
                   <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg text-sm text-orange-800 leading-relaxed">
-                    Password too weak! Use at least 8 characters with a mix of letters and numbers (e.g. <span className="font-semibold">Rohan2025</span>).
+                    {(() => {
+                      const parts = t("auth.passwordTooWeak").split("Rohan2025");
+                      return (
+                        <>
+                          {parts[0]}
+                          <span className="font-semibold">Rohan2025</span>
+                          {parts[1] ?? ""}
+                        </>
+                      );
+                    })()}
                   </div>
                 )}
 
@@ -465,7 +476,7 @@ export default function Auth() {
                   disabled={!isRegisterValid || registerMutation.isPending}
                   className="w-full h-12 text-lg rounded-xl font-semibold mt-2 bg-primary hover:bg-primary/90 disabled:opacity-50"
                 >
-                  {registerMutation.isPending ? "Creating account..." : "Create Account"}
+                  {registerMutation.isPending ? t("auth.creatingAccount") : t("auth.createAccount")}
                 </Button>
               </motion.form>
             )}

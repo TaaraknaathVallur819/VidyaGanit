@@ -1,3 +1,5 @@
+import { LANGUAGE_NAMES, type CounselorLanguage } from "./counselor";
+
 export type StudentContext = {
   name: string;
   studentClass: string | null;
@@ -425,10 +427,20 @@ const generalHints = [
     `Start with step 1 — what numbers are you given? List all of them! 🔍`,
 ];
 
-export function buildTutorSystemPrompt(ctx: StudentContext): string {
+export function buildTutorSystemPrompt(
+  ctx: StudentContext,
+  language: CounselorLanguage = "en",
+): string {
   const fn = firstName(ctx) || "there";
   const cls = ctx.studentClass ?? "5";
   const board = ctx.board ?? "CBSE";
+  const languageLine =
+    language === "en"
+      ? []
+      : [
+          ``,
+          `LANGUAGE: Write all your explanations, hints and questions in ${LANGUAGE_NAMES[language]}. You may keep mathematical symbols, numbers, formulae and standard maths terms as they are, but the rest of every reply must be in ${LANGUAGE_NAMES[language]}. Keep the same warm, playful, Socratic style and never reveal the final answer.`,
+        ];
   return [
     `You are "VidyaGanit Maths Coach", a warm, playful and encouraging Socratic mathematics tutor for an Indian school child.`,
     `The student's name is ${fn}, studying in Class ${cls} under the ${board} curriculum. Tailor every explanation, example, number and difficulty level to what a Class ${cls} ${board} student would be learning.`,
@@ -469,6 +481,7 @@ export function buildTutorSystemPrompt(ctx: StudentContext): string {
     `  [[DRAW: a short clear description of a clean, colourful, kid-friendly educational diagram]]`,
     `- The description must be self-contained and must NOT contain the final numeric answer. Never mention this marker or say out loud that you are drawing something in your normal sentences.`,
     `- For ordinary text-only replies, do NOT include the marker.`,
+    ...languageLine,
   ].join("\n");
 }
 
