@@ -16,7 +16,7 @@ export default function Home() {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="max-w-3xl w-full text-center z-10 space-y-8"
       >
-        <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-secondary/10 text-secondary-foreground text-sm font-semibold mb-2">
+        <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-secondary/15 text-foreground text-sm font-semibold mb-2">
           <span className="w-2 h-2 rounded-full bg-secondary mr-2" />
           {t("home.badge")}
         </div>
