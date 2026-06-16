@@ -18,5 +18,9 @@ Events: `{chunk}` (text), `{drawing:true}`, `{image:"data:image/png;base64,..."}
 ## `[[DRAW: ...]]` marker
 The model appends `[[DRAW: <prompt>]]` at the END of a reply when a picture would help. The server must strip it from the streamed text before the client sees it. Streaming stripper withholds only the longest trailing suffix of accumulated text that is a prefix of the literal `"[[DRAW:"` (and everything from a full marker-start onward). This avoids leaking a partial `[[` and avoids permanently stalling on unrelated `[[` (e.g. matrix notation) — unrelated text is released on the next chunk.
 
-## Known limitation (out of scope, flagged to user)
-The endpoint trusts a caller-supplied `vidyaId` with no authenticated identity check — a pre-existing app-wide pattern. Now that paid LLM/image calls hang off it, it is an abuse/cost vector. Adding real authz + rate limiting was deliberately NOT done (task scoped auth as untouched). Revisit if hardening is requested.
+## Auth / abuse hardening (chat only)
+The chat endpoint is gated by `requireAuth` (see `middlewares/auth.ts`): identity comes from a stateless HMAC-signed `vg_session` httpOnly cookie (`lib/session.ts`, signed with `SESSION_SECRET`), set on `/auth/login` + `/auth/register`. The route derives `vidyaId` from the cookie and IGNORES the body `vidyaId` (fixes IDOR/XP-spoofing). Also: in-memory fixed-window rate limits (20/min + 200/hour per identity) and input caps (message ≤1500 chars, history ≤20×2000). Frontend sends `credentials:"include"` and shows friendly 401/429 messages.
+
+**Why same-origin cookies work:** frontend (`/`) and API (`/api`) are one origin via path-based proxy routing, so the cookie auto-flows; no CORS-credentials dance needed.
+
+**Caveats:** (1) users logged in BEFORE cookies existed (localStorage-only) get 401 on chat until they log in once more. (2) The `/profile` endpoint still trusts body `vidyaId` — same IDOR pattern, deliberately left out of scope; revisit if asked. (3) Rate-limit state is per-instance (in-memory) — move to shared store if scaled horizontally.

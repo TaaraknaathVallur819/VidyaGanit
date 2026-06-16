@@ -23,6 +23,8 @@ type Message = {
   imageAlt?: string;
 };
 
+class ChatError extends Error {}
+
 type HistoryEntry = {
   role: "user" | "assistant";
   content: string;
@@ -198,9 +200,26 @@ export default function SocraticChat({
       const response = await fetch("/api/chat/message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ vidyaId, message: msg, history }),
       });
 
+      if (response.status === 401) {
+        throw new ChatError(
+          "Hmm, I need you to log in again before we keep learning. 🔑 Please sign in once more!",
+        );
+      }
+      if (response.status === 429) {
+        let msg429 =
+          "Whoa, slow down a little! 😅 Take a short breather and try again in a moment.";
+        try {
+          const body = (await response.json()) as { error?: string };
+          if (body?.error) msg429 = body.error;
+        } catch {
+          // keep default message
+        }
+        throw new ChatError(msg429);
+      }
       if (!response.ok || !response.body) throw new Error("Request failed");
 
       const reader = response.body.getReader();
@@ -297,14 +316,17 @@ export default function SocraticChat({
           }
         }
       }
-    } catch {
+    } catch (err) {
+      const friendly =
+        err instanceof ChatError
+          ? err.message
+          : "Oops! I had trouble connecting. 😅 Please try again!";
       setMessages((prev) =>
         prev.map((m) =>
           m.id === tutorMsgId
             ? {
                 ...m,
-                content:
-                  "Oops! I had trouble connecting. 😅 Please try again!",
+                content: friendly,
                 isStreaming: false,
               }
             : m,

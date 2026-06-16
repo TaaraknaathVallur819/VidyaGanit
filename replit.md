@@ -40,6 +40,14 @@ VidyaGanit is a Socratic math tuition web app for Indian school kids (Classes 4â
 - The model appends a `[[DRAW: ...]]` marker to request an illustration; the server strips it from the streamed text and emits the image as a base64 data-URL SSE event.
 - Required env (provisioned by the integration): `AI_INTEGRATIONS_OPENAI_BASE_URL`, `AI_INTEGRATIONS_OPENAI_API_KEY`.
 
+## Auth & abuse controls
+
+- Login/registration are unchanged in flow but now also set a stateless HMAC-signed `vg_session` httpOnly cookie (`src/lib/session.ts`, signed with `SESSION_SECRET`).
+- The chat endpoint is gated by `requireAuth` (`src/middlewares/auth.ts`) and derives the student identity from the cookie, never the request body.
+- Rate limiting (`src/middlewares/rateLimit.ts`): 20 messages/min and 200/hour per student (in-memory, single-instance). Message/history size caps are enforced in `routes/chat.ts`.
+- Same-origin path routing means the cookie flows automatically between the web app (`/`) and API (`/api`).
+- Known follow-ups: the `/profile` endpoint still trusts the body `vidyaId`; rate-limit state would need a shared store if scaled to multiple instances.
+
 ## User preferences
 
 _Populate as you build â€” explicit user instructions worth remembering across sessions._

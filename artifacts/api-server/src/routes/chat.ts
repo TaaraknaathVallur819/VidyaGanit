@@ -7,30 +7,59 @@ import { detectTopic, buildTutorSystemPrompt, type ChatEntry } from "../lib/tuto
 import { computeXpAndBadges } from "../lib/xp";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { generateImageBuffer } from "@workspace/integrations-openai-ai-server/image";
+import { requireAuth } from "../middlewares/auth";
+import { rateLimit } from "../middlewares/rateLimit";
 
 const router: IRouter = Router();
 
 const DRAW_MARKER_RE = /\[\[DRAW:\s*([\s\S]*?)\]\]/;
 const DRAW_MARKER_START = "[[DRAW:";
 
-router.post("/chat/message", async (req, res): Promise<void> => {
-  const parsed = SendChatMessageBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.message });
-    return;
-  }
+const MAX_MESSAGE_LEN = 1500;
+const MAX_HISTORY_ENTRIES = 20;
+const MAX_HISTORY_ENTRY_LEN = 2000;
 
-  const { vidyaId, message, history } = parsed.data;
+router.post(
+  "/chat/message",
+  requireAuth,
+  rateLimit({ windowMs: 60_000, max: 20, keyPrefix: "chat-minute" }),
+  rateLimit({
+    windowMs: 60 * 60_000,
+    max: 200,
+    keyPrefix: "chat-hour",
+    message: "You've done a lot of learning today! 🌟 Please take a break and come back in a little while.",
+  }),
+  async (req, res): Promise<void> => {
+    const parsed = SendChatMessageBody.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.message });
+      return;
+    }
 
-  const [user] = await db
-    .select()
-    .from(usersTable)
-    .where(eq(usersTable.vidyaId, vidyaId));
+    // Identity comes from the verified session cookie, never the request body.
+    const vidyaId = req.vidyaId as string;
+    const { message } = parsed.data;
 
-  if (!user) {
-    res.status(404).json({ error: "Student not found" });
-    return;
-  }
+    if (message.length > MAX_MESSAGE_LEN) {
+      res
+        .status(400)
+        .json({ error: "That message is a bit too long — try asking in a shorter way! 😊" });
+      return;
+    }
+
+    const history = (parsed.data.history ?? [])
+      .slice(-MAX_HISTORY_ENTRIES)
+      .map((h) => ({ role: h.role, content: h.content.slice(0, MAX_HISTORY_ENTRY_LEN) }));
+
+    const [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.vidyaId, vidyaId));
+
+    if (!user) {
+      res.status(404).json({ error: "Student not found" });
+      return;
+    }
 
   const context = {
     name: user.name,

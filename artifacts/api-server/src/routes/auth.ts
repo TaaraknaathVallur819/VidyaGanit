@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Response } from "express";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { db, usersTable } from "@workspace/db";
@@ -8,12 +8,23 @@ import {
   ForgotPasswordBody,
   LoginUserResponse,
 } from "@workspace/api-zod";
+import { signSession, SESSION_COOKIE, SESSION_MAX_AGE_MS } from "../lib/session";
 
 const router: IRouter = Router();
 
 function generateVidyaId(role: "student" | "parent"): string {
   const digits = Math.floor(10000 + Math.random() * 90000).toString();
   return role === "student" ? `VG-STU-${digits}` : `VG-PAR-${digits}`;
+}
+
+function setSessionCookie(res: Response, vidyaId: string): void {
+  res.cookie(SESSION_COOKIE, signSession(vidyaId), {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: SESSION_MAX_AGE_MS,
+    path: "/",
+  });
 }
 
 router.post("/auth/register", async (req, res): Promise<void> => {
@@ -55,6 +66,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
 
   req.log.info({ vidyaId }, "New account registered");
 
+  setSessionCookie(res, user.vidyaId);
   res.status(201).json(
     LoginUserResponse.parse({
       vidyaId: user.vidyaId,
@@ -98,6 +110,7 @@ router.post("/auth/login", async (req, res): Promise<void> => {
 
   req.log.info({ vidyaId }, "User logged in");
 
+  setSessionCookie(res, user.vidyaId);
   res.json(
     LoginUserResponse.parse({
       vidyaId: user.vidyaId,
