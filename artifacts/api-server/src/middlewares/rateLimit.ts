@@ -1,14 +1,25 @@
 import type { Request, Response, NextFunction } from "express";
+import { sql } from "drizzle-orm";
+import { db, rateLimitBucketsTable } from "@workspace/db";
+import { logger } from "../lib/logger";
 
-type Bucket = { count: number; resetAt: number };
+type FallbackBucket = { count: number; resetAt: number };
 
-const store = new Map<string, Bucket>();
+// Per-instance fallback used ONLY when the shared Postgres store is
+// unavailable, so abuse stays bounded during a DB outage instead of the
+// limiter silently failing open.
+const fallbackStore = new Map<string, FallbackBucket>();
 
-// Periodically prune expired buckets so the map can't grow unbounded.
+// Periodically delete expired buckets (shared + fallback) so neither store can
+// grow unbounded.
 const cleanup = setInterval(() => {
+  void db
+    .delete(rateLimitBucketsTable)
+    .where(sql`${rateLimitBucketsTable.resetAt} < now()`)
+    .catch((err) => logger.warn({ err }, "rate-limit cleanup failed"));
   const now = Date.now();
-  for (const [key, bucket] of store) {
-    if (now > bucket.resetAt) store.delete(key);
+  for (const [key, bucket] of fallbackStore) {
+    if (now > bucket.resetAt) fallbackStore.delete(key);
   }
 }, 60_000);
 cleanup.unref();
@@ -20,26 +31,54 @@ export type RateLimitOptions = {
   message?: string;
 };
 
+/** Fixed-window count against the in-memory fallback store. Returns true when over the limit. */
+function fallbackExceeds(key: string, max: number, resetAtMs: number): boolean {
+  const now = Date.now();
+  const bucket = fallbackStore.get(key);
+  if (!bucket || now > bucket.resetAt) {
+    fallbackStore.set(key, { count: 1, resetAt: resetAtMs });
+    return false;
+  }
+  bucket.count += 1;
+  return bucket.count > max;
+}
+
 /**
- * Simple in-memory fixed-window rate limiter. Keys by the authenticated
- * `vidyaId` when present, falling back to the client IP. Suitable for a
- * single-instance deployment; swap for a shared store if scaled horizontally.
+ * Fixed-window rate limiter backed by Postgres so limits hold across multiple
+ * server instances. Keys by the authenticated `vidyaId` when present, falling
+ * back to the client IP. The window start is part of the row key, so each new
+ * window is a fresh row and the per-window count is an atomic upsert/increment.
+ *
+ * If the database is unavailable it does NOT fail open: it enforces the same
+ * limit via a bounded per-instance in-memory fallback, keeping abuse capped
+ * during a DB outage while still letting legitimate traffic through.
  */
 export function rateLimit(opts: RateLimitOptions) {
-  return (req: Request, res: Response, next: NextFunction): void => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const identity = req.vidyaId ?? req.ip ?? "anonymous";
-    const key = `${opts.keyPrefix}:${identity}`;
     const now = Date.now();
+    const windowStart = Math.floor(now / opts.windowMs) * opts.windowMs;
+    const resetAt = new Date(windowStart + opts.windowMs);
+    const key = `${opts.keyPrefix}:${identity}:${windowStart}`;
 
-    const bucket = store.get(key);
-    if (!bucket || now > bucket.resetAt) {
-      store.set(key, { count: 1, resetAt: now + opts.windowMs });
-      next();
-      return;
+    let exceeded: boolean;
+    try {
+      const [row] = await db
+        .insert(rateLimitBucketsTable)
+        .values({ key, count: 1, resetAt })
+        .onConflictDoUpdate({
+          target: rateLimitBucketsTable.key,
+          set: { count: sql`${rateLimitBucketsTable.count} + 1` },
+        })
+        .returning({ count: rateLimitBucketsTable.count });
+      exceeded = (row?.count ?? 1) > opts.max;
+    } catch (err) {
+      req.log.warn({ err }, "rate-limit store unavailable; using in-memory fallback");
+      exceeded = fallbackExceeds(key, opts.max, windowStart + opts.windowMs);
     }
 
-    if (bucket.count >= opts.max) {
-      res.setHeader("Retry-After", String(Math.ceil((bucket.resetAt - now) / 1000)));
+    if (exceeded) {
+      res.setHeader("Retry-After", String(Math.ceil((resetAt.getTime() - now) / 1000)));
       res.status(429).json({
         error:
           opts.message ??
@@ -48,7 +87,6 @@ export function rateLimit(opts: RateLimitOptions) {
       return;
     }
 
-    bucket.count += 1;
     next();
   };
 }

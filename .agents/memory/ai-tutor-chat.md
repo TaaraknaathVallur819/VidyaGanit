@@ -23,4 +23,10 @@ The chat endpoint is gated by `requireAuth` (see `middlewares/auth.ts`): identit
 
 **Why same-origin cookies work:** frontend (`/`) and API (`/api`) are one origin via path-based proxy routing, so the cookie auto-flows; no CORS-credentials dance needed.
 
-**Caveats:** (1) users logged in BEFORE cookies existed (localStorage-only) get 401 on chat until they log in once more. (2) The `/profile` endpoint still trusts body `vidyaId` — same IDOR pattern, deliberately left out of scope; revisit if asked. (3) Rate-limit state is per-instance (in-memory) — move to shared store if scaled horizontally.
+Profile routes (`/profile/:vidyaId*`) are now also gated by `requireAuth` + `requireSelf` (ownership: `req.vidyaId === req.params.vidyaId`, else 403) — same IDOR class fixed there. Safe because both dashboards only fetch their own `vidyaId`.
+
+Rate limiting is backed by a shared Postgres table `rate_limit_buckets` (fixed-window, key=`prefix:identity:windowStart`, atomic `INSERT ... ON CONFLICT DO UPDATE count = count + 1`), so limits hold across instances/restarts. **Does NOT fail open:** on DB error it falls back to a bounded per-instance in-memory limiter (cost protection must survive DB outages — flagged in review). 
+
+**Note:** the chat body Zod schema still *requires* `vidyaId`, but the value is IGNORED for identity (cookie wins). The frontend still sends it; don't rely on it server-side.
+
+**Caveat:** users logged in BEFORE cookies existed (localStorage-only) get 401 on chat until they log in once more.

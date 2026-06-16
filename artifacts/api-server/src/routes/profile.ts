@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import bcrypt from "bcryptjs";
 import { and, eq } from "drizzle-orm";
 import { db, usersTable, parentStudentLinksTable } from "@workspace/db";
+import { requireAuth, requireSelf } from "../middlewares/auth";
 import {
   GetProfileParams,
   GetProfileResponse,
@@ -37,7 +38,7 @@ function toProfile(user: typeof usersTable.$inferSelect) {
   };
 }
 
-router.get("/profile/:vidyaId", async (req, res): Promise<void> => {
+router.get("/profile/:vidyaId", requireAuth, requireSelf, async (req, res): Promise<void> => {
   const params = GetProfileParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -57,7 +58,7 @@ router.get("/profile/:vidyaId", async (req, res): Promise<void> => {
   res.json(GetProfileResponse.parse(toProfile(user)));
 });
 
-router.patch("/profile/:vidyaId", async (req, res): Promise<void> => {
+router.patch("/profile/:vidyaId", requireAuth, requireSelf, async (req, res): Promise<void> => {
   const params = UpdateProfileParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -95,8 +96,12 @@ router.patch("/profile/:vidyaId", async (req, res): Promise<void> => {
   res.json(UpdateProfileResponse.parse(toProfile(user)));
 });
 
-router.post("/profile/:vidyaId/change-password", async (req, res): Promise<void> => {
-  const params = ChangePasswordParams.safeParse(req.params);
+router.post(
+  "/profile/:vidyaId/change-password",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = ChangePasswordParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
     return;
@@ -134,8 +139,12 @@ router.post("/profile/:vidyaId/change-password", async (req, res): Promise<void>
   res.json(ChangePasswordResponse.parse({ message: "Password updated successfully!" }));
 });
 
-router.get("/profile/:vidyaId/linked-students", async (req, res): Promise<void> => {
-  const params = GetLinkedStudentsParams.safeParse(req.params);
+router.get(
+  "/profile/:vidyaId/linked-students",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = GetLinkedStudentsParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
     return;
@@ -166,8 +175,12 @@ router.get("/profile/:vidyaId/linked-students", async (req, res): Promise<void> 
   );
 });
 
-router.post("/profile/:vidyaId/link-student", async (req, res): Promise<void> => {
-  const params = LinkStudentParams.safeParse(req.params);
+router.post(
+  "/profile/:vidyaId/link-student",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = LinkStudentParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
     return;
@@ -220,6 +233,8 @@ router.post("/profile/:vidyaId/link-student", async (req, res): Promise<void> =>
 
 router.delete(
   "/profile/:vidyaId/link-student/:studentVidyaId",
+  requireAuth,
+  requireSelf,
   async (req, res): Promise<void> => {
     const params = UnlinkStudentParams.safeParse(req.params);
     if (!params.success) {

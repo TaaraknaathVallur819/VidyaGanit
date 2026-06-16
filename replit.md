@@ -44,9 +44,9 @@ VidyaGanit is a Socratic math tuition web app for Indian school kids (Classes 4�
 
 - Login/registration are unchanged in flow but now also set a stateless HMAC-signed `vg_session` httpOnly cookie (`src/lib/session.ts`, signed with `SESSION_SECRET`).
 - The chat endpoint is gated by `requireAuth` (`src/middlewares/auth.ts`) and derives the student identity from the cookie, never the request body.
-- Rate limiting (`src/middlewares/rateLimit.ts`): 20 messages/min and 200/hour per student (in-memory, single-instance). Message/history size caps are enforced in `routes/chat.ts`.
+- All `/profile/:vidyaId*` routes are gated by `requireAuth` + `requireSelf` (`src/middlewares/auth.ts`): a user can only read/modify their own account (cross-account access → 403). Both dashboards only ever fetch their own profile, so this is transparent.
+- Rate limiting (`src/middlewares/rateLimit.ts`): 20 messages/min and 200/hour per student, backed by a shared Postgres table (`rate_limit_buckets`) so limits hold across instances/restarts. Atomic fixed-window via `INSERT ... ON CONFLICT DO UPDATE count = count + 1`. If the DB is unavailable it does NOT fail open — a bounded per-instance in-memory fallback enforces the same limit. Message/history size caps are enforced in `routes/chat.ts`.
 - Same-origin path routing means the cookie flows automatically between the web app (`/`) and API (`/api`).
-- Known follow-ups: the `/profile` endpoint still trusts the body `vidyaId`; rate-limit state would need a shared store if scaled to multiple instances.
 
 ## User preferences
 
