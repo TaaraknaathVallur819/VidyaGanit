@@ -11,18 +11,9 @@ import {
   X,
 } from "lucide-react";
 
-const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 MB
+import { BADGE_CATALOG } from "@/lib/badges";
 
-export const BADGE_CATALOG: { id: string; emoji: string; name: string }[] = [
-  { id: "first_step", emoji: "🌟", name: "First Step" },
-  { id: "fraction_friend", emoji: "🍕", name: "Fraction Friend" },
-  { id: "cricket_scholar", emoji: "🏏", name: "Cricket Scholar" },
-  { id: "geometry_genius", emoji: "📐", name: "Geometry Genius" },
-  { id: "algebra_ace", emoji: "🧮", name: "Algebra Ace" },
-  { id: "hot_streak", emoji: "🔥", name: "Hot Streak" },
-  { id: "never_give_up", emoji: "💪", name: "Never Give Up" },
-  { id: "century_club", emoji: "🏆", name: "Century Club" },
-];
+const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 MB
 
 type Attachment = {
   name: string;
@@ -229,12 +220,15 @@ export default function SocraticChat({
   const [badgeToasts, setBadgeToasts] = useState<BadgeToast[]>([]);
   const [attachment, setAttachment] = useState<Attachment | null>(null);
   const [attachError, setAttachError] = useState<string | null>(null);
+  const [isListening, setIsListening] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const sessionIdRef = useRef<string>(crypto.randomUUID());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const inputBeforeVoiceRef = useRef<string>("");
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -262,6 +256,70 @@ export default function SocraticChat({
       3800,
     );
   };
+
+  const stopListening = () => {
+    recognitionRef.current?.stop();
+  };
+
+  const toggleListening = () => {
+    if (isListening) {
+      stopListening();
+      return;
+    }
+    const SpeechRecognitionCtor =
+      window.SpeechRecognition ?? window.webkitSpeechRecognition;
+    if (!SpeechRecognitionCtor) {
+      setAttachError(
+        "Oops! Your browser doesn't support voice input. 🎤 Please type your maths question instead!",
+      );
+      return;
+    }
+    setAttachError(null);
+    const recognition = new SpeechRecognitionCtor();
+    recognition.lang = "en-IN";
+    recognition.interimResults = true;
+    recognition.continuous = false;
+    inputBeforeVoiceRef.current = input ? input.trim() + " " : "";
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      let transcript = "";
+      for (let i = 0; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setInput(inputBeforeVoiceRef.current + transcript);
+      requestAnimationFrame(adjustTextarea);
+    };
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      setIsListening(false);
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+        setAttachError(
+          "I need permission to use the microphone. 🎤 Please allow it and try again!",
+        );
+      } else if (event.error === "no-speech") {
+        setAttachError("I didn't catch that. 🎤 Try speaking your maths question again!");
+      }
+    };
+    recognition.onend = () => {
+      setIsListening(false);
+      recognitionRef.current = null;
+    };
+
+    recognitionRef.current = recognition;
+    try {
+      recognition.start();
+      setIsListening(true);
+    } catch {
+      recognitionRef.current = null;
+      setIsListening(false);
+      setAttachError("Couldn't start the microphone. 🎤 Please try again!");
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      recognitionRef.current?.abort();
+    };
+  }, []);
 
   const handleFilePicked = async (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -664,8 +722,14 @@ export default function SocraticChat({
             </button>
             <button
               type="button"
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-indigo-50 transition-colors"
-              title="Voice"
+              onClick={toggleListening}
+              disabled={isStreaming}
+              className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                isListening
+                  ? "text-red-500 bg-red-50 animate-pulse"
+                  : "text-muted-foreground hover:text-primary hover:bg-indigo-50"
+              }`}
+              title={isListening ? "Stop listening" : "Speak your maths question"}
             >
               <Mic className="w-4 h-4" />
             </button>

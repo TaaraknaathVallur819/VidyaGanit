@@ -29,7 +29,8 @@ import {
   BookOpen,
   CheckCircle2,
 } from "lucide-react";
-import SocraticChat, { BADGE_CATALOG } from "@/components/SocraticChat";
+import SocraticChat from "@/components/SocraticChat";
+import { BADGE_CATALOG } from "@/lib/badges";
 
 function getLevelInfo(xp: number) {
   const LEVELS = [
