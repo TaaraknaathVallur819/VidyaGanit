@@ -25,6 +25,7 @@ import type {
   ConsultantAudioInput,
   ConsultantHistoryResponse,
   ConsultantMessageInput,
+  ConsultantSessionsResponse,
   ErrorResponse,
   ForgotPasswordInput,
   HealthStatus,
@@ -1086,6 +1087,165 @@ export function useGetConsultantHistory<TData = Awaited<ReturnType<typeof getCon
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetConsultantHistoryQueryOptions(vidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getListConsultantSessionsUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/parent/${vidyaId}/consultant/sessions`
+}
+
+/**
+ * @summary List the parent's past strategy-AI conversations
+ */
+export const listConsultantSessions = async (vidyaId: string, options?: RequestInit): Promise<ConsultantSessionsResponse> => {
+
+  return customFetch<ConsultantSessionsResponse>(getListConsultantSessionsUrl(vidyaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListConsultantSessionsQueryKey = (vidyaId: string,) => {
+    return [
+    `/api/parent/${vidyaId}/consultant/sessions`
+    ] as const;
+    }
+
+
+export const getListConsultantSessionsQueryOptions = <TData = Awaited<ReturnType<typeof listConsultantSessions>>, TError = ErrorType<unknown>>(vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listConsultantSessions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListConsultantSessionsQueryKey(vidyaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listConsultantSessions>>> = ({ signal }) => listConsultantSessions(vidyaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listConsultantSessions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListConsultantSessionsQueryResult = NonNullable<Awaited<ReturnType<typeof listConsultantSessions>>>
+export type ListConsultantSessionsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List the parent's past strategy-AI conversations
+ */
+
+export function useListConsultantSessions<TData = Awaited<ReturnType<typeof listConsultantSessions>>, TError = ErrorType<unknown>>(
+ vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listConsultantSessions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListConsultantSessionsQueryOptions(vidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetConsultantSessionUrl = (vidyaId: string,
+    sessionId: string,) => {
+
+
+
+
+  return `/api/parent/${vidyaId}/consultant/sessions/${sessionId}/messages`
+}
+
+/**
+ * @summary Load a specific past strategy-AI conversation
+ */
+export const getConsultantSession = async (vidyaId: string,
+    sessionId: string, options?: RequestInit): Promise<ConsultantHistoryResponse> => {
+
+  return customFetch<ConsultantHistoryResponse>(getGetConsultantSessionUrl(vidyaId,sessionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetConsultantSessionQueryKey = (vidyaId: string,
+    sessionId: string,) => {
+    return [
+    `/api/parent/${vidyaId}/consultant/sessions/${sessionId}/messages`
+    ] as const;
+    }
+
+
+export const getGetConsultantSessionQueryOptions = <TData = Awaited<ReturnType<typeof getConsultantSession>>, TError = ErrorType<unknown>>(vidyaId: string,
+    sessionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConsultantSession>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetConsultantSessionQueryKey(vidyaId,sessionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getConsultantSession>>> = ({ signal }) => getConsultantSession(vidyaId,sessionId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId && sessionId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getConsultantSession>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetConsultantSessionQueryResult = NonNullable<Awaited<ReturnType<typeof getConsultantSession>>>
+export type GetConsultantSessionQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Load a specific past strategy-AI conversation
+ */
+
+export function useGetConsultantSession<TData = Awaited<ReturnType<typeof getConsultantSession>>, TError = ErrorType<unknown>>(
+ vidyaId: string,
+    sessionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConsultantSession>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetConsultantSessionQueryOptions(vidyaId,sessionId,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

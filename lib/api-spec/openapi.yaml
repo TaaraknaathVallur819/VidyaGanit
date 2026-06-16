@@ -415,6 +415,49 @@ paths:
               schema:
                 $ref: "#/components/schemas/ConsultantHistoryResponse"
 
+  /parent/{vidyaId}/consultant/sessions:
+    get:
+      operationId: listConsultantSessions
+      tags: [parent]
+      summary: List the parent's past strategy-AI conversations
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Past consultant sessions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConsultantSessionsResponse"
+
+  /parent/{vidyaId}/consultant/sessions/{sessionId}/messages:
+    get:
+      operationId: getConsultantSession
+      tags: [parent]
+      summary: Load a specific past strategy-AI conversation
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Saved consultant session messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConsultantHistoryResponse"
+
   /parent/{vidyaId}/consultant/message:
     post:
       operationId: sendConsultantMessage
@@ -785,6 +828,32 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ConsultantMessage"
+
+    ConsultantSession:
+      type: object
+      required: [sessionId, startedAt, lastMessageAt, messageCount, preview]
+      properties:
+        sessionId:
+          type: string
+        startedAt:
+          type: string
+          format: date-time
+        lastMessageAt:
+          type: string
+          format: date-time
+        messageCount:
+          type: integer
+        preview:
+          type: string
+
+    ConsultantSessionsResponse:
+      type: object
+      required: [sessions]
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConsultantSession"
 
     ConsultantMessageInput:
       type: object

@@ -16,6 +16,10 @@ import {
   GetStudentHistoryResponse,
   GetConsultantHistoryParams,
   GetConsultantHistoryResponse,
+  ListConsultantSessionsParams,
+  ListConsultantSessionsResponse,
+  GetConsultantSessionParams,
+  GetConsultantSessionResponse,
   SendConsultantMessageParams,
   SendConsultantMessageBody,
   TranscribeConsultantAudioParams,
@@ -263,6 +267,105 @@ router.get(
     res.json(
       GetConsultantHistoryResponse.parse({
         sessionId,
+        messages: rows.map((r) => ({
+          role: r.role === "assistant" ? "assistant" : "user",
+          content: r.content,
+          createdAt: r.createdAt.toISOString(),
+          attachmentName: r.attachmentName ?? null,
+          attachmentType: r.attachmentType ?? null,
+        })),
+      }),
+    );
+  },
+);
+
+// ── Ask Strategy AI: list past conversations ────────────────────────
+router.get(
+  "/parent/:vidyaId/consultant/sessions",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = ListConsultantSessionsParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+
+    const rows = await db
+      .select({
+        sessionId: parentChatMessagesTable.sessionId,
+        role: parentChatMessagesTable.role,
+        content: parentChatMessagesTable.content,
+        createdAt: parentChatMessagesTable.createdAt,
+      })
+      .from(parentChatMessagesTable)
+      .where(eq(parentChatMessagesTable.parentVidyaId, params.data.vidyaId))
+      .orderBy(asc(parentChatMessagesTable.createdAt));
+
+    const order: string[] = [];
+    const grouped = new Map<
+      string,
+      { startedAt: Date; lastMessageAt: Date; messageCount: number; preview: string }
+    >();
+    for (const row of rows) {
+      let g = grouped.get(row.sessionId);
+      if (!g) {
+        g = { startedAt: row.createdAt, lastMessageAt: row.createdAt, messageCount: 0, preview: "" };
+        grouped.set(row.sessionId, g);
+        order.push(row.sessionId);
+      }
+      g.lastMessageAt = row.createdAt;
+      g.messageCount += 1;
+      // Preview = the first parent (user) message in the conversation.
+      if (!g.preview && row.role === "user" && row.content.trim()) {
+        g.preview = row.content.trim().slice(0, 140);
+      }
+    }
+
+    // Newest activity first.
+    const sessions = order
+      .map((sessionId) => {
+        const g = grouped.get(sessionId)!;
+        return {
+          sessionId,
+          startedAt: g.startedAt.toISOString(),
+          lastMessageAt: g.lastMessageAt.toISOString(),
+          messageCount: g.messageCount,
+          preview: g.preview,
+        };
+      })
+      .sort((a, b) => b.lastMessageAt.localeCompare(a.lastMessageAt));
+
+    res.json(ListConsultantSessionsResponse.parse({ sessions }));
+  },
+);
+
+// ── Ask Strategy AI: load one past conversation ─────────────────────
+router.get(
+  "/parent/:vidyaId/consultant/sessions/:sessionId/messages",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = GetConsultantSessionParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+
+    const rows = await db
+      .select()
+      .from(parentChatMessagesTable)
+      .where(
+        and(
+          eq(parentChatMessagesTable.parentVidyaId, params.data.vidyaId),
+          eq(parentChatMessagesTable.sessionId, params.data.sessionId),
+        ),
+      )
+      .orderBy(asc(parentChatMessagesTable.createdAt));
+
+    res.json(
+      GetConsultantSessionResponse.parse({
+        sessionId: params.data.sessionId,
         messages: rows.map((r) => ({
           role: r.role === "assistant" ? "assistant" : "user",
           content: r.content,

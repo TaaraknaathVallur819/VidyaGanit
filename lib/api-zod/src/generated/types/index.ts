@@ -19,6 +19,8 @@ export * from './consultantMessage';
 export * from './consultantMessageInput';
 export * from './consultantMessageInputLanguage';
 export * from './consultantMessageRole';
+export * from './consultantSession';
+export * from './consultantSessionsResponse';
 export * from './errorResponse';
 export * from './forgotPasswordInput';
 export * from './healthStatus';

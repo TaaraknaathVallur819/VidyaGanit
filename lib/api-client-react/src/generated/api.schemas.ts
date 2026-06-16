@@ -275,6 +275,18 @@ export interface ConsultantHistoryResponse {
   messages: ConsultantMessage[];
 }
 
+export interface ConsultantSession {
+  sessionId: string;
+  startedAt: string;
+  lastMessageAt: string;
+  messageCount: number;
+  preview: string;
+}
+
+export interface ConsultantSessionsResponse {
+  sessions: ConsultantSession[];
+}
+
 export type ConsultantMessageInputLanguage = typeof ConsultantMessageInputLanguage[keyof typeof ConsultantMessageInputLanguage];
 
 

@@ -290,6 +290,44 @@ export const GetConsultantHistoryResponse = zod.object({
 
 
 /**
+ * @summary List the parent's past strategy-AI conversations
+ */
+export const ListConsultantSessionsParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const ListConsultantSessionsResponse = zod.object({
+  "sessions": zod.array(zod.object({
+  "sessionId": zod.string(),
+  "startedAt": zod.coerce.date(),
+  "lastMessageAt": zod.coerce.date(),
+  "messageCount": zod.number(),
+  "preview": zod.string()
+}))
+})
+
+
+/**
+ * @summary Load a specific past strategy-AI conversation
+ */
+export const GetConsultantSessionParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "sessionId": zod.coerce.string()
+})
+
+export const GetConsultantSessionResponse = zod.object({
+  "sessionId": zod.string(),
+  "messages": zod.array(zod.object({
+  "role": zod.enum(['user', 'assistant']),
+  "content": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "attachmentName": zod.string().nullish(),
+  "attachmentType": zod.string().nullish()
+}))
+})
+
+
+/**
  * @summary Ask the parent strategy AI (SSE stream)
  */
 export const SendConsultantMessageParams = zod.object({

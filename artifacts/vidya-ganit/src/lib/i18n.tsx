@@ -90,6 +90,11 @@ const en: Dict = {
     "Hello! I'm your Strategy AI counsellor. Ask me anything about supporting your child's maths learning — daily routines, building confidence, or handling tricky topics. Pick a child above and I'll tailor my advice to their progress.",
   "strategy.error": "Sorry, I had trouble connecting. Please try again.",
   "strategy.fileTooBig": "That file is too big! Please pick one under 8 MB.",
+  "strategy.history": "Past conversations",
+  "strategy.newChat": "New conversation",
+  "strategy.noSessions": "No past conversations yet.",
+  "strategy.continue": "Continuing past conversation",
+  "strategy.messageCount": "{count} messages",
 
   // Header
   "header.hi": "Hi",
@@ -297,6 +302,11 @@ const ta: Dict = {
     "வணக்கம்! நான் உங்கள் உத்தி AI ஆலோசகர். உங்கள் குழந்தையின் கணிதக் கற்றலுக்கு உதவுவது குறித்து எதையும் கேளுங்கள் — தினசரி வழக்கங்கள், நம்பிக்கையை வளர்ப்பது, அல்லது கடினமான தலைப்புகள். மேலே ஒரு குழந்தையைத் தேர்ந்தெடுத்தால் அவர்களின் முன்னேற்றத்திற்கு ஏற்ப ஆலோசனை வழங்குவேன்.",
   "strategy.error": "மன்னிக்கவும், இணைப்பதில் சிக்கல். மீண்டும் முயற்சிக்கவும்.",
   "strategy.fileTooBig": "அந்தக் கோப்பு மிகப் பெரியது! 8 MB க்கு குறைவாக ஒன்றைத் தேர்ந்தெடுக்கவும்.",
+  "strategy.history": "முந்தைய உரையாடல்கள்",
+  "strategy.newChat": "புதிய உரையாடல்",
+  "strategy.noSessions": "இன்னும் முந்தைய உரையாடல்கள் இல்லை.",
+  "strategy.continue": "முந்தைய உரையாடலைத் தொடர்கிறது",
+  "strategy.messageCount": "{count} செய்திகள்",
 
   "header.hi": "வணக்கம்",
   "header.logout": "வெளியேறு",
@@ -499,6 +509,11 @@ const hi: Dict = {
     "नमस्ते! मैं आपका रणनीति AI सलाहकार हूँ। अपने बच्चे की गणित सीखने में मदद के बारे में कुछ भी पूछें — दैनिक दिनचर्या, आत्मविश्वास बढ़ाना, या कठिन विषय। ऊपर एक बच्चा चुनें और मैं उनकी प्रगति के अनुसार सलाह दूँगा।",
   "strategy.error": "क्षमा करें, कनेक्ट करने में समस्या हुई। कृपया फिर प्रयास करें।",
   "strategy.fileTooBig": "वह फ़ाइल बहुत बड़ी है! कृपया 8 MB से छोटी फ़ाइल चुनें।",
+  "strategy.history": "पिछली बातचीत",
+  "strategy.newChat": "नई बातचीत",
+  "strategy.noSessions": "अभी तक कोई पिछली बातचीत नहीं।",
+  "strategy.continue": "पिछली बातचीत जारी है",
+  "strategy.messageCount": "{count} संदेश",
 
   "header.hi": "नमस्ते",
   "header.logout": "लॉग आउट",
@@ -701,6 +716,11 @@ const te: Dict = {
     "నమస్తే! నేను మీ వ్యూహ AI సలహాదారుని. మీ పిల్లల గణిత అభ్యాసానికి మద్దతు గురించి ఏదైనా అడగండి — రోజువారీ అలవాట్లు, ఆత్మవిశ్వాసం పెంచడం, లేదా కష్టమైన అంశాలు. పైన ఒక పిల్లవాడిని ఎంచుకోండి, వారి పురోగతికి తగ్గట్టు సలహా ఇస్తాను.",
   "strategy.error": "క్షమించండి, కనెక్ట్ చేయడంలో సమస్య. దయచేసి మళ్లీ ప్రయత్నించండి.",
   "strategy.fileTooBig": "ఆ ఫైల్ చాలా పెద్దది! దయచేసి 8 MB కంటే తక్కువ ఫైల్ ఎంచుకోండి.",
+  "strategy.history": "గత సంభాషణలు",
+  "strategy.newChat": "కొత్త సంభాషణ",
+  "strategy.noSessions": "ఇంకా గత సంభాషణలు లేవు.",
+  "strategy.continue": "గత సంభాషణ కొనసాగుతోంది",
+  "strategy.messageCount": "{count} సందేశాలు",
 
   "header.hi": "నమస్తే",
   "header.logout": "లాగ్ అవుట్",
