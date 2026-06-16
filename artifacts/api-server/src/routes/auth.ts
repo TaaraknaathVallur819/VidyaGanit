@@ -65,6 +65,8 @@ router.post("/auth/register", async (req, res): Promise<void> => {
       board: user.board ?? null,
       parentType: user.parentType ?? null,
       contact: user.contact ?? null,
+      xp: user.xp ?? 0,
+      badges: user.badges ?? [],
     }),
   );
 });
@@ -106,6 +108,8 @@ router.post("/auth/login", async (req, res): Promise<void> => {
       board: user.board ?? null,
       parentType: user.parentType ?? null,
       contact: user.contact ?? null,
+      xp: user.xp ?? 0,
+      badges: user.badges ?? [],
     }),
   );
 });
