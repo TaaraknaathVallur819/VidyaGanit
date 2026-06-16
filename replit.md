@@ -54,7 +54,8 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- After merging schema changes, run `pnpm --filter @workspace/db run push` before the app/tests will work in dev. A `POST /api/auth/register` 500 with `column "..." of relation "users" does not exist` (and matching api-server test failures) means the dev DB is out of sync with the committed Drizzle schema.
+- i18n dictionary parity (en/ta/hi/te share identical keys, no blanks, no untranslated English) is guarded by a permanent vitest test in the web artifact (`artifacts/vidya-ganit/src/lib/i18n.test.ts`). The `test` validation runs all workspace packages (`pnpm -r --if-present run test`), so this runs in CI alongside the api-server tests.
 
 ## Pointers
 

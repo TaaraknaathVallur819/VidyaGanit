@@ -945,7 +945,7 @@ const te: Dict = {
   "chat.badgeUnlocked": "🎉 బ్యాడ్జ్ అన్‌లాక్ అయింది!",
 };
 
-const DICTS: Record<Language, Dict> = {
+export const DICTS: Record<Language, Dict> = {
   en,
   hi,
   bn,
