@@ -53,7 +53,6 @@ export default function Home() {
   
   const y1 = useTransform(scrollYProgress, [0, 1], [0, 200]);
   const y2 = useTransform(scrollYProgress, [0, 1], [0, -150]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   return (
     <div ref={containerRef} className="flex-1 flex flex-col items-center bg-[#f8faff] overflow-hidden relative w-full min-h-screen">
@@ -82,7 +81,7 @@ export default function Home() {
 
       {/* Main Hero Content */}
       <motion.div 
-        style={{ y: y1, opacity }}
+        style={{ y: y1 }}
         className="relative z-10 w-full max-w-5xl mx-auto px-6 pt-24 pb-32 flex flex-col items-center text-center mt-8 md:mt-16"
       >
         {/* Bouncy Badge */}
