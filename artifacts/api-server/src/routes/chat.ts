@@ -26,9 +26,10 @@ const router: IRouter = Router();
 
 const DRAW_MARKER_RE = /\[\[DRAW:\s*([\s\S]*?)\]\]/;
 const GAME_MARKER_RE = /\[\[GAME(?::[^\]]*)?\]\]/;
-// Both markers may appear at the very end of a reply; we withhold streamed text
-// from the earliest marker start onward so neither ever leaks to the student.
-const MARKER_STARTS = ["[[DRAW:", "[[GAME"];
+const TEST_MARKER_RE = /\[\[TEST(?::[^\]]*)?\]\]/;
+// All markers may appear at the very end of a reply; we withhold streamed text
+// from the earliest marker start onward so none of them ever leak to the student.
+const MARKER_STARTS = ["[[DRAW:", "[[GAME", "[[TEST"];
 
 // Recognisable maths topics that should always trigger a "play a game?" offer
 // when the student raises a fresh question. Greetings, "give up" pleas and
@@ -188,6 +189,7 @@ router.post(
   let sent = 0;
   let imagePrompt: string | null = null;
   let offerGame = false;
+  let offerTest = false;
   let fallbackText: string | null = null;
 
   const streamFlush = (): void => {
@@ -259,6 +261,7 @@ router.post(
 
     const drawMatch = full.match(DRAW_MARKER_RE);
     const gameMatch = full.match(GAME_MARKER_RE);
+    const testMatch = full.match(TEST_MARKER_RE);
     let visibleEnd = full.length;
     if (drawMatch) {
       imagePrompt = drawMatch[1].trim();
@@ -267,6 +270,10 @@ router.post(
     if (gameMatch) {
       offerGame = true;
       visibleEnd = Math.min(visibleEnd, gameMatch.index ?? full.length);
+    }
+    if (testMatch) {
+      offerTest = true;
+      visibleEnd = Math.min(visibleEnd, testMatch.index ?? full.length);
     }
     if (visibleEnd > sent) {
       send({ chunk: full.slice(sent, visibleEnd) });
@@ -319,11 +326,21 @@ router.post(
     send({ game: true });
   }
 
+  // The model emits [[TEST]] only when the student is clearly comfortable with
+  // the current topic. Offer a graded topic-mastery test for that topic; the
+  // client surfaces a Yes/No prompt just like the game offer.
+  if (offerTest) {
+    send({ test: true, topic });
+  }
+
   // Compliance: append-only log of the tutor's reply (markers stripped). Falls
   // back to the error message actually shown to the child if the AI call failed.
   const assistantText =
-    full.replace(DRAW_MARKER_RE, "").replace(GAME_MARKER_RE, "").trim() ||
-    (fallbackText ?? "");
+    full
+      .replace(DRAW_MARKER_RE, "")
+      .replace(GAME_MARKER_RE, "")
+      .replace(TEST_MARKER_RE, "")
+      .trim() || (fallbackText ?? "");
   if (assistantText) {
     try {
       await db.insert(chatMessagesTable).values({

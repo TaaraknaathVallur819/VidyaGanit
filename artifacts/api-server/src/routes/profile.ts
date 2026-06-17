@@ -38,6 +38,9 @@ function toProfile(user: typeof usersTable.$inferSelect) {
     language: user.language ?? null,
     xp: user.xp ?? 0,
     badges: user.badges ?? [],
+    voiceRate: user.voiceRate ?? 1,
+    voicePitch: user.voicePitch ?? 1,
+    voiceName: user.voiceName ?? null,
   };
 }
 
@@ -79,6 +82,17 @@ router.patch("/profile/:vidyaId", requireAuth, requireSelf, async (req, res): Pr
   if (body.data.gender !== undefined) updates.gender = body.data.gender;
   if (body.data.contact !== undefined) updates.contact = body.data.contact ?? null;
   if (body.data.language !== undefined) updates.language = body.data.language;
+  // Read-aloud voice settings: clamp to the same ranges the browser SpeechSynthesis
+  // API accepts so a bad client value can never be persisted.
+  if (body.data.voiceRate !== undefined && body.data.voiceRate !== null) {
+    updates.voiceRate = Math.min(2, Math.max(0.5, body.data.voiceRate));
+  }
+  if (body.data.voicePitch !== undefined && body.data.voicePitch !== null) {
+    updates.voicePitch = Math.min(2, Math.max(0, body.data.voicePitch));
+  }
+  if (body.data.voiceName !== undefined) {
+    updates.voiceName = body.data.voiceName ? body.data.voiceName.slice(0, 200) : null;
+  }
 
   if (Object.keys(updates).length === 0) {
     res.status(400).json({ error: "No fields to update" });

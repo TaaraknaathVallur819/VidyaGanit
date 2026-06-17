@@ -47,6 +47,14 @@ export const LoginUserBody = zod.object({
   "password": zod.string()
 })
 
+export const loginUserResponseVoiceRateDefault = 1;
+export const loginUserResponseVoiceRateMin = 0.5;
+export const loginUserResponseVoiceRateMax = 2;
+
+export const loginUserResponseVoicePitchDefault = 1;
+export const loginUserResponseVoicePitchMin = 0;
+export const loginUserResponseVoicePitchMax = 2;
+
 export const loginUserResponseXpDefault = 0;
 
 export const LoginUserResponse = zod.object({
@@ -61,6 +69,9 @@ export const LoginUserResponse = zod.object({
   "batch": zod.string().nullish(),
   "academyName": zod.string().nullish(),
   "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
+  "voiceRate": zod.number().min(loginUserResponseVoiceRateMin).max(loginUserResponseVoiceRateMax).default(loginUserResponseVoiceRateDefault),
+  "voicePitch": zod.number().min(loginUserResponseVoicePitchMin).max(loginUserResponseVoicePitchMax).default(loginUserResponseVoicePitchDefault),
+  "voiceName": zod.string().nullish(),
   "xp": zod.number().default(loginUserResponseXpDefault),
   "badges": zod.array(zod.string())
 })
@@ -72,6 +83,14 @@ export const LoginUserResponse = zod.object({
 export const GetProfileParams = zod.object({
   "vidyaId": zod.coerce.string()
 })
+
+export const getProfileResponseVoiceRateDefault = 1;
+export const getProfileResponseVoiceRateMin = 0.5;
+export const getProfileResponseVoiceRateMax = 2;
+
+export const getProfileResponseVoicePitchDefault = 1;
+export const getProfileResponseVoicePitchMin = 0;
+export const getProfileResponseVoicePitchMax = 2;
 
 export const getProfileResponseXpDefault = 0;
 
@@ -87,6 +106,9 @@ export const GetProfileResponse = zod.object({
   "batch": zod.string().nullish(),
   "academyName": zod.string().nullish(),
   "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
+  "voiceRate": zod.number().min(getProfileResponseVoiceRateMin).max(getProfileResponseVoiceRateMax).default(getProfileResponseVoiceRateDefault),
+  "voicePitch": zod.number().min(getProfileResponseVoicePitchMin).max(getProfileResponseVoicePitchMax).default(getProfileResponseVoicePitchDefault),
+  "voiceName": zod.string().nullish(),
   "xp": zod.number().default(getProfileResponseXpDefault),
   "badges": zod.array(zod.string())
 })
@@ -100,14 +122,31 @@ export const UpdateProfileParams = zod.object({
 })
 
 
+export const updateProfileBodyVoiceRateMin = 0.5;
+export const updateProfileBodyVoiceRateMax = 2;
+
+export const updateProfileBodyVoicePitchMin = 0;
+export const updateProfileBodyVoicePitchMax = 2;
+
 
 
 export const UpdateProfileBody = zod.object({
   "name": zod.string().min(1).optional(),
   "gender": zod.enum(['male', 'female']).optional(),
   "contact": zod.string().nullish(),
-  "language": zod.enum(['en', 'hi', 'bn', 'mr', 'te', 'ta', 'gu', 'ur', 'kn', 'ml', 'pa', 'or', 'as', 'brx', 'doi', 'ks', 'kok', 'mai', 'mni', 'ne', 'sa', 'sat', 'sd']).optional()
+  "language": zod.enum(['en', 'hi', 'bn', 'mr', 'te', 'ta', 'gu', 'ur', 'kn', 'ml', 'pa', 'or', 'as', 'brx', 'doi', 'ks', 'kok', 'mai', 'mni', 'ne', 'sa', 'sat', 'sd']).optional(),
+  "voiceRate": zod.number().min(updateProfileBodyVoiceRateMin).max(updateProfileBodyVoiceRateMax).optional(),
+  "voicePitch": zod.number().min(updateProfileBodyVoicePitchMin).max(updateProfileBodyVoicePitchMax).optional(),
+  "voiceName": zod.string().nullish()
 })
+
+export const updateProfileResponseVoiceRateDefault = 1;
+export const updateProfileResponseVoiceRateMin = 0.5;
+export const updateProfileResponseVoiceRateMax = 2;
+
+export const updateProfileResponseVoicePitchDefault = 1;
+export const updateProfileResponseVoicePitchMin = 0;
+export const updateProfileResponseVoicePitchMax = 2;
 
 export const updateProfileResponseXpDefault = 0;
 
@@ -123,6 +162,9 @@ export const UpdateProfileResponse = zod.object({
   "batch": zod.string().nullish(),
   "academyName": zod.string().nullish(),
   "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
+  "voiceRate": zod.number().min(updateProfileResponseVoiceRateMin).max(updateProfileResponseVoiceRateMax).default(updateProfileResponseVoiceRateDefault),
+  "voicePitch": zod.number().min(updateProfileResponseVoicePitchMin).max(updateProfileResponseVoicePitchMax).default(updateProfileResponseVoicePitchDefault),
+  "voiceName": zod.string().nullish(),
   "xp": zod.number().default(updateProfileResponseXpDefault),
   "badges": zod.array(zod.string())
 })
@@ -454,6 +496,98 @@ export const GetChatSessionResponse = zod.object({
   "role": zod.enum(['user', 'assistant']),
   "content": zod.string(),
   "createdAt": zod.coerce.date()
+}))
+})
+
+
+/**
+ * @summary Generate a topic-mastery test (quiz/worksheet) for the student
+ */
+export const GenerateAssessmentBody = zod.object({
+  "topic": zod.string(),
+  "language": zod.enum(['en', 'hi', 'bn', 'mr', 'te', 'ta', 'gu', 'ur', 'kn', 'ml', 'pa', 'or', 'as', 'brx', 'doi', 'ks', 'kok', 'mai', 'mni', 'ne', 'sa', 'sat', 'sd']).optional()
+})
+
+export const GenerateAssessmentResponse = zod.object({
+  "testId": zod.string(),
+  "topic": zod.string(),
+  "topicLabel": zod.string(),
+  "pointsPerCorrect": zod.number(),
+  "totalQuestions": zod.number(),
+  "questions": zod.array(zod.object({
+  "prompt": zod.string(),
+  "options": zod.array(zod.string())
+}))
+})
+
+
+/**
+ * @summary Submit answers for a generated test and get the score
+ */
+export const SubmitAssessmentBody = zod.object({
+  "testId": zod.string(),
+  "answers": zod.array(zod.number()).describe('Chosen option index per question; -1 means left blank.')
+})
+
+export const SubmitAssessmentResponse = zod.object({
+  "testId": zod.string(),
+  "topic": zod.string(),
+  "topicLabel": zod.string(),
+  "totalQuestions": zod.number(),
+  "correctCount": zod.number(),
+  "incorrectCount": zod.number(),
+  "pointsPerCorrect": zod.number(),
+  "score": zod.number(),
+  "maxScore": zod.number(),
+  "review": zod.array(zod.object({
+  "prompt": zod.string(),
+  "options": zod.array(zod.string()),
+  "answerIndex": zod.number(),
+  "chosenIndex": zod.number(),
+  "correct": zod.boolean()
+}))
+})
+
+
+/**
+ * @summary List the student's own completed test results
+ */
+export const ListOwnAssessmentsParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const ListOwnAssessmentsResponse = zod.object({
+  "results": zod.array(zod.object({
+  "testId": zod.string(),
+  "topic": zod.string(),
+  "topicLabel": zod.string(),
+  "totalQuestions": zod.number(),
+  "correctCount": zod.number(),
+  "score": zod.number(),
+  "maxScore": zod.number(),
+  "completedAt": zod.coerce.date()
+}))
+})
+
+
+/**
+ * @summary Completed test results for a linked student
+ */
+export const GetStudentAssessmentsParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "studentVidyaId": zod.coerce.string()
+})
+
+export const GetStudentAssessmentsResponse = zod.object({
+  "results": zod.array(zod.object({
+  "testId": zod.string(),
+  "topic": zod.string(),
+  "topicLabel": zod.string(),
+  "totalQuestions": zod.number(),
+  "correctCount": zod.number(),
+  "score": zod.number(),
+  "maxScore": zod.number(),
+  "completedAt": zod.coerce.date()
 }))
 })
 

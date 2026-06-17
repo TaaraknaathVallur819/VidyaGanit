@@ -28,6 +28,18 @@ export interface UserProfile {
   academyName?: string | null;
   /** @nullable */
   language?: UserProfileLanguage;
+  /**
+     * @minimum 0.5
+     * @maximum 2
+     */
+  voiceRate?: number;
+  /**
+     * @minimum 0
+     * @maximum 2
+     */
+  voicePitch?: number;
+  /** @nullable */
+  voiceName?: string | null;
   xp: number;
   badges: string[];
 }

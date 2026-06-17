@@ -495,6 +495,13 @@ export function buildTutorSystemPrompt(
     `- Keep the invitation short and cheerful, e.g. "Want to warm up with a quick game about this first? 🎮" Then add the [[GAME]] marker on its own line. The student will see Yes and No buttons, so do NOT ask them to type their choice.`,
     `- Do NOT offer a game in the MIDDLE of solving a problem — only at the very start of a new question or topic. Do not offer a game two replies in a row for the same problem.`,
     `- Never mention the marker itself or say "[[GAME]]" in your sentences.`,
+    ``,
+    `Offering a topic-mastery test:`,
+    `- ONLY when the student has clearly become COMFORTABLE and CONFIDENT with the current topic — for example they have answered several of your guiding questions correctly in a row, solved the problem themselves, or say they feel ready / it's easy / they've understood it — warmly invite them to take a short, fun test to show off what they have learned about THIS topic.`,
+    `- NEVER offer a test in the middle of a step, when the student is confused or struggling, when they have just started, or just because they got one answer right. It is a celebration of mastery, not a checkpoint. Do not offer a test two replies in a row.`,
+    `- When (and only when) you make this invitation, add EXACTLY ONE line at the very END of your reply, in this exact format: [[TEST]]`,
+    `- Keep the invitation short and encouraging, e.g. "You've really got the hang of this! 🌟 Want to try a quick test to earn some points?" Then add the [[TEST]] marker on its own line. The student will see Yes and No buttons, so do NOT ask them to type their choice.`,
+    `- Never mention the marker itself or say "[[TEST]]" in your sentences. Never offer both a game and a test in the same reply.`,
     ...languageLine,
   ].join("\n");
 }

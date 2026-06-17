@@ -20,6 +20,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AssessmentResult,
+  AssessmentResultsResponse,
   ChangePasswordInput,
   ChatMessageInput,
   ChatSessionResponse,
@@ -32,6 +34,8 @@ import type {
   ForgotPasswordInput,
   GameScoreInput,
   GameScoreResponse,
+  GenerateAssessmentInput,
+  GeneratedAssessment,
   HealthStatus,
   LinkStudentInput,
   LinkedStudentProfile,
@@ -42,6 +46,7 @@ import type {
   ResetPasswordInput,
   StudentAnalytics,
   StudentHistoryResponse,
+  SubmitAssessmentInput,
   TranscriptionResponse,
   UserProfile,
   UserRegistrationInput
@@ -1696,6 +1701,307 @@ export function useGetChatSession<TData = Awaited<ReturnType<typeof getChatSessi
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetChatSessionQueryOptions(vidyaId,sessionId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGenerateAssessmentUrl = () => {
+
+
+
+
+  return `/api/assessment/generate`
+}
+
+/**
+ * @summary Generate a topic-mastery test (quiz/worksheet) for the student
+ */
+export const generateAssessment = async (generateAssessmentInput: GenerateAssessmentInput, options?: RequestInit): Promise<GeneratedAssessment> => {
+
+  return customFetch<GeneratedAssessment>(getGenerateAssessmentUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      generateAssessmentInput,)
+  }
+);}
+
+
+
+
+export const getGenerateAssessmentMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateAssessment>>, TError,{data: BodyType<GenerateAssessmentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof generateAssessment>>, TError,{data: BodyType<GenerateAssessmentInput>}, TContext> => {
+
+const mutationKey = ['generateAssessment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof generateAssessment>>, {data: BodyType<GenerateAssessmentInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  generateAssessment(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GenerateAssessmentMutationResult = NonNullable<Awaited<ReturnType<typeof generateAssessment>>>
+    export type GenerateAssessmentMutationBody = BodyType<GenerateAssessmentInput>
+    export type GenerateAssessmentMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Generate a topic-mastery test (quiz/worksheet) for the student
+ */
+export const useGenerateAssessment = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateAssessment>>, TError,{data: BodyType<GenerateAssessmentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof generateAssessment>>,
+        TError,
+        {data: BodyType<GenerateAssessmentInput>},
+        TContext
+      > => {
+      return useMutation(getGenerateAssessmentMutationOptions(options));
+    }
+
+export const getSubmitAssessmentUrl = () => {
+
+
+
+
+  return `/api/assessment/submit`
+}
+
+/**
+ * @summary Submit answers for a generated test and get the score
+ */
+export const submitAssessment = async (submitAssessmentInput: SubmitAssessmentInput, options?: RequestInit): Promise<AssessmentResult> => {
+
+  return customFetch<AssessmentResult>(getSubmitAssessmentUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      submitAssessmentInput,)
+  }
+);}
+
+
+
+
+export const getSubmitAssessmentMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitAssessment>>, TError,{data: BodyType<SubmitAssessmentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof submitAssessment>>, TError,{data: BodyType<SubmitAssessmentInput>}, TContext> => {
+
+const mutationKey = ['submitAssessment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitAssessment>>, {data: BodyType<SubmitAssessmentInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  submitAssessment(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubmitAssessmentMutationResult = NonNullable<Awaited<ReturnType<typeof submitAssessment>>>
+    export type SubmitAssessmentMutationBody = BodyType<SubmitAssessmentInput>
+    export type SubmitAssessmentMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Submit answers for a generated test and get the score
+ */
+export const useSubmitAssessment = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitAssessment>>, TError,{data: BodyType<SubmitAssessmentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof submitAssessment>>,
+        TError,
+        {data: BodyType<SubmitAssessmentInput>},
+        TContext
+      > => {
+      return useMutation(getSubmitAssessmentMutationOptions(options));
+    }
+
+export const getListOwnAssessmentsUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/assessment/${vidyaId}/results`
+}
+
+/**
+ * @summary List the student's own completed test results
+ */
+export const listOwnAssessments = async (vidyaId: string, options?: RequestInit): Promise<AssessmentResultsResponse> => {
+
+  return customFetch<AssessmentResultsResponse>(getListOwnAssessmentsUrl(vidyaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListOwnAssessmentsQueryKey = (vidyaId: string,) => {
+    return [
+    `/api/assessment/${vidyaId}/results`
+    ] as const;
+    }
+
+
+export const getListOwnAssessmentsQueryOptions = <TData = Awaited<ReturnType<typeof listOwnAssessments>>, TError = ErrorType<unknown>>(vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listOwnAssessments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListOwnAssessmentsQueryKey(vidyaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listOwnAssessments>>> = ({ signal }) => listOwnAssessments(vidyaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listOwnAssessments>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListOwnAssessmentsQueryResult = NonNullable<Awaited<ReturnType<typeof listOwnAssessments>>>
+export type ListOwnAssessmentsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List the student's own completed test results
+ */
+
+export function useListOwnAssessments<TData = Awaited<ReturnType<typeof listOwnAssessments>>, TError = ErrorType<unknown>>(
+ vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listOwnAssessments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListOwnAssessmentsQueryOptions(vidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetStudentAssessmentsUrl = (vidyaId: string,
+    studentVidyaId: string,) => {
+
+
+
+
+  return `/api/parent/${vidyaId}/students/${studentVidyaId}/assessments`
+}
+
+/**
+ * @summary Completed test results for a linked student
+ */
+export const getStudentAssessments = async (vidyaId: string,
+    studentVidyaId: string, options?: RequestInit): Promise<AssessmentResultsResponse> => {
+
+  return customFetch<AssessmentResultsResponse>(getGetStudentAssessmentsUrl(vidyaId,studentVidyaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStudentAssessmentsQueryKey = (vidyaId: string,
+    studentVidyaId: string,) => {
+    return [
+    `/api/parent/${vidyaId}/students/${studentVidyaId}/assessments`
+    ] as const;
+    }
+
+
+export const getGetStudentAssessmentsQueryOptions = <TData = Awaited<ReturnType<typeof getStudentAssessments>>, TError = ErrorType<ErrorResponse>>(vidyaId: string,
+    studentVidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentAssessments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentAssessmentsQueryKey(vidyaId,studentVidyaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentAssessments>>> = ({ signal }) => getStudentAssessments(vidyaId,studentVidyaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId && studentVidyaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStudentAssessments>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStudentAssessmentsQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentAssessments>>>
+export type GetStudentAssessmentsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Completed test results for a linked student
+ */
+
+export function useGetStudentAssessments<TData = Awaited<ReturnType<typeof getStudentAssessments>>, TError = ErrorType<ErrorResponse>>(
+ vidyaId: string,
+    studentVidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentAssessments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStudentAssessmentsQueryOptions(vidyaId,studentVidyaId,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

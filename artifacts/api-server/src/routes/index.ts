@@ -5,6 +5,7 @@ import profileRouter from "./profile";
 import chatRouter from "./chat";
 import parentRouter from "./parent";
 import gamesRouter from "./games";
+import assessmentRouter from "./assessment";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(profileRouter);
 router.use(chatRouter);
 router.use(parentRouter);
 router.use(gamesRouter);
+router.use(assessmentRouter);
 
 export default router;

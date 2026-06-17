@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, real } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
@@ -17,6 +17,12 @@ export const usersTable = pgTable("users", {
   batch: text("batch"),
   academyName: text("academy_name"),
   language: text("language"),
+  // Read-aloud voice preferences for the AI tutor/counselor speech synthesis.
+  // rate = speaking pace, pitch = tone, voiceName = the chosen system voice
+  // (accent/gender) the browser should prefer for this user's language.
+  voiceRate: real("voice_rate").notNull().default(1),
+  voicePitch: real("voice_pitch").notNull().default(1),
+  voiceName: text("voice_name"),
   xp: integer("xp").notNull().default(0),
   badges: text("badges").array().notNull().default(sql`ARRAY[]::text[]`),
   resetTokenHash: text("reset_token_hash"),

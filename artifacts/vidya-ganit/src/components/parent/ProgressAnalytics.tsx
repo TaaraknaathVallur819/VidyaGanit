@@ -1,11 +1,14 @@
 import { motion } from "framer-motion";
-import { Loader2, TrendingUp, Sparkles, MessageCircle, BookOpen } from "lucide-react";
+import { Loader2, TrendingUp, Sparkles, MessageCircle, BookOpen, ClipboardCheck } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   useGetStudentAnalytics,
   getGetStudentAnalyticsQueryKey,
+  useGetStudentAssessments,
+  getGetStudentAssessmentsQueryKey,
 } from "@workspace/api-client-react";
 import { useLanguage } from "@/lib/i18n";
+import AssessmentReport from "@/components/AssessmentReport";
 
 const TOPIC_COLORS: Record<string, string> = {
   fraction: "from-rose-500 to-pink-500",
@@ -33,6 +36,13 @@ export default function ProgressAnalytics({
       queryKey: getGetStudentAnalyticsQueryKey(vidyaId, studentVidyaId),
     },
   });
+  const { data: assessments, isLoading: assessmentsLoading } =
+    useGetStudentAssessments(vidyaId, studentVidyaId, {
+      query: {
+        enabled: !!vidyaId && !!studentVidyaId,
+        queryKey: getGetStudentAssessmentsQueryKey(vidyaId, studentVidyaId),
+      },
+    });
 
   if (isLoading) {
     return (
@@ -145,6 +155,18 @@ export default function ProgressAnalytics({
           </p>
         </>
       )}
+
+      {/* Graded test reports — shown regardless of chat activity */}
+      <div className="pt-2">
+        <h3 className="text-base font-bold text-foreground flex items-center gap-2 mb-3">
+          <ClipboardCheck className="w-5 h-5 text-emerald-500" />
+          {t("report.testReports")}
+        </h3>
+        <AssessmentReport
+          results={assessments?.results ?? []}
+          isLoading={assessmentsLoading}
+        />
+      </div>
     </div>
   );
 }

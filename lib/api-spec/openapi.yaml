@@ -611,6 +611,117 @@ paths:
               schema:
                 $ref: "#/components/schemas/ChatSessionResponse"
 
+  /assessment/generate:
+    post:
+      operationId: generateAssessment
+      tags: [assessment]
+      summary: Generate a topic-mastery test (quiz/worksheet) for the student
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateAssessmentInput"
+      responses:
+        "200":
+          description: A freshly generated test (answer key withheld)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeneratedAssessment"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /assessment/submit:
+    post:
+      operationId: submitAssessment
+      tags: [assessment]
+      summary: Submit answers for a generated test and get the score
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmitAssessmentInput"
+      responses:
+        "200":
+          description: Graded result (no negative marking)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssessmentResult"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Test not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /assessment/{vidyaId}/results:
+    get:
+      operationId: listOwnAssessments
+      tags: [assessment]
+      summary: List the student's own completed test results
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Completed test results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssessmentResultsResponse"
+
+  /parent/{vidyaId}/students/{studentVidyaId}/assessments:
+    get:
+      operationId: getStudentAssessments
+      tags: [parent]
+      summary: Completed test results for a linked student
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: studentVidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Student test results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssessmentResultsResponse"
+        "403":
+          description: Student not linked to this parent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Student not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -709,6 +820,18 @@ components:
         language:
           type: ["string", "null"]
           enum: [en, hi, bn, mr, te, ta, gu, ur, kn, ml, pa, or, as, brx, doi, ks, kok, mai, mni, ne, sa, sat, sd, null]
+        voiceRate:
+          type: number
+          minimum: 0.5
+          maximum: 2
+          default: 1
+        voicePitch:
+          type: number
+          minimum: 0
+          maximum: 2
+          default: 1
+        voiceName:
+          type: ["string", "null"]
         xp:
           type: integer
           default: 0
@@ -731,6 +854,16 @@ components:
         language:
           type: string
           enum: [en, hi, bn, mr, te, ta, gu, ur, kn, ml, pa, or, as, brx, doi, ks, kok, mai, mni, ne, sa, sat, sd]
+        voiceRate:
+          type: number
+          minimum: 0.5
+          maximum: 2
+        voicePitch:
+          type: number
+          minimum: 0
+          maximum: 2
+        voiceName:
+          type: ["string", "null"]
 
     ChangePasswordInput:
       type: object
@@ -1098,3 +1231,132 @@ components:
       properties:
         text:
           type: string
+
+    GenerateAssessmentInput:
+      type: object
+      required: [topic]
+      properties:
+        topic:
+          type: string
+        language:
+          type: string
+          enum: [en, hi, bn, mr, te, ta, gu, ur, kn, ml, pa, or, as, brx, doi, ks, kok, mai, mni, ne, sa, sat, sd]
+
+    AssessmentQuestionPublic:
+      type: object
+      required: [prompt, options]
+      properties:
+        prompt:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+
+    GeneratedAssessment:
+      type: object
+      required: [testId, topic, topicLabel, pointsPerCorrect, totalQuestions, questions]
+      properties:
+        testId:
+          type: string
+        topic:
+          type: string
+        topicLabel:
+          type: string
+        pointsPerCorrect:
+          type: integer
+        totalQuestions:
+          type: integer
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssessmentQuestionPublic"
+
+    SubmitAssessmentInput:
+      type: object
+      required: [testId, answers]
+      properties:
+        testId:
+          type: string
+        answers:
+          type: array
+          description: Chosen option index per question; -1 means left blank.
+          items:
+            type: integer
+
+    AssessmentQuestionReview:
+      type: object
+      required: [prompt, options, answerIndex, chosenIndex, correct]
+      properties:
+        prompt:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        answerIndex:
+          type: integer
+        chosenIndex:
+          type: integer
+        correct:
+          type: boolean
+
+    AssessmentResult:
+      type: object
+      required:
+        [testId, topic, topicLabel, totalQuestions, correctCount, incorrectCount, pointsPerCorrect, score, maxScore, review]
+      properties:
+        testId:
+          type: string
+        topic:
+          type: string
+        topicLabel:
+          type: string
+        totalQuestions:
+          type: integer
+        correctCount:
+          type: integer
+        incorrectCount:
+          type: integer
+        pointsPerCorrect:
+          type: integer
+        score:
+          type: integer
+        maxScore:
+          type: integer
+        review:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssessmentQuestionReview"
+
+    AssessmentSummary:
+      type: object
+      required:
+        [testId, topic, topicLabel, totalQuestions, correctCount, score, maxScore, completedAt]
+      properties:
+        testId:
+          type: string
+        topic:
+          type: string
+        topicLabel:
+          type: string
+        totalQuestions:
+          type: integer
+        correctCount:
+          type: integer
+        score:
+          type: integer
+        maxScore:
+          type: integer
+        completedAt:
+          type: string
+          format: date-time
+
+    AssessmentResultsResponse:
+      type: object
+      required: [results]
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssessmentSummary"

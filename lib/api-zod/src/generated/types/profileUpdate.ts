@@ -15,4 +15,16 @@ export interface ProfileUpdate {
   /** @nullable */
   contact?: string | null;
   language?: ProfileUpdateLanguage;
+  /**
+     * @minimum 0.5
+     * @maximum 2
+     */
+  voiceRate?: number;
+  /**
+     * @minimum 0
+     * @maximum 2
+     */
+  voicePitch?: number;
+  /** @nullable */
+  voiceName?: string | null;
 }

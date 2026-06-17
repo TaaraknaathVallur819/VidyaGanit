@@ -155,6 +155,18 @@ export interface UserProfile {
   academyName?: string | null;
   /** @nullable */
   language?: UserProfileLanguage;
+  /**
+     * @minimum 0.5
+     * @maximum 2
+     */
+  voiceRate?: number;
+  /**
+     * @minimum 0
+     * @maximum 2
+     */
+  voicePitch?: number;
+  /** @nullable */
+  voiceName?: string | null;
   xp: number;
   badges: string[];
 }
@@ -203,6 +215,18 @@ export interface ProfileUpdate {
   /** @nullable */
   contact?: string | null;
   language?: ProfileUpdateLanguage;
+  /**
+     * @minimum 0.5
+     * @maximum 2
+     */
+  voiceRate?: number;
+  /**
+     * @minimum 0
+     * @maximum 2
+     */
+  voicePitch?: number;
+  /** @nullable */
+  voiceName?: string | null;
 }
 
 export interface ChangePasswordInput {
@@ -538,5 +562,95 @@ export interface ConsultantAudioInput {
 
 export interface TranscriptionResponse {
   text: string;
+}
+
+export type GenerateAssessmentInputLanguage = typeof GenerateAssessmentInputLanguage[keyof typeof GenerateAssessmentInputLanguage];
+
+
+export const GenerateAssessmentInputLanguage = {
+  en: 'en',
+  hi: 'hi',
+  bn: 'bn',
+  mr: 'mr',
+  te: 'te',
+  ta: 'ta',
+  gu: 'gu',
+  ur: 'ur',
+  kn: 'kn',
+  ml: 'ml',
+  pa: 'pa',
+  or: 'or',
+  as: 'as',
+  brx: 'brx',
+  doi: 'doi',
+  ks: 'ks',
+  kok: 'kok',
+  mai: 'mai',
+  mni: 'mni',
+  ne: 'ne',
+  sa: 'sa',
+  sat: 'sat',
+  sd: 'sd',
+} as const;
+
+export interface GenerateAssessmentInput {
+  topic: string;
+  language?: GenerateAssessmentInputLanguage;
+}
+
+export interface AssessmentQuestionPublic {
+  prompt: string;
+  options: string[];
+}
+
+export interface GeneratedAssessment {
+  testId: string;
+  topic: string;
+  topicLabel: string;
+  pointsPerCorrect: number;
+  totalQuestions: number;
+  questions: AssessmentQuestionPublic[];
+}
+
+export interface SubmitAssessmentInput {
+  testId: string;
+  /** Chosen option index per question; -1 means left blank. */
+  answers: number[];
+}
+
+export interface AssessmentQuestionReview {
+  prompt: string;
+  options: string[];
+  answerIndex: number;
+  chosenIndex: number;
+  correct: boolean;
+}
+
+export interface AssessmentResult {
+  testId: string;
+  topic: string;
+  topicLabel: string;
+  totalQuestions: number;
+  correctCount: number;
+  incorrectCount: number;
+  pointsPerCorrect: number;
+  score: number;
+  maxScore: number;
+  review: AssessmentQuestionReview[];
+}
+
+export interface AssessmentSummary {
+  testId: string;
+  topic: string;
+  topicLabel: string;
+  totalQuestions: number;
+  correctCount: number;
+  score: number;
+  maxScore: number;
+  completedAt: string;
+}
+
+export interface AssessmentResultsResponse {
+  results: AssessmentSummary[];
 }
 

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Volume2, Square } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
-import { isSpeechSupported, speechLocale } from "@/lib/speech";
+import { isSpeechSupported, speechLocale, resolveVoice } from "@/lib/speech";
+import { useVoicePrefs, useVoices } from "@/lib/voice";
 
 /**
  * A small toggle that reads the given text aloud using the browser's built-in
@@ -20,6 +21,8 @@ export default function SpeakButton({
   className?: string;
 }) {
   const { t, lang } = useLanguage();
+  const prefs = useVoicePrefs();
+  const voices = useVoices();
   const [speaking, setSpeaking] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
@@ -45,7 +48,10 @@ export default function SpeakButton({
     synth.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = speechLocale(lang);
-    utterance.rate = 0.95;
+    utterance.rate = prefs.rate;
+    utterance.pitch = prefs.pitch;
+    const chosen = resolveVoice(voices, prefs.voiceName);
+    if (chosen) utterance.voice = chosen;
     utterance.onend = () => {
       setSpeaking(false);
       utteranceRef.current = null;

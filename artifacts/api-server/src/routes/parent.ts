@@ -1,18 +1,21 @@
 import { Router, type IRouter } from "express";
 import { randomUUID } from "node:crypto";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import {
   db,
   usersTable,
   parentStudentLinksTable,
   chatMessagesTable,
   parentChatMessagesTable,
+  assessmentsTable,
 } from "@workspace/db";
 import {
   GetStudentAnalyticsParams,
   GetStudentAnalyticsResponse,
   GetStudentHistoryParams,
   GetStudentHistoryResponse,
+  GetStudentAssessmentsParams,
+  GetStudentAssessmentsResponse,
   GetConsultantHistoryParams,
   GetConsultantHistoryResponse,
   ListConsultantSessionsParams,
@@ -238,6 +241,52 @@ router.get(
         studentVidyaId: student.vidyaId,
         name: student.name,
         sessions,
+      }),
+    );
+  },
+);
+
+// ── Topic-mastery test results for a linked student ─────────────────
+router.get(
+  "/parent/:vidyaId/students/:studentVidyaId/assessments",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = GetStudentAssessmentsParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+
+    const student = await getLinkedStudent(params.data.vidyaId, params.data.studentVidyaId);
+    if (!student) {
+      res.status(403).json({ error: "This student is not linked to your account." });
+      return;
+    }
+
+    const rows = await db
+      .select()
+      .from(assessmentsTable)
+      .where(
+        and(
+          eq(assessmentsTable.studentVidyaId, student.vidyaId),
+          eq(assessmentsTable.status, "completed"),
+        ),
+      )
+      .orderBy(desc(assessmentsTable.completedAt));
+
+    res.json(
+      GetStudentAssessmentsResponse.parse({
+        results: rows.map((r) => ({
+          testId: r.testId,
+          topic: r.topic,
+          topicLabel: r.topicLabel,
+          totalQuestions: r.totalQuestions,
+          correctCount: r.correctCount ?? 0,
+          score: r.score ?? 0,
+          maxScore: r.totalQuestions * r.pointsPerCorrect,
+          completedAt: (r.completedAt ?? r.createdAt).toISOString(),
+        })),
       }),
     );
   },

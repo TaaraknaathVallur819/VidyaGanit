@@ -6,6 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './assessmentQuestionPublic';
+export * from './assessmentQuestionReview';
+export * from './assessmentResult';
+export * from './assessmentResultsResponse';
+export * from './assessmentSummary';
 export * from './changePasswordInput';
 export * from './chatAttachment';
 export * from './chatHistoryItem';
@@ -33,6 +38,9 @@ export * from './errorResponse';
 export * from './forgotPasswordInput';
 export * from './gameScoreInput';
 export * from './gameScoreResponse';
+export * from './generateAssessmentInput';
+export * from './generateAssessmentInputLanguage';
+export * from './generatedAssessment';
 export * from './healthStatus';
 export * from './historyMessage';
 export * from './historyMessageRole';
@@ -49,6 +57,7 @@ export * from './profileUpdateLanguage';
 export * from './resetPasswordInput';
 export * from './studentAnalytics';
 export * from './studentHistoryResponse';
+export * from './submitAssessmentInput';
 export * from './topicMastery';
 export * from './transcriptionResponse';
 export * from './userProfile';

@@ -18,6 +18,8 @@ import {
   getGetProfileQueryKey,
   useUpdateProfile,
   useChangePassword,
+  useListOwnAssessments,
+  getListOwnAssessmentsQueryKey,
 } from "@workspace/api-client-react";
 import {
   User,
@@ -29,11 +31,25 @@ import {
   BookOpen,
   CheckCircle2,
   Gamepad2,
+  ClipboardCheck,
 } from "lucide-react";
 import SocraticChat from "@/components/SocraticChat";
 import MiniGames from "@/components/MiniGames";
+import AssessmentTest from "@/components/AssessmentTest";
+import AssessmentReport from "@/components/AssessmentReport";
+import VoiceSettings from "@/components/VoiceSettings";
+import FloatingShapes from "@/components/FloatingShapes";
 import { BADGE_CATALOG } from "@/lib/badges";
 import { useLanguage } from "@/lib/i18n";
+
+const TEST_TOPICS: { topic: string; key: string }[] = [
+  { topic: "fraction", key: "test.topic.fraction" },
+  { topic: "multiply", key: "test.topic.multiply" },
+  { topic: "divide", key: "test.topic.divide" },
+  { topic: "decimal", key: "test.topic.decimal" },
+  { topic: "percent", key: "test.topic.percent" },
+  { topic: "geometry", key: "test.topic.geometry" },
+];
 
 function getLevelInfo(xp: number) {
   const LEVELS = [
@@ -84,6 +100,19 @@ export default function StudentDashboard() {
   // Edit Profile dialog
   const [editOpen, setEditOpen] = useState(false);
   const [gamesOpen, setGamesOpen] = useState(false);
+
+  // Assessment test
+  const [testOpen, setTestOpen] = useState(false);
+  const [testTopic, setTestTopic] = useState("general");
+  const { data: assessments, isLoading: assessmentsLoading, refetch: refetchAssessments } =
+    useListOwnAssessments(vidyaId, {
+      query: { enabled: !!vidyaId, queryKey: getListOwnAssessmentsQueryKey(vidyaId) },
+    });
+
+  const startTest = (topic: string) => {
+    setTestTopic(topic);
+    setTestOpen(true);
+  };
   const [editName, setEditName] = useState("");
   const [editGender, setEditGender] = useState<"male" | "female">("male");
   const [editError, setEditError] = useState("");
@@ -181,8 +210,9 @@ export default function StudentDashboard() {
         </div>
 
         {/* ── My Profile Tab ── */}
-        <TabsContent value="profile" className="mt-0 p-6">
-          <div className="max-w-3xl mx-auto space-y-6">
+        <TabsContent value="profile" className="mt-0 p-6 relative">
+          <FloatingShapes />
+          <div className="max-w-3xl mx-auto space-y-6 relative">
 
             {/* Profile Card */}
             <motion.div
@@ -324,6 +354,63 @@ export default function StudentDashboard() {
                 </CardContent>
               </Card>
             </motion.div>
+
+            {/* Take a Test */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: 0.15 }}
+            >
+              <Card className="border-0 shadow-md rounded-2xl overflow-hidden">
+                <CardContent className="p-6 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <ClipboardCheck className="w-5 h-5 text-emerald-500" />
+                    <h3 className="font-bold text-lg text-foreground">{t("test.takeTitle")}</h3>
+                  </div>
+                  <p className="text-xs text-muted-foreground -mt-2">{t("test.takeSubtitle")}</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                    {TEST_TOPICS.map((tt) => (
+                      <Button
+                        key={tt.topic}
+                        type="button"
+                        variant="outline"
+                        data-testid={`button-take-test-${tt.topic}`}
+                        onClick={() => startTest(tt.topic)}
+                        className="h-11 rounded-xl font-semibold justify-center hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300"
+                      >
+                        {t(tt.key)}
+                      </Button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* My Scores */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: 0.2 }}
+            >
+              <div className="flex items-center gap-2 mb-3 px-1">
+                <Star className="w-5 h-5 text-violet-500" />
+                <h3 className="font-bold text-lg text-foreground">{t("report.myScores")}</h3>
+              </div>
+              <AssessmentReport
+                results={assessments?.results ?? []}
+                isLoading={assessmentsLoading}
+                variant="kid"
+              />
+            </motion.div>
+
+            {/* Voice Settings */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: 0.25 }}
+            >
+              <VoiceSettings />
+            </motion.div>
           </div>
         </TabsContent>
 
@@ -338,6 +425,18 @@ export default function StudentDashboard() {
           />
         </TabsContent>
       </Tabs>
+
+      {/* ── Assessment Test ── */}
+      <AssessmentTest
+        open={testOpen}
+        onClose={() => setTestOpen(false)}
+        topic={testTopic}
+        vidyaId={vidyaId}
+        onCompleted={() => {
+          refetchAssessments();
+          refetch();
+        }}
+      />
 
       {/* ── Edit Profile Dialog ── */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>

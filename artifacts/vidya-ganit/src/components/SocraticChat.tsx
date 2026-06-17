@@ -13,6 +13,7 @@ import {
   History,
   Loader2,
   MessageSquare,
+  ClipboardCheck,
 } from "lucide-react";
 
 import {
@@ -23,6 +24,7 @@ import {
 import { BADGE_CATALOG } from "@/lib/badges";
 import { useLanguage } from "@/lib/i18n";
 import MiniGames from "@/components/MiniGames";
+import AssessmentTest from "@/components/AssessmentTest";
 import AiModelSelect, { type ChatProvider } from "@/components/AiModelSelect";
 import ImageModelSelect, { type ImageModel } from "@/components/ImageModelSelect";
 import SpeakButton from "@/components/SpeakButton";
@@ -250,6 +252,9 @@ export default function SocraticChat({
   const [imageModel, setImageModel] = useState<ImageModel>("openai");
   const [gameOffered, setGameOffered] = useState(false);
   const [gamesOpen, setGamesOpen] = useState(false);
+  const [testOffer, setTestOffer] = useState<string | null>(null);
+  const [testOpen, setTestOpen] = useState(false);
+  const [testTopic, setTestTopic] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
@@ -303,6 +308,7 @@ export default function SocraticChat({
         setInput("");
         setAttachment(null);
         setGameOffered(false);
+        setTestOffer(null);
         setShowHistory(false);
       } catch {
         setAttachError(t("chat.err.connect"));
@@ -540,10 +546,16 @@ export default function SocraticChat({
               imageAlt?: string;
               imageError?: boolean;
               game?: boolean;
+              test?: boolean;
+              topic?: string;
             };
 
             if (data.game) {
               setGameOffered(true);
+            }
+
+            if (data.test) {
+              setTestOffer(data.topic ?? "fraction");
             }
 
             if (typeof data.chunk === "string") {
@@ -647,6 +659,7 @@ export default function SocraticChat({
     setAttachment(null);
     setAttachError(null);
     setGameOffered(false);
+    setTestOffer(null);
     setActiveSessionId(null);
     setShowHistory(false);
     sessionIdRef.current = crypto.randomUUID();
@@ -878,6 +891,41 @@ export default function SocraticChat({
           </div>
         )}
 
+        {testOffer && (
+          <div
+            data-testid="test-offer"
+            className="mb-2 rounded-2xl border-2 border-indigo-200 bg-indigo-50 px-4 py-3"
+          >
+            <p className="mb-2 flex items-center justify-center gap-2 text-sm font-bold text-primary">
+              <ClipboardCheck className="w-4 h-4" />
+              {t("test.offer")}
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                data-testid="button-take-test-yes"
+                onClick={() => {
+                  setTestTopic(testOffer);
+                  setTestOpen(true);
+                  setTestOffer(null);
+                }}
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:opacity-90 transition-opacity"
+              >
+                <ClipboardCheck className="w-4 h-4" />
+                {t("test.offerYes")}
+              </button>
+              <button
+                type="button"
+                data-testid="button-take-test-no"
+                onClick={() => setTestOffer(null)}
+                className="flex-1 rounded-xl border-2 border-indigo-200 bg-white px-4 py-2.5 text-sm font-bold text-primary hover:bg-indigo-100 transition-colors"
+              >
+                {t("test.offerNo")}
+              </button>
+            </div>
+          </div>
+        )}
+
         {attachment && (
           <div className="mb-2 flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-xl px-2.5 py-2">
             {attachment.isImage ? (
@@ -1036,6 +1084,14 @@ export default function SocraticChat({
         onClose={() => setGamesOpen(false)}
         vidyaId={vidyaId}
         onXpAwarded={onXpAwarded}
+      />
+
+      <AssessmentTest
+        open={testOpen}
+        onClose={() => setTestOpen(false)}
+        topic={testTopic}
+        vidyaId={vidyaId}
+        onCompleted={onXpAwarded}
       />
     </div>
   );

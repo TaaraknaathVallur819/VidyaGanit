@@ -44,3 +44,81 @@ export function isSpeechSupported(): boolean {
     typeof window.SpeechSynthesisUtterance !== "undefined"
   );
 }
+
+/** Saved per-user read-aloud preferences. */
+export type VoicePrefs = {
+  /** Speaking pace, 0.5–2 (1 = normal). */
+  rate: number;
+  /** Tone/pitch, 0–2 (1 = normal). */
+  pitch: number;
+  /** Chosen system voice name, or null for the browser default. */
+  voiceName: string | null;
+};
+
+export const DEFAULT_VOICE_PREFS: VoicePrefs = {
+  rate: 1,
+  pitch: 1,
+  voiceName: null,
+};
+
+export const VOICE_RATE_RANGE = { min: 0.5, max: 2, step: 0.1 } as const;
+export const VOICE_PITCH_RANGE = { min: 0, max: 2, step: 0.1 } as const;
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+/**
+ * Normalise raw (possibly nullish) values from the user profile into safe
+ * SpeechSynthesis ranges, so a missing/garbage value never breaks playback.
+ */
+export function normaliseVoicePrefs(raw: {
+  voiceRate?: number | null;
+  voicePitch?: number | null;
+  voiceName?: string | null;
+}): VoicePrefs {
+  return {
+    rate:
+      typeof raw.voiceRate === "number"
+        ? clamp(raw.voiceRate, VOICE_RATE_RANGE.min, VOICE_RATE_RANGE.max)
+        : DEFAULT_VOICE_PREFS.rate,
+    pitch:
+      typeof raw.voicePitch === "number"
+        ? clamp(raw.voicePitch, VOICE_PITCH_RANGE.min, VOICE_PITCH_RANGE.max)
+        : DEFAULT_VOICE_PREFS.pitch,
+    voiceName: raw.voiceName ?? null,
+  };
+}
+
+/**
+ * The browser populates the voice list asynchronously, so callers should react
+ * to `voiceschanged`. Returns whatever is available right now (possibly empty).
+ */
+export function getVoices(): SpeechSynthesisVoice[] {
+  if (!isSpeechSupported()) return [];
+  return window.speechSynthesis.getVoices();
+}
+
+/**
+ * Voices whose locale matches the app language's BCP-47 base (e.g. "hi" for
+ * "hi-IN"). When none match, returns all voices so the user can still pick one.
+ */
+export function voicesForLang(
+  voices: SpeechSynthesisVoice[],
+  lang: Language,
+): SpeechSynthesisVoice[] {
+  const base = speechLocale(lang).split("-")[0].toLowerCase();
+  const matched = voices.filter((v) =>
+    v.lang.toLowerCase().startsWith(base),
+  );
+  return matched.length > 0 ? matched : voices;
+}
+
+/** Resolve a saved voice name to a live voice object, if still available. */
+export function resolveVoice(
+  voices: SpeechSynthesisVoice[],
+  voiceName: string | null,
+): SpeechSynthesisVoice | undefined {
+  if (!voiceName) return undefined;
+  return voices.find((v) => v.name === voiceName);
+}

@@ -21,6 +21,7 @@ import {
 import { useAuth } from "@/lib/auth";
 import { useLanguage, LANGUAGES } from "@/lib/i18n";
 import ProgressAnalytics from "@/components/parent/ProgressAnalytics";
+import VoiceSettings from "@/components/VoiceSettings";
 import SavedHistory from "@/components/parent/SavedHistory";
 import ParentConsultantChat from "@/components/parent/ParentConsultantChat";
 import {
@@ -482,6 +483,15 @@ export default function ParentDashboard() {
                   )}
                 </CardContent>
               </Card>
+            </motion.div>
+
+            {/* Voice Settings */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: 0.2 }}
+            >
+              <VoiceSettings />
             </motion.div>
           </div>
         </TabsContent>
