@@ -62,6 +62,11 @@ export type CounselorTopicSummary = {
 export type CounselorContext = {
   parentName: string;
   language: CounselorLanguage;
+  /**
+   * Who is being advised. "parent" → the at-home support counsellor persona;
+   * "tutor" → the teaching coach persona. Defaults to "parent".
+   */
+  role?: "parent" | "tutor";
   student: {
     name: string;
     studentClass: string | null;
@@ -81,6 +86,10 @@ export type CounselorContext = {
  */
 export function buildCounselorSystemPrompt(ctx: CounselorContext): string {
   const langName = LANGUAGE_NAMES[ctx.language];
+  const isTutor = ctx.role === "tutor";
+  // The two personas describe the same student data differently: a parent hears
+  // "the child", a tutor hears "the student".
+  const learnerNoun = isTutor ? "student" : "child";
 
   let studentBlock: string;
   if (ctx.student) {
@@ -98,13 +107,33 @@ export function buildCounselorSystemPrompt(ctx: CounselorContext): string {
             .join("\n")
         : "- No topic practice recorded yet.";
     studentBlock =
-      `You are advising about the child "${s.name}"${classBoard ? ` (${classBoard})` : ""}.\n` +
+      `You are advising about the ${learnerNoun} "${s.name}"${classBoard ? ` (${classBoard})` : ""}.\n` +
       `Overall: ${s.totalSessions} tutoring sessions, ${s.totalMessages} messages exchanged.\n` +
       `Topic activity:\n${topicLines}\n` +
-      `Note: mastery figures are rough estimates based on how much the child has practised on VidyaGanit, not formal test scores. Be honest about this when interpreting them.`;
+      `Note: mastery figures are rough estimates based on how much the ${learnerNoun} has practised on VidyaGanit, not formal test scores. Be honest about this when interpreting them.`;
+  } else if (isTutor) {
+    studentBlock =
+      "No specific student is selected. Give general teaching guidance and, when useful, suggest the tutor pick a linked student to get data-driven advice.";
   } else {
     studentBlock =
       "No specific child is selected. Give general, practical guidance and, when useful, suggest the parent pick a child to get data-driven advice.";
+  }
+
+  if (isTutor) {
+    return `You are "AI Coach", a friendly and experienced master maths teacher and mentor inside VidyaGanit — a Socratic maths tuition app for Indian school children (Classes 4–7). You speak with ${ctx.parentName}, a maths tutor/teacher.
+
+Your job: help the tutor teach maths better. Give clear, SPECIFIC, classroom-ready help — lesson ideas, step-by-step ways to explain a concept, common misconceptions to watch for, good practice problems, quick whiteboard or group activities, and how to use the Socratic method (guiding students with questions instead of handing over answers). Use relatable Indian everyday examples (rupees, cricket scores, sharing rotis/pizza) where helpful.
+
+You are talking to a teaching professional, so you MAY give direct explanations, fully worked methods, and concrete teaching plans.
+
+${studentBlock}
+
+Guidelines:
+- Be collegial and practical; respect the tutor's expertise.
+- When you reference a student's data, interpret it gently and suggest concrete next teaching steps.
+- Keep replies focused and skimmable (short paragraphs or a few bullet points).
+- If asked about something outside maths teaching, gently steer back.
+- IMPORTANT: Respond entirely in ${langName}. Every part of your reply must be in ${langName}.`;
   }
 
   return `You are "Strategy AI", a warm, experienced educational counsellor inside VidyaGanit — a Socratic maths tuition app for Indian school children (Classes 4–7). You speak with ${ctx.parentName}, a parent.

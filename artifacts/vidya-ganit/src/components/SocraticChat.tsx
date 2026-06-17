@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Mic,
@@ -10,13 +10,22 @@ import {
   FileText,
   X,
   Gamepad2,
+  History,
+  Loader2,
+  MessageSquare,
 } from "lucide-react";
 
+import {
+  useListChatSessions,
+  getListChatSessionsQueryKey,
+  getChatSession,
+} from "@workspace/api-client-react";
 import { BADGE_CATALOG } from "@/lib/badges";
 import { useLanguage } from "@/lib/i18n";
 import MiniGames from "@/components/MiniGames";
 import AiModelSelect, { type ChatProvider } from "@/components/AiModelSelect";
 import ImageModelSelect, { type ImageModel } from "@/components/ImageModelSelect";
+import SpeakButton from "@/components/SpeakButton";
 
 const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 MB
 
@@ -153,6 +162,11 @@ function TutorBubble({
             <span>{drawingLabel}</span>
           </div>
         )}
+        {!isStreaming && !isDrawing && content && (
+          <div className="mt-1.5 -mb-1 -ml-1">
+            <SpeakButton text={content} tone="light" />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -236,6 +250,9 @@ export default function SocraticChat({
   const [imageModel, setImageModel] = useState<ImageModel>("openai");
   const [gameOffered, setGameOffered] = useState(false);
   const [gamesOpen, setGamesOpen] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -244,6 +261,67 @@ export default function SocraticChat({
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const inputBeforeVoiceRef = useRef<string>("");
+
+  // List the student's own past tutoring conversations.
+  const { data: sessionsData, refetch: refetchSessions } = useListChatSessions(
+    vidyaId,
+    {
+      query: {
+        enabled: !!vidyaId,
+        queryKey: getListChatSessionsQueryKey(vidyaId),
+        staleTime: 0,
+      },
+    },
+  );
+  const sessions = sessionsData?.sessions ?? [];
+
+  const loadSession = useCallback(
+    async (sessionId: string) => {
+      if (isStreaming || loadingSessionId) return;
+      if (sessionId === activeSessionId) {
+        setShowHistory(false);
+        return;
+      }
+      setLoadingSessionId(sessionId);
+      try {
+        const data = await getChatSession(vidyaId, sessionId);
+        sessionIdRef.current = data.sessionId;
+        setActiveSessionId(data.sessionId);
+        setMessages(
+          data.messages.map((m, i) => ({
+            id: `saved-${data.sessionId}-${i}`,
+            role: m.role === "assistant" ? "tutor" : "user",
+            content: m.content,
+          })),
+        );
+        setHistory(
+          data.messages.map((m) => ({
+            role: m.role === "assistant" ? "assistant" : "user",
+            content: m.content,
+          })),
+        );
+        setInput("");
+        setAttachment(null);
+        setGameOffered(false);
+        setShowHistory(false);
+      } catch {
+        setAttachError(t("chat.err.connect"));
+      } finally {
+        setLoadingSessionId(null);
+      }
+    },
+    [vidyaId, isStreaming, loadingSessionId, activeSessionId, t],
+  );
+
+  const formatSessionDate = (value: Date | string) => {
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toLocaleDateString(undefined, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -528,6 +606,8 @@ export default function SocraticChat({
                 });
               }
 
+              setActiveSessionId(sessionIdRef.current);
+              void refetchSessions();
               setIsStreaming(false);
             }
           } catch {
@@ -567,6 +647,8 @@ export default function SocraticChat({
     setAttachment(null);
     setAttachError(null);
     setGameOffered(false);
+    setActiveSessionId(null);
+    setShowHistory(false);
     sessionIdRef.current = crypto.randomUUID();
   };
 
@@ -599,6 +681,20 @@ export default function SocraticChat({
         <ImageModelSelect value={imageModel} onChange={setImageModel} disabled={isStreaming} />
         <button
           type="button"
+          onClick={() => setShowHistory((v) => !v)}
+          aria-label={t("strategy.history")}
+          aria-pressed={showHistory}
+          className={`p-1.5 rounded-lg transition-colors ${
+            showHistory
+              ? "bg-indigo-50 text-primary"
+              : "text-muted-foreground hover:text-primary hover:bg-indigo-50"
+          }`}
+          title={t("strategy.history")}
+        >
+          <History className="w-4 h-4" />
+        </button>
+        <button
+          type="button"
           onClick={clearChat}
           disabled={messages.length === 0}
           className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-indigo-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
@@ -607,6 +703,64 @@ export default function SocraticChat({
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Past conversations panel */}
+      <AnimatePresence>
+        {showHistory && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="border-b border-indigo-100 bg-indigo-50/40 overflow-hidden shrink-0"
+          >
+            <div className="max-h-56 overflow-y-auto p-2">
+              {sessions.length === 0 ? (
+                <p className="text-xs text-muted-foreground px-3 py-4 text-center">
+                  {t("strategy.noSessions")}
+                </p>
+              ) : (
+                <ul className="space-y-1">
+                  {sessions.map((s) => (
+                    <li key={s.sessionId}>
+                      <button
+                        type="button"
+                        onClick={() => void loadSession(s.sessionId)}
+                        disabled={!!loadingSessionId || isStreaming}
+                        className={`w-full text-left flex items-start gap-2.5 rounded-xl px-3 py-2 transition-colors disabled:opacity-60 ${
+                          s.sessionId === activeSessionId
+                            ? "bg-white border border-indigo-200 shadow-sm"
+                            : "hover:bg-white/70 border border-transparent"
+                        }`}
+                      >
+                        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shrink-0 mt-0.5">
+                          {loadingSessionId === s.sessionId ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <MessageSquare className="w-3.5 h-3.5" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-foreground truncate">
+                            {s.preview || t("chat.tutorName")}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            {formatSessionDate(s.lastMessageAt)} ·{" "}
+                            {t("strategy.messageCount").replace(
+                              "{count}",
+                              String(s.messageCount),
+                            )}
+                          </p>
+                        </div>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 min-h-0">

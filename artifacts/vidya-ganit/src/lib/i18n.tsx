@@ -328,6 +328,14 @@ const en: Dict = {
     "Whoa, slow down a little! 😅 Take a short breather and try again in a moment.",
   "chat.err.connect": "Oops! I had trouble connecting. 😅 Please try again!",
   "chat.badgeUnlocked": "🎉 Badge Unlocked!",
+
+  // AI Coach (tutor) + read-aloud
+  "chat.readAloud": "Read aloud",
+  "tab.coach": "AI Coach",
+  "coach.title": "Ask your Coach",
+  "coach.placeholder": "Ask for teaching ideas…",
+  "coach.welcome":
+    "Hello {name}! I'm your teaching Coach. Ask me for ideas to explain tricky topics, plan a lesson, or support a student's maths journey. Pick a student above and I'll tailor my suggestions to their progress.",
 };
 
 const ta: Dict = {
@@ -573,6 +581,14 @@ const ta: Dict = {
     "ஓ, சற்று மெதுவாக! 😅 சிறிது ஓய்வெடுத்து சிறிது நேரத்தில் மீண்டும் முயற்சிக்கவும்.",
   "chat.err.connect": "அய்யோ! இணைப்பதில் சிக்கல். 😅 மீண்டும் முயற்சிக்கவும்!",
   "chat.badgeUnlocked": "🎉 பேட்ஜ் திறக்கப்பட்டது!",
+
+  // AI Coach (tutor) + read-aloud
+  "chat.readAloud": "உரக்கப் படியுங்கள்",
+  "tab.coach": "AI பயிற்சியாளர்",
+  "coach.title": "உங்கள் பயிற்சியாளரிடம் கேளுங்கள்",
+  "coach.placeholder": "கற்பித்தல் யோசனைகளைக் கேளுங்கள்…",
+  "coach.welcome":
+    "வணக்கம் {name}! நான் உங்கள் கற்பித்தல் பயிற்சியாளர். கடினமான தலைப்புகளை விளக்கவும், பாடத்தைத் திட்டமிடவும், அல்லது மாணவரின் கணிதப் பயணத்தை ஆதரிக்கவும் என்னிடம் யோசனைகளைக் கேளுங்கள். மேலே ஒரு மாணவரைத் தேர்ந்தெடுங்கள், அவர்களின் முன்னேற்றத்திற்கு ஏற்ப நான் ஆலோசனைகளை வழங்குவேன்.",
 };
 
 const hi: Dict = {
@@ -818,6 +834,14 @@ const hi: Dict = {
     "अरे, थोड़ा धीरे! 😅 थोड़ी साँस लें और कुछ देर में फिर प्रयास करें।",
   "chat.err.connect": "ओह! कनेक्ट करने में समस्या हुई। 😅 कृपया फिर प्रयास करें!",
   "chat.badgeUnlocked": "🎉 बैज अनलॉक हुआ!",
+
+  // AI Coach (tutor) + read-aloud
+  "chat.readAloud": "ज़ोर से पढ़ें",
+  "tab.coach": "AI कोच",
+  "coach.title": "अपने कोच से पूछें",
+  "coach.placeholder": "पढ़ाने के तरीके पूछें…",
+  "coach.welcome":
+    "नमस्ते {name}! मैं आपका टीचिंग कोच हूँ। कठिन विषयों को समझाने, पाठ की योजना बनाने, या किसी छात्र की गणित यात्रा में मदद के लिए मुझसे सुझाव पूछें। ऊपर एक छात्र चुनें और मैं उनकी प्रगति के अनुसार सलाह दूँगा।",
 };
 
 const te: Dict = {
@@ -1063,6 +1087,14 @@ const te: Dict = {
     "ఓ, కొంచెం నెమ్మదిగా! 😅 కొద్దిసేపు విశ్రాంతి తీసుకుని కొద్దిసేపటిలో మళ్లీ ప్రయత్నించండి.",
   "chat.err.connect": "అయ్యో! కనెక్ట్ చేయడంలో సమస్య. 😅 దయచేసి మళ్లీ ప్రయత్నించండి!",
   "chat.badgeUnlocked": "🎉 బ్యాడ్జ్ అన్‌లాక్ అయింది!",
+
+  // AI Coach (tutor) + read-aloud
+  "chat.readAloud": "గట్టిగా చదవండి",
+  "tab.coach": "AI కోచ్",
+  "coach.title": "మీ కోచ్‌ను అడగండి",
+  "coach.placeholder": "బోధన ఆలోచనల కోసం అడగండి…",
+  "coach.welcome":
+    "నమస్తే {name}! నేను మీ టీచింగ్ కోచ్‌ని. కష్టమైన అంశాలను వివరించడానికి, పాఠాన్ని ప్లాన్ చేయడానికి, లేదా విద్యార్థి గణిత ప్రయాణానికి సహాయం చేయడానికి నన్ను ఆలోచనలు అడగండి. పైన ఒక విద్యార్థిని ఎంచుకోండి, వారి పురోగతికి తగ్గట్టు నేను సూచనలు ఇస్తాను.",
 };
 
 export const DICTS: Record<Language, Dict> = {

@@ -1,14 +1,20 @@
 import { Router, type IRouter } from "express";
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { db, usersTable, chatMessagesTable } from "@workspace/db";
-import { SendChatMessageBody } from "@workspace/api-zod";
+import {
+  SendChatMessageBody,
+  ListChatSessionsParams,
+  ListChatSessionsResponse,
+  GetChatSessionParams,
+  GetChatSessionResponse,
+} from "@workspace/api-zod";
 import { detectTopic, buildTutorSystemPrompt, type ChatEntry } from "../lib/tutor";
 import { normalizeLanguage } from "../lib/counselor";
 import { computeXpAndBadges } from "../lib/xp";
 import { streamChat, normalizeProvider, type ChatImage } from "../lib/aiChat";
 import { generateImageDataUrl, normalizeImageModel } from "../lib/aiImage";
-import { requireAuth } from "../middlewares/auth";
+import { requireAuth, requireSelf } from "../middlewares/auth";
 import { rateLimit } from "../middlewares/rateLimit";
 
 const router: IRouter = Router();
@@ -317,5 +323,102 @@ router.post(
   send({ done: true, xpAwarded: xpGained, newBadges });
   res.end();
 });
+
+// ── Chat history: list a student's own past tutoring conversations ───
+router.get(
+  "/chat/:vidyaId/sessions",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = ListChatSessionsParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+
+    const rows = await db
+      .select({
+        sessionId: chatMessagesTable.sessionId,
+        role: chatMessagesTable.role,
+        content: chatMessagesTable.content,
+        createdAt: chatMessagesTable.createdAt,
+      })
+      .from(chatMessagesTable)
+      .where(eq(chatMessagesTable.studentVidyaId, params.data.vidyaId))
+      .orderBy(asc(chatMessagesTable.createdAt));
+
+    const order: string[] = [];
+    const grouped = new Map<
+      string,
+      { startedAt: Date; lastMessageAt: Date; messageCount: number; preview: string }
+    >();
+    for (const row of rows) {
+      let g = grouped.get(row.sessionId);
+      if (!g) {
+        g = { startedAt: row.createdAt, lastMessageAt: row.createdAt, messageCount: 0, preview: "" };
+        grouped.set(row.sessionId, g);
+        order.push(row.sessionId);
+      }
+      g.lastMessageAt = row.createdAt;
+      g.messageCount += 1;
+      // Preview = the first student (user) message in the conversation.
+      if (!g.preview && row.role === "user" && row.content.trim()) {
+        g.preview = row.content.trim().slice(0, 140);
+      }
+    }
+
+    // Newest activity first.
+    const sessions = order
+      .map((sessionId) => {
+        const g = grouped.get(sessionId)!;
+        return {
+          sessionId,
+          startedAt: g.startedAt.toISOString(),
+          lastMessageAt: g.lastMessageAt.toISOString(),
+          messageCount: g.messageCount,
+          preview: g.preview,
+        };
+      })
+      .sort((a, b) => b.lastMessageAt.localeCompare(a.lastMessageAt));
+
+    res.json(ListChatSessionsResponse.parse({ sessions }));
+  },
+);
+
+// ── Chat history: load one of the student's own past conversations ───
+router.get(
+  "/chat/:vidyaId/sessions/:sessionId/messages",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = GetChatSessionParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+
+    const rows = await db
+      .select()
+      .from(chatMessagesTable)
+      .where(
+        and(
+          eq(chatMessagesTable.studentVidyaId, params.data.vidyaId),
+          eq(chatMessagesTable.sessionId, params.data.sessionId),
+        ),
+      )
+      .orderBy(asc(chatMessagesTable.createdAt));
+
+    res.json(
+      GetChatSessionResponse.parse({
+        sessionId: params.data.sessionId,
+        messages: rows.map((r) => ({
+          role: r.role === "assistant" ? "assistant" : "user",
+          content: r.content,
+          createdAt: r.createdAt.toISOString(),
+        })),
+      }),
+    );
+  },
+);
 
 export default router;

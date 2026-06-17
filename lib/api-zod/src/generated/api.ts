@@ -422,3 +422,39 @@ export const TranscribeConsultantAudioResponse = zod.object({
 })
 
 
+/**
+ * @summary List a student's past tutoring conversations
+ */
+export const ListChatSessionsParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const ListChatSessionsResponse = zod.object({
+  "sessions": zod.array(zod.object({
+  "sessionId": zod.string(),
+  "startedAt": zod.coerce.date(),
+  "lastMessageAt": zod.coerce.date(),
+  "messageCount": zod.number(),
+  "preview": zod.string()
+}))
+})
+
+
+/**
+ * @summary Load a specific past tutoring conversation
+ */
+export const GetChatSessionParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "sessionId": zod.coerce.string()
+})
+
+export const GetChatSessionResponse = zod.object({
+  "sessionId": zod.string(),
+  "messages": zod.array(zod.object({
+  "role": zod.enum(['user', 'assistant']),
+  "content": zod.string(),
+  "createdAt": zod.coerce.date()
+}))
+})
+
+

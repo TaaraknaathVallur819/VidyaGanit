@@ -568,6 +568,49 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /chat/{vidyaId}/sessions:
+    get:
+      operationId: listChatSessions
+      tags: [chat]
+      summary: List a student's past tutoring conversations
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Past tutoring sessions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatSessionsResponse"
+
+  /chat/{vidyaId}/sessions/{sessionId}/messages:
+    get:
+      operationId: getChatSession
+      tags: [chat]
+      summary: Load a specific past tutoring conversation
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Saved tutoring session messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatSessionResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -934,6 +977,56 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ConsultantSession"
+
+    ChatSession:
+      type: object
+      required: [sessionId, startedAt, lastMessageAt, messageCount, preview]
+      properties:
+        sessionId:
+          type: string
+        startedAt:
+          type: string
+          format: date-time
+        lastMessageAt:
+          type: string
+          format: date-time
+        messageCount:
+          type: integer
+        preview:
+          type: string
+
+    ChatSessionsResponse:
+      type: object
+      required: [sessions]
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatSession"
+
+    ChatSessionMessage:
+      type: object
+      required: [role, content, createdAt]
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    ChatSessionResponse:
+      type: object
+      required: [sessionId, messages]
+      properties:
+        sessionId:
+          type: string
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatSessionMessage"
 
     ConsultantMessageInput:
       type: object

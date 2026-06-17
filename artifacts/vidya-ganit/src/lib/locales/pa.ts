@@ -225,6 +225,13 @@ const dict: Record<string, string> = {
   "auth.roleMismatch": "ਇਹ ਆਈਡੀ ਉਸ ਭੂਮਿਕਾ ਲਈ ਰਜਿਸਟਰਡ ਨਹੀਂ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਸਹੀ ਚੁਣੋ।",
   "tutor.title": "ਅਧਿਆਪਕ ਡੈਸ਼ਬੋਰਡ",
   "tutor.batch": "ਬੈਚ",
+  // AI Coach (tutor) + read-aloud
+  "chat.readAloud": "ਉੱਚੀ ਆਵਾਜ਼ ਵਿੱਚ ਪੜ੍ਹੋ",
+  "tab.coach": "AI ਕੋਚ",
+  "coach.title": "ਆਪਣੇ ਕੋਚ ਨੂੰ ਪੁੱਛੋ",
+  "coach.placeholder": "ਸਿਖਾਉਣ ਦੇ ਵਿਚਾਰ ਪੁੱਛੋ…",
+  "coach.welcome":
+    "ਸਤ ਸ੍ਰੀ ਅਕਾਲ {name}! ਮੈਂ ਤੁਹਾਡਾ ਟੀਚਿੰਗ ਕੋਚ ਹਾਂ। ਔਖੇ ਵਿਸ਼ੇ ਸਮਝਾਉਣ, ਪਾਠ ਯੋਜਨਾ ਬਣਾਉਣ, ਜਾਂ ਕਿਸੇ ਵਿਦਿਆਰਥੀ ਦੇ ਗਣਿਤ ਸਫ਼ਰ ਵਿੱਚ ਮਦਦ ਲਈ ਮੈਨੂੰ ਵਿਚਾਰ ਪੁੱਛੋ। ਉੱਪਰ ਇੱਕ ਵਿਦਿਆਰਥੀ ਚੁਣੋ, ਮੈਂ ਉਨ੍ਹਾਂ ਦੀ ਤਰੱਕੀ ਅਨੁਸਾਰ ਸਲਾਹ ਦਿਆਂਗਾ।",
 };
 
 export default dict;

@@ -225,6 +225,13 @@ const dict: Record<string, string> = {
   "auth.roleMismatch": "یہ آی ڈی چھنہ تَس رول خٲطرٕ رجسٹرڈ۔ مہربانی کرِتھ صحیح ژارٕو۔",
   "tutor.title": "اُستاد ڈیش بورڈ",
   "tutor.batch": "بیچ",
+  // AI Coach (tutor) + read-aloud
+  "chat.readAloud": "زۆرَس سٟتؠ پَرِو",
+  "tab.coach": "AI کوچ",
+  "coach.title": "پنُن کوچ پرژھِو",
+  "coach.placeholder": "ہاوُنہٕ ہنٛد خیال پرژھِو…",
+  "coach.welcome":
+    "آداب {name}! بہ چھُس تُہنٛد ٹیچِنٛگ کوچ۔ مشکِل موضوع سمجھاوَنہٕ، سبق پلان کرنہٕ، یا کنہہ طالٕب علمَس ہنٛز ریاضی سفرَس منٛز مدد خٲطرٕ مے پرژھِو خیال۔ ہیورٕ اکھ طالٕب علم ژارٕو، بہ ماگہ تہنٛز ترقی مطٛابق صلاح دِمہٕ۔",
 };
 
 export default dict;

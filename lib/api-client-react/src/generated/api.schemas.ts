@@ -406,6 +406,37 @@ export interface ConsultantSessionsResponse {
   sessions: ConsultantSession[];
 }
 
+export interface ChatSession {
+  sessionId: string;
+  startedAt: string;
+  lastMessageAt: string;
+  messageCount: number;
+  preview: string;
+}
+
+export interface ChatSessionsResponse {
+  sessions: ChatSession[];
+}
+
+export type ChatSessionMessageRole = typeof ChatSessionMessageRole[keyof typeof ChatSessionMessageRole];
+
+
+export const ChatSessionMessageRole = {
+  user: 'user',
+  assistant: 'assistant',
+} as const;
+
+export interface ChatSessionMessage {
+  role: ChatSessionMessageRole;
+  content: string;
+  createdAt: string;
+}
+
+export interface ChatSessionResponse {
+  sessionId: string;
+  messages: ChatSessionMessage[];
+}
+
 export type ConsultantMessageInputLanguage = typeof ConsultantMessageInputLanguage[keyof typeof ConsultantMessageInputLanguage];
 
 

@@ -22,6 +22,8 @@ import type {
 import type {
   ChangePasswordInput,
   ChatMessageInput,
+  ChatSessionResponse,
+  ChatSessionsResponse,
   ConsultantAudioInput,
   ConsultantHistoryResponse,
   ConsultantMessageInput,
@@ -1546,4 +1548,163 @@ export const useTranscribeConsultantAudio = <TError = ErrorType<ErrorResponse>,
       > => {
       return useMutation(getTranscribeConsultantAudioMutationOptions(options));
     }
+
+export const getListChatSessionsUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/chat/${vidyaId}/sessions`
+}
+
+/**
+ * @summary List a student's past tutoring conversations
+ */
+export const listChatSessions = async (vidyaId: string, options?: RequestInit): Promise<ChatSessionsResponse> => {
+
+  return customFetch<ChatSessionsResponse>(getListChatSessionsUrl(vidyaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListChatSessionsQueryKey = (vidyaId: string,) => {
+    return [
+    `/api/chat/${vidyaId}/sessions`
+    ] as const;
+    }
+
+
+export const getListChatSessionsQueryOptions = <TData = Awaited<ReturnType<typeof listChatSessions>>, TError = ErrorType<unknown>>(vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChatSessions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListChatSessionsQueryKey(vidyaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listChatSessions>>> = ({ signal }) => listChatSessions(vidyaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listChatSessions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListChatSessionsQueryResult = NonNullable<Awaited<ReturnType<typeof listChatSessions>>>
+export type ListChatSessionsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List a student's past tutoring conversations
+ */
+
+export function useListChatSessions<TData = Awaited<ReturnType<typeof listChatSessions>>, TError = ErrorType<unknown>>(
+ vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChatSessions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListChatSessionsQueryOptions(vidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetChatSessionUrl = (vidyaId: string,
+    sessionId: string,) => {
+
+
+
+
+  return `/api/chat/${vidyaId}/sessions/${sessionId}/messages`
+}
+
+/**
+ * @summary Load a specific past tutoring conversation
+ */
+export const getChatSession = async (vidyaId: string,
+    sessionId: string, options?: RequestInit): Promise<ChatSessionResponse> => {
+
+  return customFetch<ChatSessionResponse>(getGetChatSessionUrl(vidyaId,sessionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetChatSessionQueryKey = (vidyaId: string,
+    sessionId: string,) => {
+    return [
+    `/api/chat/${vidyaId}/sessions/${sessionId}/messages`
+    ] as const;
+    }
+
+
+export const getGetChatSessionQueryOptions = <TData = Awaited<ReturnType<typeof getChatSession>>, TError = ErrorType<unknown>>(vidyaId: string,
+    sessionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getChatSession>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetChatSessionQueryKey(vidyaId,sessionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getChatSession>>> = ({ signal }) => getChatSession(vidyaId,sessionId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId && sessionId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getChatSession>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetChatSessionQueryResult = NonNullable<Awaited<ReturnType<typeof getChatSession>>>
+export type GetChatSessionQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Load a specific past tutoring conversation
+ */
+
+export function useGetChatSession<TData = Awaited<ReturnType<typeof getChatSession>>, TError = ErrorType<unknown>>(
+ vidyaId: string,
+    sessionId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getChatSession>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetChatSessionQueryOptions(vidyaId,sessionId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
 

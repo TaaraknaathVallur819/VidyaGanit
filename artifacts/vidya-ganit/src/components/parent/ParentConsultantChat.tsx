@@ -22,6 +22,7 @@ import {
 } from "@workspace/api-client-react";
 import { useLanguage } from "@/lib/i18n";
 import AiModelSelect, { type ChatProvider } from "@/components/AiModelSelect";
+import SpeakButton from "@/components/SpeakButton";
 
 const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 MB
 
@@ -69,13 +70,22 @@ export default function ParentConsultantChat({
   parentName,
   selectedStudentId,
   selectedStudentName,
+  variant = "parent",
 }: {
   vidyaId: string;
   parentName: string;
   selectedStudentId: string | null;
   selectedStudentName: string | null;
+  /** "parent" → Strategy AI counsellor; "coach" → tutor teaching coach. */
+  variant?: "parent" | "coach";
 }) {
   const { t, lang } = useLanguage();
+  const isCoach = variant === "coach";
+  const titleKey = isCoach ? "coach.title" : "strategy.title";
+  const placeholderKey = isCoach ? "coach.placeholder" : "strategy.placeholder";
+  const welcomeText = isCoach
+    ? t("coach.welcome").replace("{name}", parentName)
+    : t("strategy.welcome").replace("{parent}", parentName);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
@@ -460,7 +470,7 @@ export default function ParentConsultantChat({
           <Sparkles className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-bold text-sm text-foreground">{t("strategy.title")}</p>
+          <p className="font-bold text-sm text-foreground">{t(titleKey)}</p>
           <p className="text-xs text-muted-foreground truncate">
             {isContinuing
               ? t("strategy.continue")
@@ -562,9 +572,7 @@ export default function ParentConsultantChat({
               <Sparkles className="w-4 h-4" />
             </div>
             <div className="bg-white border border-emerald-100 text-foreground rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed shadow-sm">
-              <span className="whitespace-pre-wrap break-words">
-                {t("strategy.welcome").replace("{parent}", parentName)}
-              </span>
+              <span className="whitespace-pre-wrap break-words">{welcomeText}</span>
             </div>
           </div>
         )}
@@ -632,6 +640,11 @@ export default function ParentConsultantChat({
                     )}
                     {msg.isStreaming && msg.content && (
                       <span className="inline-block w-0.5 h-[14px] bg-emerald-400/60 ml-0.5 animate-pulse align-middle rounded-full" />
+                    )}
+                    {!msg.isStreaming && msg.content && (
+                      <div className="mt-1.5 -mb-1 -ml-1">
+                        <SpeakButton text={msg.content} tone="dark" />
+                      </div>
                     )}
                   </div>
                 </div>
@@ -738,7 +751,7 @@ export default function ParentConsultantChat({
             }}
             onKeyDown={handleKeyDown}
             rows={1}
-            placeholder={t("strategy.placeholder")}
+            placeholder={t(placeholderKey)}
             disabled={isStreaming}
             className="flex-1 resize-none rounded-2xl border border-indigo-100 bg-gray-50 px-4 py-2.5 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 disabled:opacity-60 max-h-[120px]"
           />
