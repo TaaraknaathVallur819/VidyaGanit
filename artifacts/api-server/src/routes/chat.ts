@@ -9,7 +9,12 @@ import {
   GetChatSessionParams,
   GetChatSessionResponse,
 } from "@workspace/api-zod";
-import { detectTopic, buildTutorSystemPrompt, type ChatEntry } from "../lib/tutor";
+import {
+  detectTopic,
+  buildTutorSystemPrompt,
+  type ChatEntry,
+  type Topic,
+} from "../lib/tutor";
 import { normalizeLanguage } from "../lib/counselor";
 import { computeXpAndBadges } from "../lib/xp";
 import { streamChat, normalizeProvider, type ChatImage } from "../lib/aiChat";
@@ -24,6 +29,28 @@ const GAME_MARKER_RE = /\[\[GAME(?::[^\]]*)?\]\]/;
 // Both markers may appear at the very end of a reply; we withhold streamed text
 // from the earliest marker start onward so neither ever leaks to the student.
 const MARKER_STARTS = ["[[DRAW:", "[[GAME"];
+
+// Recognisable maths topics that should always trigger a "play a game?" offer
+// when the student raises a fresh question. Greetings, "give up" pleas and
+// vague/general messages are intentionally excluded.
+const OFFER_GAME_TOPICS: ReadonlySet<Topic> = new Set<Topic>([
+  "fraction",
+  "multiply",
+  "divide",
+  "add_subtract",
+  "percent",
+  "geometry",
+  "algebra",
+  "decimal",
+  "ratio",
+]);
+
+// A real new question is more than a one- or two-word reply (which is usually a
+// mid-step answer to the coach's guiding question). This keeps us from popping
+// the game prompt while the student is concentrating on solving a step.
+function isLikelyNewQuestion(message: string): boolean {
+  return message.trim().split(/\s+/).filter(Boolean).length >= 4;
+}
 
 const MAX_MESSAGE_LEN = 1500;
 const MAX_HISTORY_ENTRIES = 20;
@@ -279,8 +306,15 @@ router.post(
     }
   }
 
-  // The coach occasionally invites the student to play a quick mini-game. The
-  // marker is stripped from the text; the client surfaces a "Play" button.
+  // Always offer a quick warm-up game when the student asks a fresh question
+  // about a recognisable maths topic — not only when the model remembers to
+  // emit the [[GAME]] marker. The marker still works, but this guarantees the
+  // Yes/No prompt the student expects on every new topic question. The text is
+  // stripped of the marker; the client surfaces the Yes/No buttons.
+  const topic = detectTopic(message);
+  if (!offerGame && OFFER_GAME_TOPICS.has(topic) && isLikelyNewQuestion(message)) {
+    offerGame = true;
+  }
   if (offerGame) {
     send({ game: true });
   }
@@ -303,7 +337,6 @@ router.post(
     }
   }
 
-  const topic = detectTopic(message);
   const { xpGained, newBadges } = computeXpAndBadges({
     topic,
     message,

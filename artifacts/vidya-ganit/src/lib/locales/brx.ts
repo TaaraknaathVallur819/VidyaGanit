@@ -17,6 +17,8 @@ const dict: Record<string, string> = {
   "games.missing.name": "गोमानाय अनजिमा",
   "games.missing.desc": "थार अनजिमा नागिर!",
   "games.offer": "मोनसे गाज्रि गेलेनाय गेलेन? 🎮",
+  "games.offerYes": "नंगौ, गेलेन! 🎮",
+  "games.offerNo": "नङा, सालायबाय थाबाय",
   "chat.aiModel": "AI मडेल",
   "dashboard.title": "बिमा-बिफा डेशबर्ड",
   "language.label": "राव",

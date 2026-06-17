@@ -17,6 +17,8 @@ const dict: Record<string, string> = {
   "games.missing.name": "মাংখ্রবা মশিং",
   "games.missing.desc": "অচুম্বা মশিং থিবিয়ু!",
   "games.offer": "য়াংনা খেল অমা শান্নসি? 🎮",
+  "games.offerYes": "হোয়, শান্নসি! 🎮",
+  "games.offerNo": "নত্তে, মখা চত্থসি",
   "chat.aiModel": "AI মোডেল",
   "dashboard.title": "মমা-মপাগী ড্যাশবোর্দ",
   "language.label": "লোন",

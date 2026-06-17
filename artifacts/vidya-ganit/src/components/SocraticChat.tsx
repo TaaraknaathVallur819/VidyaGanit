@@ -845,18 +845,37 @@ export default function SocraticChat({
         />
 
         {gameOffered && (
-          <button
-            type="button"
-            data-testid="button-play-game-offer"
-            onClick={() => {
-              setGamesOpen(true);
-              setGameOffered(false);
-            }}
-            className="mb-2 w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:opacity-90 transition-opacity"
+          <div
+            data-testid="game-offer"
+            className="mb-2 rounded-2xl border-2 border-amber-200 bg-amber-50 px-4 py-3"
           >
-            <Gamepad2 className="w-4 h-4" />
-            {t("games.offer")}
-          </button>
+            <p className="mb-2 flex items-center justify-center gap-2 text-sm font-bold text-amber-700">
+              <Gamepad2 className="w-4 h-4" />
+              {t("games.offer")}
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                data-testid="button-play-game-yes"
+                onClick={() => {
+                  setGamesOpen(true);
+                  setGameOffered(false);
+                }}
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:opacity-90 transition-opacity"
+              >
+                <Gamepad2 className="w-4 h-4" />
+                {t("games.offerYes")}
+              </button>
+              <button
+                type="button"
+                data-testid="button-play-game-no"
+                onClick={() => setGameOffered(false)}
+                className="flex-1 rounded-xl border-2 border-amber-200 bg-white px-4 py-2.5 text-sm font-bold text-amber-700 hover:bg-amber-100 transition-colors"
+              >
+                {t("games.offerNo")}
+              </button>
+            </div>
+          </div>
         )}
 
         {attachment && (

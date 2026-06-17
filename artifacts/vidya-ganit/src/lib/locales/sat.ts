@@ -17,6 +17,8 @@ const dict: Record<string, string> = {
   "games.missing.name": "ᱟᱫᱟᱜ ᱮᱞ",
   "games.missing.desc": "ᱥᱟᱹᱨᱤ ᱮᱞ ᱯᱟᱱᱛᱮ ᱢᱮ!",
   "games.offer": "ᱢᱤᱫ ᱞᱚᱜᱚᱱ ᱮᱱᱮᱢ ᱮᱱᱮᱢᱟ? 🎮",
+  "games.offerYes": "ᱦᱮᱸ, ᱮᱱᱮᱢᱟ! 🎮",
+  "games.offerNo": "ᱵᱟᱝ, ᱟᱭᱟᱣ ᱪᱟᱞᱟᱣ ᱢᱮ",
   "chat.aiModel": "AI ᱢᱳᱰᱮᱞ",
   "dashboard.title": "ᱟᱯᱟᱛ-ᱮᱸᱜᱟᱛ ᱰᱮᱥᱵᱳᱰ",
   "language.label": "ᱯᱟᱹᱨᱥᱤ",

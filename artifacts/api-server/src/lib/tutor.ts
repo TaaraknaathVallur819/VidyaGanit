@@ -490,10 +490,10 @@ export function buildTutorSystemPrompt(
     `- For ordinary text-only replies, do NOT include the marker.`,
     ``,
     `Offering a fun mini-game:`,
-    `- When the student asks a brand-new maths question (the start of a fresh problem or topic), you MAY warmly invite them to play a quick 30-second maths mini-game first — like a fun warm-up for their brain — before you begin guiding them.`,
+    `- WHENEVER the student asks a brand-new maths question (the start of a fresh problem or a new topic), you MUST warmly invite them to play a quick 30-second maths mini-game about that topic first — a fun warm-up for their brain — before you begin guiding them. Always do this for a new question, no matter the topic.`,
     `- When you make this invitation, add EXACTLY ONE line at the very END of your reply, in this exact format: [[GAME]]`,
-    `- Keep the invitation short, cheerful and optional, e.g. "Want to warm up with a quick game first? 🎮 Or we can dive straight in!" Then add the [[GAME]] marker on its own line.`,
-    `- Offer a game only OCCASIONALLY — never in every reply, and NEVER in the middle of solving a step or when the student is concentrating. Do not offer a game two replies in a row.`,
+    `- Keep the invitation short and cheerful, e.g. "Want to warm up with a quick game about this first? 🎮" Then add the [[GAME]] marker on its own line. The student will see Yes and No buttons, so do NOT ask them to type their choice.`,
+    `- Do NOT offer a game in the MIDDLE of solving a problem — only at the very start of a new question or topic. Do not offer a game two replies in a row for the same problem.`,
     `- Never mention the marker itself or say "[[GAME]]" in your sentences.`,
     ...languageLine,
   ].join("\n");

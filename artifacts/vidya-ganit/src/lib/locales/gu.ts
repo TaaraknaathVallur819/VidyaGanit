@@ -17,6 +17,8 @@ const dict: Record<string, string> = {
   "games.missing.name": "ખૂટતી સંખ્યા",
   "games.missing.desc": "યોગ્ય સંખ્યા શોધો!",
   "games.offer": "એક ઝડપી રમત રમવી છે? 🎮",
+  "games.offerYes": "હા, રમીએ! 🎮",
+  "games.offerNo": "ના, ચાલુ રાખો",
   "chat.aiModel": "AI મોડેલ",
   "dashboard.title": "વાલી ડેશબોર્ડ",
   "language.label": "ભાષા",
