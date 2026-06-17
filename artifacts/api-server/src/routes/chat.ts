@@ -251,7 +251,15 @@ router.post(
     send({ drawing: true });
     try {
       const buffer = await generateImageBuffer(
-        `Clean, simple, colourful, kid-friendly educational illustration for a primary-school maths lesson. ${imagePrompt}. Flat vector style, clearly labelled, friendly, plain white background. Do not show the final numeric answer.`,
+        [
+          "Create ONE accurate educational maths diagram for a primary-school child (ages 9–13).",
+          "Draw EXACTLY and ONLY what the description says, with the correct quantities, groupings, divisions, shading and labels. The diagram must be mathematically correct: counts must match exactly (if it says 3 rows of 4, draw exactly 3 rows of 4), shapes and proportions must be right, and every required label must be present and legible.",
+          "Do NOT add any extra, decorative or unrelated objects, cartoon characters, mascots, busy backgrounds, or scenery — only the maths concept being taught.",
+          "Style: clean flat vector, bright friendly colours, bold simple shapes, large clear labels, plain white background. Keep any text very short and spelled correctly.",
+          "Do NOT reveal or write the final numeric answer anywhere in the image.",
+          "",
+          `Diagram to draw: ${imagePrompt}`,
+        ].join("\n"),
         "1024x1024",
       );
       send({

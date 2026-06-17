@@ -24,6 +24,12 @@ async function buildAll() {
     logLevel: "info",
     // Some packages may not be bundleable, so we externalize them, we can add more here as needed.
     // Some of the packages below may not be imported or installed, but we're adding them in case they are in the future.
+    // NOTE: anything externalized here is NOT bundled and must be resolvable at
+    // runtime from this artifact's own node_modules. If a workspace lib (e.g.
+    // integrations-gemini-ai) pulls in an externalized package such as
+    // `@google/genai` (matched by `@google/*` below), that package must ALSO be
+    // declared as a direct dependency of @workspace/api-server, otherwise the
+    // bundled dist will fail at startup with ERR_MODULE_NOT_FOUND.
     // Examples of unbundleable packages:
     // - uses native modules and loads them dynamically (e.g. sharp)
     // - use path traversal to read files (e.g. @google-cloud/secret-manager loads sibling .proto files)

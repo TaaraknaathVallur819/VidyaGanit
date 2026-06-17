@@ -1,3 +1,4 @@
 - [AI tutor chat](ai-tutor-chat.md) — SSE chat contract, gpt-5.4/gpt-image-1, [[DRAW]] marker stripping, vidyaId-trust caveat
+- [api-server externals](api-server-externals.md) — packages matched by build.mjs `external` (e.g. @google/genai) must be DIRECT api-server deps or dist crashes with ERR_MODULE_NOT_FOUND
 - [i18n language set](i18n-language-set.md) — 23-code UI language set must stay synced across i18n.tsx, counselor.ts, and 5 openapi.yaml enums (then regen codegen)
 - [i18n parity guard](i18n-parity.md) — all DICTS languages must key-match English; enforced by vitest in web artifact; `test` validation runs all packages
