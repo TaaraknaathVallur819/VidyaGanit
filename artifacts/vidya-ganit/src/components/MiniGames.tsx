@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Dialog,
@@ -10,168 +10,42 @@ import { Button } from "@/components/ui/button";
 import { Zap, Timer, Trophy, Gamepad2, Check, X } from "lucide-react";
 import { useSubmitGameScore } from "@workspace/api-client-react";
 import { useLanguage } from "@/lib/i18n";
-
-type GameId = "speed" | "truefalse" | "missing";
-
-type Question = {
-  prompt: string;
-  options: string[];
-  answer: number; // index into options
-};
+import {
+  gamesForClass,
+  makeQuestion,
+  type GameId,
+  type GameQuestion,
+} from "@/lib/games";
 
 const ROUND_SECONDS = 30;
-
-function randInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function buildChoices(correct: number): Question["options"] {
-  const set = new Set<number>([correct]);
-  while (set.size < 4) {
-    const delta = randInt(-9, 9);
-    const candidate = correct + delta;
-    if (candidate >= 0 && delta !== 0) set.add(candidate);
-  }
-  const opts = shuffle([...set]);
-  return opts.map(String);
-}
-
-function makeSpeed(): Question {
-  const ops = ["+", "−", "×"] as const;
-  const op = ops[randInt(0, 2)];
-  let a: number;
-  let b: number;
-  let answer: number;
-  if (op === "+") {
-    a = randInt(2, 49);
-    b = randInt(2, 49);
-    answer = a + b;
-  } else if (op === "−") {
-    a = randInt(10, 60);
-    b = randInt(1, a);
-    answer = a - b;
-  } else {
-    a = randInt(2, 12);
-    b = randInt(2, 12);
-    answer = a * b;
-  }
-  const opts = buildChoices(answer);
-  return {
-    prompt: `${a} ${op} ${b} = ?`,
-    options: opts,
-    answer: opts.indexOf(String(answer)),
-  };
-}
-
-function makeMissing(): Question {
-  const ops = ["+", "−", "×"] as const;
-  const op = ops[randInt(0, 2)];
-  let a: number;
-  let result: number;
-  let missing: number;
-  if (op === "+") {
-    a = randInt(2, 30);
-    missing = randInt(2, 30);
-    result = a + missing;
-  } else if (op === "−") {
-    missing = randInt(2, 30);
-    a = randInt(missing, 60);
-    result = a - missing;
-  } else {
-    a = randInt(2, 10);
-    missing = randInt(2, 10);
-    result = a * missing;
-  }
-  const opts = buildChoices(missing);
-  return {
-    prompt: `${a} ${op} ? = ${result}`,
-    options: opts,
-    answer: opts.indexOf(String(missing)),
-  };
-}
-
-function makeTrueFalse(): Question {
-  const ops = ["+", "−", "×"] as const;
-  const op = ops[randInt(0, 2)];
-  let a: number;
-  let b: number;
-  let real: number;
-  if (op === "+") {
-    a = randInt(2, 49);
-    b = randInt(2, 49);
-    real = a + b;
-  } else if (op === "−") {
-    a = randInt(10, 60);
-    b = randInt(1, a);
-    real = a - b;
-  } else {
-    a = randInt(2, 12);
-    b = randInt(2, 12);
-    real = a * b;
-  }
-  const isTrue = Math.random() < 0.5;
-  let shown = real;
-  if (!isTrue) {
-    // Pick a wrong value that stays >= 0 and never equals the real answer.
-    do {
-      const delta = (Math.random() < 0.5 ? 1 : -1) * randInt(1, 5);
-      shown = Math.max(0, real + delta);
-    } while (shown === real);
-  }
-  // options: index 0 = "true" (✓), index 1 = "false" (✗)
-  return {
-    prompt: `${a} ${op} ${b} = ${shown}`,
-    options: ["true", "false"],
-    answer: isTrue ? 0 : 1,
-  };
-}
-
-function makeQuestion(game: GameId): Question {
-  if (game === "speed") return makeSpeed();
-  if (game === "missing") return makeMissing();
-  return makeTrueFalse();
-}
-
-const GAMES: { id: GameId; emoji: string; nameKey: string; descKey: string }[] = [
-  { id: "speed", emoji: "⚡", nameKey: "games.speed.name", descKey: "games.speed.desc" },
-  {
-    id: "truefalse",
-    emoji: "🤔",
-    nameKey: "games.truefalse.name",
-    descKey: "games.truefalse.desc",
-  },
-  {
-    id: "missing",
-    emoji: "🔢",
-    nameKey: "games.missing.name",
-    descKey: "games.missing.desc",
-  },
-];
 
 export default function MiniGames({
   open,
   onClose,
   vidyaId,
+  studentClass,
   onXpAwarded,
 }: {
   open: boolean;
   onClose: () => void;
   vidyaId: string;
+  studentClass?: number | string | null;
   onXpAwarded?: () => void;
 }) {
   const { t } = useLanguage();
+
+  // Resolve the student's class (may arrive as a string from the profile).
+  const cls = useMemo(() => {
+    if (studentClass == null || studentClass === "") return null;
+    const n = Number(studentClass);
+    return Number.isNaN(n) ? null : n;
+  }, [studentClass]);
+
+  const availableGames = useMemo(() => gamesForClass(cls), [cls]);
+
   const [phase, setPhase] = useState<"menu" | "playing" | "result">("menu");
   const [game, setGame] = useState<GameId>("speed");
-  const [question, setQuestion] = useState<Question | null>(null);
+  const [question, setQuestion] = useState<GameQuestion | null>(null);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(ROUND_SECONDS);
   const [picked, setPicked] = useState<number | null>(null);
@@ -184,6 +58,8 @@ export default function MiniGames({
   // The active game is tracked in a ref so the interval/finish callbacks never
   // read a stale `game` value captured at the time the closure was created.
   const gameRef = useRef<GameId>("speed");
+  const clsRef = useRef<number | null>(cls);
+  clsRef.current = cls;
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
@@ -221,7 +97,7 @@ export default function MiniGames({
       scoreRef.current = 0;
       setPicked(null);
       setTimeLeft(ROUND_SECONDS);
-      setQuestion(makeQuestion(id));
+      setQuestion(makeQuestion(id, clsRef.current));
       setPhase("playing");
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
@@ -247,7 +123,7 @@ export default function MiniGames({
     // Brief feedback flash, then next question.
     feedbackRef.current = setTimeout(() => {
       setPicked(null);
-      setQuestion(makeQuestion(gameRef.current));
+      setQuestion(makeQuestion(gameRef.current, clsRef.current));
     }, 350);
   };
 
@@ -284,8 +160,8 @@ export default function MiniGames({
         {phase === "menu" && (
           <div className="space-y-3 mt-1">
             <p className="text-sm text-muted-foreground">{t("games.subtitle")}</p>
-            <div className="space-y-2.5">
-              {GAMES.map((g) => (
+            <div className="space-y-2.5 max-h-[55vh] overflow-y-auto pr-1">
+              {availableGames.map((g) => (
                 <button
                   key={g.id}
                   type="button"
