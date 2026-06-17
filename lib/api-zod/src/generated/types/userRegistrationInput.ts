@@ -27,4 +27,6 @@ export interface UserRegistrationInput {
   contact?: string | null;
   /** @nullable */
   batch?: string | null;
+  /** @nullable */
+  academyName?: string | null;
 }

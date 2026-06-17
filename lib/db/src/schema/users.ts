@@ -15,6 +15,7 @@ export const usersTable = pgTable("users", {
   parentType: text("parent_type"),
   contact: text("contact"),
   batch: text("batch"),
+  academyName: text("academy_name"),
   language: text("language"),
   xp: integer("xp").notNull().default(0),
   badges: text("badges").array().notNull().default(sql`ARRAY[]::text[]`),

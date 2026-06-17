@@ -90,6 +90,7 @@ export default function Auth() {
   const [regName, setRegName] = useState("");
   const [regContact, setRegContact] = useState("");
   const [regBatch, setRegBatch] = useState("");
+  const [regAcademyName, setRegAcademyName] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [nameError, setNameError] = useState("");
   const [gender, setGender] = useState<Gender | null>(null);
@@ -183,6 +184,7 @@ export default function Auth() {
               ? regContact.trim() || null
               : null,
           batch: role === "tutor" ? regBatch.trim() || null : null,
+          academyName: role === "tutor" ? regAcademyName.trim() || null : null,
         },
       },
       {
@@ -456,6 +458,24 @@ export default function Auth() {
                       placeholder={t("auth.batchPlaceholder")}
                       className="h-12 text-lg px-4 bg-gray-50 border-gray-200"
                       required
+                    />
+                  </div>
+                )}
+
+                {/* Tutor academy name (optional) */}
+                {role === "tutor" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-academy" className="text-foreground font-medium">
+                      {t("auth.academyName")}{" "}
+                      <span className="text-muted-foreground font-normal text-sm">{t("auth.optional")}</span>
+                    </Label>
+                    <Input
+                      id="reg-academy"
+                      data-testid="input-register-academy"
+                      value={regAcademyName}
+                      onChange={(e) => setRegAcademyName(e.target.value)}
+                      placeholder={t("auth.academyNamePlaceholder")}
+                      className="h-12 text-lg px-4 bg-gray-50 border-gray-200"
                     />
                   </div>
                 )}

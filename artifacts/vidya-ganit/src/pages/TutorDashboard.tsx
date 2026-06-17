@@ -24,6 +24,7 @@ import {
   Users2,
   Mail,
   CheckCircle2,
+  School,
 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 
@@ -173,6 +174,9 @@ export default function TutorDashboard() {
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-5">
                 <InfoChip label={t("student.gender")} value={displayed.gender === "male" ? t("student.male") : t("student.female")} />
+                {displayed.academyName && (
+                  <InfoChip label={t("auth.academyName")} value={displayed.academyName} icon={<School className="w-3.5 h-3.5" />} />
+                )}
                 <InfoChip label={t("tutor.batch")} value={displayed.batch ?? "—"} icon={<Users2 className="w-3.5 h-3.5" />} />
                 <InfoChip label={t("auth.emailOrPhone")} value={displayed.contact ?? "—"} icon={<Mail className="w-3.5 h-3.5" />} />
               </div>

@@ -606,6 +606,8 @@ components:
           type: ["string", "null"]
         batch:
           type: ["string", "null"]
+        academyName:
+          type: ["string", "null"]
 
     LoginInput:
       type: object
@@ -658,6 +660,8 @@ components:
         contact:
           type: ["string", "null"]
         batch:
+          type: ["string", "null"]
+        academyName:
           type: ["string", "null"]
         language:
           type: ["string", "null"]

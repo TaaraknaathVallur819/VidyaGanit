@@ -34,7 +34,8 @@ export const RegisterUserBody = zod.object({
   "board": zod.string().nullish(),
   "parentType": zod.union([zod.literal('father'),zod.literal('mother'),zod.literal(null)]).nullish(),
   "contact": zod.string().nullish(),
-  "batch": zod.string().nullish()
+  "batch": zod.string().nullish(),
+  "academyName": zod.string().nullish()
 })
 
 
@@ -58,6 +59,7 @@ export const LoginUserResponse = zod.object({
   "parentType": zod.string().nullish(),
   "contact": zod.string().nullish(),
   "batch": zod.string().nullish(),
+  "academyName": zod.string().nullish(),
   "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
   "xp": zod.number().default(loginUserResponseXpDefault),
   "badges": zod.array(zod.string())
@@ -83,6 +85,7 @@ export const GetProfileResponse = zod.object({
   "parentType": zod.string().nullish(),
   "contact": zod.string().nullish(),
   "batch": zod.string().nullish(),
+  "academyName": zod.string().nullish(),
   "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
   "xp": zod.number().default(getProfileResponseXpDefault),
   "badges": zod.array(zod.string())
@@ -118,6 +121,7 @@ export const UpdateProfileResponse = zod.object({
   "parentType": zod.string().nullish(),
   "contact": zod.string().nullish(),
   "batch": zod.string().nullish(),
+  "academyName": zod.string().nullish(),
   "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
   "xp": zod.number().default(updateProfileResponseXpDefault),
   "badges": zod.array(zod.string())

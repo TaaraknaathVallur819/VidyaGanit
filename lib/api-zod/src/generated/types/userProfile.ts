@@ -25,6 +25,8 @@ export interface UserProfile {
   /** @nullable */
   batch?: string | null;
   /** @nullable */
+  academyName?: string | null;
+  /** @nullable */
   language?: UserProfileLanguage;
   xp: number;
   badges: string[];

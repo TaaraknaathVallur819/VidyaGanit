@@ -57,6 +57,7 @@ function profileResponse(user: typeof usersTable.$inferSelect) {
     parentType: user.parentType ?? null,
     contact: user.contact ?? null,
     batch: user.batch ?? null,
+    academyName: user.academyName ?? null,
     language: user.language ?? null,
     xp: user.xp ?? 0,
     badges: user.badges ?? [],
@@ -70,7 +71,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
     return;
   }
 
-  const { name, password, role, gender, studentClass, board, parentType, contact, batch } =
+  const { name, password, role, gender, studentClass, board, parentType, contact, batch, academyName } =
     parsed.data;
 
   const [existing] = await db
@@ -99,6 +100,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
       parentType: parentType ?? null,
       contact: contact ?? null,
       batch: batch ?? null,
+      academyName: academyName ?? null,
     })
     .returning();
 

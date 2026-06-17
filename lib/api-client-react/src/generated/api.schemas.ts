@@ -67,6 +67,8 @@ export interface UserRegistrationInput {
   contact?: string | null;
   /** @nullable */
   batch?: string | null;
+  /** @nullable */
+  academyName?: string | null;
 }
 
 export interface LoginInput {
@@ -149,6 +151,8 @@ export interface UserProfile {
   contact?: string | null;
   /** @nullable */
   batch?: string | null;
+  /** @nullable */
+  academyName?: string | null;
   /** @nullable */
   language?: UserProfileLanguage;
   xp: number;
