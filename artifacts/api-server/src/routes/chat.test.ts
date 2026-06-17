@@ -178,3 +178,79 @@ describe("POST /chat/message", () => {
     expect(mocks.chatCreate).not.toHaveBeenCalled();
   });
 });
+
+describe("POST /chat/message — game offer", () => {
+  const url = "/api/chat/message";
+
+  // The default mocked stream ("Let's think step by step.") emits no [[GAME]]
+  // marker, so any `{ game: true }` event in these tests comes purely from the
+  // deterministic server-side rule: a recognisable maths topic + a question of
+  // 4+ words. This guards the "always offer on a new topic question" guarantee.
+
+  it("offers a game on a fresh fraction question", async () => {
+    const res = await request(app)
+      .post(url)
+      .set("Cookie", cookieFor(STUDENT_A))
+      .send({ vidyaId: STUDENT_A, message: "How do I add 3/4 and 1/2?" });
+
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('"game":true');
+  });
+
+  it("offers a game on a fresh geometry question", async () => {
+    const res = await request(app)
+      .post(url)
+      .set("Cookie", cookieFor(STUDENT_A))
+      .send({ vidyaId: STUDENT_A, message: "What is the area of a triangle?" });
+
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('"game":true');
+  });
+
+  it("does NOT offer a game for a greeting", async () => {
+    const res = await request(app)
+      .post(url)
+      .set("Cookie", cookieFor(STUDENT_A))
+      .send({ vidyaId: STUDENT_A, message: "Hello there dear coach!" });
+
+    expect(res.status).toBe(200);
+    expect(res.text).not.toContain('"game":true');
+  });
+
+  it("does NOT offer a game when the student gives up / asks for the answer", async () => {
+    const res = await request(app)
+      .post(url)
+      .set("Cookie", cookieFor(STUDENT_A))
+      .send({ vidyaId: STUDENT_A, message: "I give up, just tell me the answer" });
+
+    expect(res.status).toBe(200);
+    expect(res.text).not.toContain('"game":true');
+  });
+
+  it("does NOT offer a game for a short mid-step reply (even on a topic)", async () => {
+    // "is it 3/4" is a fraction topic but only 3 words — a mid-step answer to
+    // the coach's guiding question, so the offer must stay suppressed.
+    const res = await request(app)
+      .post(url)
+      .set("Cookie", cookieFor(STUDENT_A))
+      .send({ vidyaId: STUDENT_A, message: "is it 3/4" });
+
+    expect(res.status).toBe(200);
+    expect(res.text).not.toContain('"game":true');
+  });
+
+  it("still honours an explicit [[GAME]] marker from the model", async () => {
+    // Even for a short, non-topic message, an explicit marker surfaces the
+    // offer — and the marker text itself never leaks to the student.
+    mocks.chatCreate.mockResolvedValueOnce(makeStream(["Great work! ", "[[GAME]]"]));
+
+    const res = await request(app)
+      .post(url)
+      .set("Cookie", cookieFor(STUDENT_A))
+      .send({ vidyaId: STUDENT_A, message: "ok" });
+
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('"game":true');
+    expect(res.text).not.toContain("[[GAME");
+  });
+});
