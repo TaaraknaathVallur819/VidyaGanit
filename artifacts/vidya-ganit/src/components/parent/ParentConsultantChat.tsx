@@ -573,6 +573,9 @@ export default function ParentConsultantChat({
             </div>
             <div className="bg-white border border-emerald-100 text-foreground rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed shadow-sm">
               <span className="whitespace-pre-wrap break-words">{welcomeText}</span>
+              <div className="mt-1.5 -mb-1 -ml-1">
+                <SpeakButton text={welcomeText} tone="dark" />
+              </div>
             </div>
           </div>
         )}

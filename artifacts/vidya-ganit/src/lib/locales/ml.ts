@@ -25,6 +25,7 @@ const dict: Record<string, string> = {
 
   "tab.profile": "എന്റെ പ്രൊഫൈൽ",
   "tab.progress": "പുരോഗതി",
+  "tab.students": "വിദ്യാർത്ഥികൾ",
   "tab.history": "ചരിത്രം",
   "tab.strategy": "സ്ട്രാറ്റജി AI",
 

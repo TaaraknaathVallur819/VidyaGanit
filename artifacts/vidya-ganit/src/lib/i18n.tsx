@@ -112,6 +112,7 @@ const en: Dict = {
 
   "tab.profile": "My Profile",
   "tab.progress": "Progress",
+  "tab.students": "Students",
   "tab.history": "History",
   "tab.strategy": "Strategy AI",
 
@@ -378,6 +379,7 @@ const ta: Dict = {
 
   "tab.profile": "என் சுயவிவரம்",
   "tab.progress": "முன்னேற்றம்",
+  "tab.students": "மாணவர்கள்",
   "tab.history": "வரலாறு",
   "tab.strategy": "உத்தி AI",
 
@@ -633,6 +635,7 @@ const hi: Dict = {
 
   "tab.profile": "मेरी प्रोफ़ाइल",
   "tab.progress": "प्रगति",
+  "tab.students": "छात्र",
   "tab.history": "इतिहास",
   "tab.strategy": "रणनीति AI",
 
@@ -888,6 +891,7 @@ const te: Dict = {
 
   "tab.profile": "నా ప్రొఫైల్",
   "tab.progress": "పురోగతి",
+  "tab.students": "విద్యార్థులు",
   "tab.history": "చరిత్ర",
   "tab.strategy": "వ్యూహ AI",
 

@@ -266,6 +266,10 @@ export default function TutorDashboard() {
                 <User className="w-4 h-4" />
                 {t("tab.profile")}
               </TabsTrigger>
+              <TabsTrigger value="students" className={tabTriggerClass}>
+                <Users2 className="w-4 h-4" />
+                {t("tab.students")}
+              </TabsTrigger>
               <TabsTrigger value="progress" className={tabTriggerClass}>
                 <TrendingUp className="w-4 h-4" />
                 {t("tab.progress")}
@@ -363,7 +367,12 @@ export default function TutorDashboard() {
                 </CardContent>
               </Card>
             </motion.div>
+          </div>
+        </TabsContent>
 
+        {/* ── Students Tab ── */}
+        <TabsContent value="students" className="mt-0 p-6">
+          <div className="max-w-3xl mx-auto space-y-6">
             {/* Connected Students */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
