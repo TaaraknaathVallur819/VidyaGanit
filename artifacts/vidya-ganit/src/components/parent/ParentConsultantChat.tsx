@@ -21,6 +21,7 @@ import {
   getConsultantSession,
 } from "@workspace/api-client-react";
 import { useLanguage } from "@/lib/i18n";
+import AiModelSelect, { type ChatProvider } from "@/components/AiModelSelect";
 
 const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 MB
 
@@ -88,6 +89,7 @@ export default function ParentConsultantChat({
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
   const [isContinuing, setIsContinuing] = useState(false);
+  const [provider, setProvider] = useState<ChatProvider>("openai");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -316,6 +318,7 @@ export default function ParentConsultantChat({
           sessionId: mySessionId,
           studentVidyaId: selectedStudentId,
           language: lang,
+          provider,
           history,
           ...(currentAttachment
             ? {
@@ -466,6 +469,7 @@ export default function ParentConsultantChat({
                 : t("strategy.general")}
           </p>
         </div>
+        <AiModelSelect value={provider} onChange={setProvider} disabled={isStreaming} />
         <button
           type="button"
           onClick={() => setShowHistory((v) => !v)}

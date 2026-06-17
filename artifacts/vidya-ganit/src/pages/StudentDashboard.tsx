@@ -28,8 +28,10 @@ import {
   GraduationCap,
   BookOpen,
   CheckCircle2,
+  Gamepad2,
 } from "lucide-react";
 import SocraticChat from "@/components/SocraticChat";
+import MiniGames from "@/components/MiniGames";
 import { BADGE_CATALOG } from "@/lib/badges";
 import { useLanguage } from "@/lib/i18n";
 
@@ -81,6 +83,7 @@ export default function StudentDashboard() {
 
   // Edit Profile dialog
   const [editOpen, setEditOpen] = useState(false);
+  const [gamesOpen, setGamesOpen] = useState(false);
   const [editName, setEditName] = useState("");
   const [editGender, setEditGender] = useState<"male" | "female">("male");
   const [editError, setEditError] = useState("");
@@ -302,6 +305,22 @@ export default function StudentDashboard() {
                       </p>
                     )}
                   </div>
+
+                  <div className="rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 p-4 text-white">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Gamepad2 className="w-5 h-5" />
+                      <h3 className="font-bold">{t("games.title")}</h3>
+                    </div>
+                    <p className="text-xs text-white/85 mb-3">{t("games.subtitle")}</p>
+                    <Button
+                      type="button"
+                      data-testid="button-open-games"
+                      onClick={() => setGamesOpen(true)}
+                      className="w-full h-10 rounded-xl bg-white font-bold text-indigo-600 hover:bg-white/90"
+                    >
+                      {t("games.play")}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
@@ -446,6 +465,13 @@ export default function StudentDashboard() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <MiniGames
+        open={gamesOpen}
+        onClose={() => setGamesOpen(false)}
+        vidyaId={vidyaId}
+        onXpAwarded={() => { refetch(); }}
+      />
     </div>
   );
 }

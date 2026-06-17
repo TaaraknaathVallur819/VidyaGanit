@@ -1,13 +1,12 @@
 import { Router, type IRouter } from "express";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import type OpenAI from "openai";
 import { db, usersTable, chatMessagesTable } from "@workspace/db";
 import { SendChatMessageBody } from "@workspace/api-zod";
 import { detectTopic, buildTutorSystemPrompt, type ChatEntry } from "../lib/tutor";
 import { normalizeLanguage } from "../lib/counselor";
 import { computeXpAndBadges } from "../lib/xp";
-import { openai } from "@workspace/integrations-openai-ai-server";
+import { streamChat, normalizeProvider, type ChatImage } from "../lib/aiChat";
 import { generateImageBuffer } from "@workspace/integrations-openai-ai-server/image";
 import { requireAuth } from "../middlewares/auth";
 import { rateLimit } from "../middlewares/rateLimit";
@@ -15,7 +14,10 @@ import { rateLimit } from "../middlewares/rateLimit";
 const router: IRouter = Router();
 
 const DRAW_MARKER_RE = /\[\[DRAW:\s*([\s\S]*?)\]\]/;
-const DRAW_MARKER_START = "[[DRAW:";
+const GAME_MARKER_RE = /\[\[GAME(?::[^\]]*)?\]\]/;
+// Both markers may appear at the very end of a reply; we withhold streamed text
+// from the earliest marker start onward so neither ever leaks to the student.
+const MARKER_STARTS = ["[[DRAW:", "[[GAME"];
 
 const MAX_MESSAGE_LEN = 1500;
 const MAX_HISTORY_ENTRIES = 20;
@@ -152,23 +154,30 @@ router.post(
   let full = "";
   let sent = 0;
   let imagePrompt: string | null = null;
+  let offerGame = false;
   let fallbackText: string | null = null;
 
   const streamFlush = (): void => {
-    let safeEnd: number;
-    const markerIdx = full.indexOf(DRAW_MARKER_START);
-    if (markerIdx !== -1) {
-      // A full marker prefix is present — withhold everything from it onward.
-      safeEnd = markerIdx;
-    } else {
-      // Withhold only a trailing run that could still grow into the marker,
-      // i.e. the longest suffix of `full` that is a prefix of "[[DRAW:".
+    let safeEnd = full.length;
+    let markerFound = false;
+    for (const ms of MARKER_STARTS) {
+      const idx = full.indexOf(ms);
+      if (idx !== -1) {
+        safeEnd = Math.min(safeEnd, idx);
+        markerFound = true;
+      }
+    }
+    if (!markerFound) {
+      // Withhold only a trailing run that could still grow into a marker, i.e.
+      // the longest suffix of `full` that is a prefix of one of the markers.
       let hold = 0;
-      const maxHold = Math.min(DRAW_MARKER_START.length - 1, full.length);
-      for (let k = maxHold; k > 0; k--) {
-        if (full.slice(full.length - k) === DRAW_MARKER_START.slice(0, k)) {
-          hold = k;
-          break;
+      for (const ms of MARKER_STARTS) {
+        const maxHold = Math.min(ms.length - 1, full.length);
+        for (let k = maxHold; k > 0; k--) {
+          if (full.slice(full.length - k) === ms.slice(0, k)) {
+            hold = Math.max(hold, k);
+            break;
+          }
         }
       }
       safeEnd = full.length - hold;
@@ -182,58 +191,48 @@ router.post(
   // Build the latest user turn. Images go to the vision model directly; readable
   // text files are inlined; anything else is described so the coach can ask the
   // student to photograph or retype the problem instead.
-  let userContent: OpenAI.Chat.Completions.ChatCompletionUserMessageParam["content"];
+  let userText: string;
+  let image: ChatImage | null = null;
   if (attachment && attachment.mimeType.startsWith("image/")) {
-    userContent = [
-      {
-        type: "text",
-        text:
-          message ||
-          "I've attached a picture of my maths problem. Please help me solve it step by step using questions — don't just give me the answer.",
-      },
-      { type: "image_url", image_url: { url: attachment.dataUrl } },
-    ];
+    userText =
+      message ||
+      "I've attached a picture of my maths problem. Please help me solve it step by step using questions — don't just give me the answer.";
+    image = { mimeType: attachment.mimeType, dataUrl: attachment.dataUrl };
   } else if (attachment) {
     const fileText = decodeTextAttachment(attachment.mimeType, attachment.dataUrl);
-    userContent = fileText
+    userText = fileText
       ? `${message || "Please help me with this maths problem."}\n\n[The student attached a file named "${attachment.name}". Its contents are:]\n${fileText}`
       : `${message || "I tried to attach a file."}\n\n[The student attached a file named "${attachment.name}" (type ${attachment.mimeType}), but it is not an image or readable text file, so its contents cannot be seen. Gently let them know and ask them to upload a clear photo of the problem or type it out.]`;
   } else {
-    userContent = message;
+    userText = message;
   }
 
-  const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-    { role: "system", content: buildTutorSystemPrompt(context, language) },
-    ...chatHistory.map(
-      (h): OpenAI.Chat.Completions.ChatCompletionMessageParam =>
-        h.role === "assistant"
-          ? { role: "assistant", content: h.content }
-          : { role: "user", content: h.content },
-    ),
-    { role: "user", content: userContent },
-  ];
+  const provider = normalizeProvider(parsed.data.provider);
 
   try {
-    const stream = await openai.chat.completions.create({
-      model: "gpt-5-mini",
-      max_completion_tokens: 8192,
-      stream: true,
-      messages,
+    const stream = streamChat({
+      provider,
+      system: buildTutorSystemPrompt(context, language),
+      history: chatHistory,
+      userText,
+      image,
     });
 
-    for await (const part of stream) {
-      const content = part.choices[0]?.delta?.content;
-      if (content) {
-        full += content;
-        streamFlush();
-      }
+    for await (const delta of stream) {
+      full += delta;
+      streamFlush();
     }
 
-    const match = full.match(DRAW_MARKER_RE);
+    const drawMatch = full.match(DRAW_MARKER_RE);
+    const gameMatch = full.match(GAME_MARKER_RE);
     let visibleEnd = full.length;
-    if (match) {
-      imagePrompt = match[1].trim();
-      visibleEnd = match.index ?? full.length;
+    if (drawMatch) {
+      imagePrompt = drawMatch[1].trim();
+      visibleEnd = Math.min(visibleEnd, drawMatch.index ?? full.length);
+    }
+    if (gameMatch) {
+      offerGame = true;
+      visibleEnd = Math.min(visibleEnd, gameMatch.index ?? full.length);
     }
     if (visibleEnd > sent) {
       send({ chunk: full.slice(sent, visibleEnd) });
@@ -265,9 +264,17 @@ router.post(
     }
   }
 
-  // Compliance: append-only log of the tutor's reply (marker stripped). Falls
+  // The coach occasionally invites the student to play a quick mini-game. The
+  // marker is stripped from the text; the client surfaces a "Play" button.
+  if (offerGame) {
+    send({ game: true });
+  }
+
+  // Compliance: append-only log of the tutor's reply (markers stripped). Falls
   // back to the error message actually shown to the child if the AI call failed.
-  const assistantText = full.replace(DRAW_MARKER_RE, "").trim() || (fallbackText ?? "");
+  const assistantText =
+    full.replace(DRAW_MARKER_RE, "").replace(GAME_MARKER_RE, "").trim() ||
+    (fallbackText ?? "");
   if (assistantText) {
     try {
       await db.insert(chatMessagesTable).values({

@@ -1,4 +1,23 @@
 const dict: Record<string, string> = {
+  // Brain games & AI model
+  "games.title": "মগজগী খেল",
+  "games.subtitle": "মগজ থৌনা ওইহনবা য়াংনা গণিত খেল!",
+  "games.play": "শান্নবিয়ু",
+  "games.close": "লোনথোকউ",
+  "games.score": "স্কোর",
+  "games.time": "মতম",
+  "games.playAgain": "অমুক্কা শান্নবিয়ু",
+  "games.result": "নহাক্না {score} স্কোর ফংলে!",
+  "games.xpEarned": "+{xp} XP ফংলে!",
+  "games.pick": "খেল অমা খনবিয়ু",
+  "games.speed.name": "য়াংবা গণিত",
+  "games.speed.desc": "সেকেণ্ড ৩০দা য়াবমখৈ শোল্বিয়ু!",
+  "games.truefalse.name": "অচুম্বা নত্ত্রগা অরানবা",
+  "games.truefalse.desc": "সমীকরণ অসি অচুম্বরা? ✓ নত্ত্রগা ✗ নম্বিয়ু",
+  "games.missing.name": "মাংখ্রবা মশিং",
+  "games.missing.desc": "অচুম্বা মশিং থিবিয়ু!",
+  "games.offer": "য়াংনা খেল অমা শান্নসি? 🎮",
+  "chat.aiModel": "AI মোডেল",
   "dashboard.title": "মমা-মপাগী ড্যাশবোর্দ",
   "language.label": "লোন",
 

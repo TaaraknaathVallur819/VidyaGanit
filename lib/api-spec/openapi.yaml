@@ -299,6 +299,31 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /games/score:
+    post:
+      operationId: submitGameScore
+      tags: [chat]
+      summary: Award XP for completing a mini-game
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GameScoreInput"
+      responses:
+        "200":
+          description: Updated XP and badges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameScoreResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /auth/forgot-password:
     post:
       operationId: forgotPassword
@@ -657,6 +682,9 @@ components:
             $ref: "#/components/schemas/ChatHistoryItem"
         attachment:
           $ref: "#/components/schemas/ChatAttachment"
+        provider:
+          type: string
+          enum: [openai, anthropic, gemini]
 
     ChatAttachment:
       type: object
@@ -879,6 +907,38 @@ components:
             $ref: "#/components/schemas/ChatHistoryItem"
         attachment:
           $ref: "#/components/schemas/ChatAttachment"
+        provider:
+          type: string
+          enum: [openai, anthropic, gemini]
+
+    GameScoreInput:
+      type: object
+      required: [vidyaId, game, score]
+      properties:
+        vidyaId:
+          type: string
+        game:
+          type: string
+        score:
+          type: integer
+          minimum: 0
+
+    GameScoreResponse:
+      type: object
+      required: [xp, xpAwarded, badges, newBadges]
+      properties:
+        xp:
+          type: integer
+        xpAwarded:
+          type: integer
+        badges:
+          type: array
+          items:
+            type: string
+        newBadges:
+          type: array
+          items:
+            type: string
 
     ConsultantAudioInput:
       type: object

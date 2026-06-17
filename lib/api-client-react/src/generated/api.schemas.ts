@@ -228,6 +228,15 @@ export const ChatMessageInputLanguage = {
   sd: 'sd',
 } as const;
 
+export type ChatMessageInputProvider = typeof ChatMessageInputProvider[keyof typeof ChatMessageInputProvider];
+
+
+export const ChatMessageInputProvider = {
+  openai: 'openai',
+  anthropic: 'anthropic',
+  gemini: 'gemini',
+} as const;
+
 export type ChatHistoryItemRole = typeof ChatHistoryItemRole[keyof typeof ChatHistoryItemRole];
 
 
@@ -255,6 +264,7 @@ export interface ChatMessageInput {
   language?: ChatMessageInputLanguage;
   history?: ChatHistoryItem[];
   attachment?: ChatAttachment;
+  provider?: ChatMessageInputProvider;
 }
 
 export interface LinkStudentInput {
@@ -399,6 +409,15 @@ export const ConsultantMessageInputLanguage = {
   sd: 'sd',
 } as const;
 
+export type ConsultantMessageInputProvider = typeof ConsultantMessageInputProvider[keyof typeof ConsultantMessageInputProvider];
+
+
+export const ConsultantMessageInputProvider = {
+  openai: 'openai',
+  anthropic: 'anthropic',
+  gemini: 'gemini',
+} as const;
+
 export interface ConsultantMessageInput {
   message?: string;
   sessionId?: string;
@@ -407,6 +426,21 @@ export interface ConsultantMessageInput {
   language?: ConsultantMessageInputLanguage;
   history?: ChatHistoryItem[];
   attachment?: ChatAttachment;
+  provider?: ConsultantMessageInputProvider;
+}
+
+export interface GameScoreInput {
+  vidyaId: string;
+  game: string;
+  /** @minimum 0 */
+  score: number;
+}
+
+export interface GameScoreResponse {
+  xp: number;
+  xpAwarded: number;
+  badges: string[];
+  newBadges: string[];
 }
 
 export type ConsultantAudioInputLanguage = typeof ConsultantAudioInputLanguage[keyof typeof ConsultantAudioInputLanguage];

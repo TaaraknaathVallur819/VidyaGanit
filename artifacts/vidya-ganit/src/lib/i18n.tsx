@@ -75,6 +75,25 @@ const STORAGE_KEY = "vidyaganit_lang";
 type Dict = Record<string, string>;
 
 const en: Dict = {
+  // Brain games & AI model
+  "games.title": "Brain Games",
+  "games.subtitle": "Quick maths games to warm up your brain!",
+  "games.play": "Play",
+  "games.close": "Close",
+  "games.score": "Score",
+  "games.time": "Time",
+  "games.playAgain": "Play Again",
+  "games.result": "You scored {score}!",
+  "games.xpEarned": "+{xp} XP earned!",
+  "games.pick": "Pick a game",
+  "games.speed.name": "Speed Math",
+  "games.speed.desc": "Solve as many as you can in 30 seconds!",
+  "games.truefalse.name": "True or False",
+  "games.truefalse.desc": "Is the equation right? Tap ✓ or ✗",
+  "games.missing.name": "Missing Number",
+  "games.missing.desc": "Find the number that fits!",
+  "games.offer": "Play a quick game? 🎮",
+  "chat.aiModel": "AI Model",
   "dashboard.title": "Parent Dashboard",
   "language.label": "Language",
 
@@ -301,6 +320,25 @@ const en: Dict = {
 };
 
 const ta: Dict = {
+  // Brain games & AI model
+  "games.title": "மூளை விளையாட்டுகள்",
+  "games.subtitle": "மூளையைத் தூண்டும் விரைவு கணித விளையாட்டுகள்!",
+  "games.play": "விளையாடு",
+  "games.close": "மூடு",
+  "games.score": "மதிப்பெண்",
+  "games.time": "நேரம்",
+  "games.playAgain": "மீண்டும் விளையாடு",
+  "games.result": "நீ {score} மதிப்பெண் பெற்றாய்!",
+  "games.xpEarned": "+{xp} XP கிடைத்தது!",
+  "games.pick": "ஒரு விளையாட்டைத் தேர்ந்தெடு",
+  "games.speed.name": "வேக கணிதம்",
+  "games.speed.desc": "30 விநாடிகளில் முடிந்தவரை தீர்!",
+  "games.truefalse.name": "சரியா தவறா",
+  "games.truefalse.desc": "சமன்பாடு சரியா? ✓ அல்லது ✗ அழுத்து",
+  "games.missing.name": "விடுபட்ட எண்",
+  "games.missing.desc": "சரியான எண்ணைக் கண்டுபிடி!",
+  "games.offer": "ஒரு விரைவு விளையாட்டு விளையாடலாமா? 🎮",
+  "chat.aiModel": "AI மாடல்",
   "dashboard.title": "பெற்றோர் டாஷ்போர்டு",
   "language.label": "மொழி",
 
@@ -516,6 +554,25 @@ const ta: Dict = {
 };
 
 const hi: Dict = {
+  // Brain games & AI model
+  "games.title": "दिमागी खेल",
+  "games.subtitle": "दिमाग को तेज़ करने वाले झटपट गणित खेल!",
+  "games.play": "खेलें",
+  "games.close": "बंद करें",
+  "games.score": "स्कोर",
+  "games.time": "समय",
+  "games.playAgain": "फिर से खेलें",
+  "games.result": "आपने {score} अंक बनाए!",
+  "games.xpEarned": "+{xp} XP मिले!",
+  "games.pick": "एक खेल चुनें",
+  "games.speed.name": "तेज़ गणित",
+  "games.speed.desc": "30 सेकंड में जितने हो सकें हल करें!",
+  "games.truefalse.name": "सही या ग़लत",
+  "games.truefalse.desc": "क्या समीकरण सही है? ✓ या ✗ दबाएँ",
+  "games.missing.name": "छूटी संख्या",
+  "games.missing.desc": "सही संख्या ढूँढें!",
+  "games.offer": "एक झटपट खेल खेलें? 🎮",
+  "chat.aiModel": "AI मॉडल",
   "dashboard.title": "पैरेंट डैशबोर्ड",
   "language.label": "भाषा",
 
@@ -731,6 +788,25 @@ const hi: Dict = {
 };
 
 const te: Dict = {
+  // Brain games & AI model
+  "games.title": "మెదడు ఆటలు",
+  "games.subtitle": "మెదడును చురుకుగా చేసే వేగవంతమైన గణిత ఆటలు!",
+  "games.play": "ఆడు",
+  "games.close": "మూసివేయి",
+  "games.score": "స్కోరు",
+  "games.time": "సమయం",
+  "games.playAgain": "మళ్లీ ఆడు",
+  "games.result": "నీవు {score} పాయింట్లు సాధించావు!",
+  "games.xpEarned": "+{xp} XP వచ్చాయి!",
+  "games.pick": "ఒక ఆటను ఎంచుకో",
+  "games.speed.name": "వేగ గణితం",
+  "games.speed.desc": "30 సెకన్లలో వీలైనన్ని సాధించు!",
+  "games.truefalse.name": "నిజమా అబద్ధమా",
+  "games.truefalse.desc": "సమీకరణం సరైనదా? ✓ లేదా ✗ నొక్కు",
+  "games.missing.name": "తప్పిన సంఖ్య",
+  "games.missing.desc": "సరైన సంఖ్యను కనుగొను!",
+  "games.offer": "ఒక చిన్న ఆట ఆడదామా? 🎮",
+  "chat.aiModel": "AI మోడల్",
   "dashboard.title": "తల్లిదండ్రుల డాష్‌బోర్డ్",
   "language.label": "భాష",
 

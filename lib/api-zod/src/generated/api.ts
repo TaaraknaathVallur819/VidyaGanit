@@ -208,7 +208,29 @@ export const SendChatMessageBody = zod.object({
   "name": zod.string(),
   "mimeType": zod.string(),
   "dataUrl": zod.string().describe('Base64 data URL of the attached file (data:<mime>;base64,...)')
-}).optional()
+}).optional(),
+  "provider": zod.enum(['openai', 'anthropic', 'gemini']).optional()
+})
+
+
+/**
+ * @summary Award XP for completing a mini-game
+ */
+export const submitGameScoreBodyScoreMin = 0;
+
+
+
+export const SubmitGameScoreBody = zod.object({
+  "vidyaId": zod.string(),
+  "game": zod.string(),
+  "score": zod.number().min(submitGameScoreBodyScoreMin)
+})
+
+export const SubmitGameScoreResponse = zod.object({
+  "xp": zod.number(),
+  "xpAwarded": zod.number(),
+  "badges": zod.array(zod.string()),
+  "newBadges": zod.array(zod.string())
 })
 
 
@@ -351,7 +373,8 @@ export const SendConsultantMessageBody = zod.object({
   "name": zod.string(),
   "mimeType": zod.string(),
   "dataUrl": zod.string().describe('Base64 data URL of the attached file (data:<mime>;base64,...)')
-}).optional()
+}).optional(),
+  "provider": zod.enum(['openai', 'anthropic', 'gemini']).optional()
 })
 
 

@@ -1,4 +1,23 @@
 const dict: Record<string, string> = {
+  // Brain games & AI model
+  "games.title": "ᱢᱳᱱᱳ ᱮᱱᱮᱢ",
+  "games.subtitle": "ᱢᱳᱱᱳ ᱞᱮᱸᱜᱟᱱ ᱞᱟᱹᱜᱤᱫ ᱞᱚᱜᱚᱱ ᱜᱟᱱᱤᱛ ᱮᱱᱮᱢ!",
+  "games.play": "ᱮᱱᱮᱢ ᱢᱮ",
+  "games.close": "ᱵᱚᱸᱫᱚᱭ ᱢᱮ",
+  "games.score": "ᱥᱠᱳᱨ",
+  "games.time": "ᱚᱠᱛᱚ",
+  "games.playAgain": "ᱫᱚᱦᱲᱟ ᱮᱱᱮᱢ ᱢᱮ",
+  "games.result": "ᱟᱢ {score} ᱥᱠᱳᱨ ᱮᱢ ᱠᱮᱫᱟᱢ!",
+  "games.xpEarned": "+{xp} XP ᱧᱟᱢ ᱠᱮᱫᱟᱢ!",
+  "games.pick": "ᱢᱤᱫ ᱮᱱᱮᱢ ᱵᱟᱨᱟᱭ ᱢᱮ",
+  "games.speed.name": "ᱞᱚᱜᱚᱱ ᱜᱟᱱᱤᱛ",
+  "games.speed.desc": "30 ᱥᱮᱠᱮᱱᱰ ᱨᱮ ᱡᱟᱹᱛᱤ ᱫᱟᱲᱮᱭᱟᱜ ᱛᱮ ᱛᱮᱭᱟᱨ ᱢᱮ!",
+  "games.truefalse.name": "ᱥᱟᱹᱨᱤ ᱥᱮ ᱵᱷᱩᱞ",
+  "games.truefalse.desc": "ᱥᱚᱢᱤᱠᱚᱨᱚᱱ ᱥᱟᱹᱨᱤ ᱦᱚᱸ? ✓ ᱥᱮ ✗ ᱳᱛᱟᱭ ᱢᱮ",
+  "games.missing.name": "ᱟᱫᱟᱜ ᱮᱞ",
+  "games.missing.desc": "ᱥᱟᱹᱨᱤ ᱮᱞ ᱯᱟᱱᱛᱮ ᱢᱮ!",
+  "games.offer": "ᱢᱤᱫ ᱞᱚᱜᱚᱱ ᱮᱱᱮᱢ ᱮᱱᱮᱢᱟ? 🎮",
+  "chat.aiModel": "AI ᱢᱳᱰᱮᱞ",
   "dashboard.title": "ᱟᱯᱟᱛ-ᱮᱸᱜᱟᱛ ᱰᱮᱥᱵᱳᱰ",
   "language.label": "ᱯᱟᱹᱨᱥᱤ",
 

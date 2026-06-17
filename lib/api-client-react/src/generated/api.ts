@@ -28,6 +28,8 @@ import type {
   ConsultantSessionsResponse,
   ErrorResponse,
   ForgotPasswordInput,
+  GameScoreInput,
+  GameScoreResponse,
   HealthStatus,
   LinkStudentInput,
   LinkedStudentProfile,
@@ -785,6 +787,77 @@ export const useSendChatMessage = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getSendChatMessageMutationOptions(options));
+    }
+
+export const getSubmitGameScoreUrl = () => {
+
+
+
+
+  return `/api/games/score`
+}
+
+/**
+ * @summary Award XP for completing a mini-game
+ */
+export const submitGameScore = async (gameScoreInput: GameScoreInput, options?: RequestInit): Promise<GameScoreResponse> => {
+
+  return customFetch<GameScoreResponse>(getSubmitGameScoreUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      gameScoreInput,)
+  }
+);}
+
+
+
+
+export const getSubmitGameScoreMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitGameScore>>, TError,{data: BodyType<GameScoreInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof submitGameScore>>, TError,{data: BodyType<GameScoreInput>}, TContext> => {
+
+const mutationKey = ['submitGameScore'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitGameScore>>, {data: BodyType<GameScoreInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  submitGameScore(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubmitGameScoreMutationResult = NonNullable<Awaited<ReturnType<typeof submitGameScore>>>
+    export type SubmitGameScoreMutationBody = BodyType<GameScoreInput>
+    export type SubmitGameScoreMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Award XP for completing a mini-game
+ */
+export const useSubmitGameScore = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitGameScore>>, TError,{data: BodyType<GameScoreInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof submitGameScore>>,
+        TError,
+        {data: BodyType<GameScoreInput>},
+        TContext
+      > => {
+      return useMutation(getSubmitGameScoreMutationOptions(options));
     }
 
 export const getForgotPasswordUrl = () => {

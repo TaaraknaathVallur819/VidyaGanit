@@ -8,6 +8,7 @@
 import type { ChatAttachment } from './chatAttachment';
 import type { ChatHistoryItem } from './chatHistoryItem';
 import type { ConsultantMessageInputLanguage } from './consultantMessageInputLanguage';
+import type { ConsultantMessageInputProvider } from './consultantMessageInputProvider';
 
 export interface ConsultantMessageInput {
   message?: string;
@@ -17,4 +18,5 @@ export interface ConsultantMessageInput {
   language?: ConsultantMessageInputLanguage;
   history?: ChatHistoryItem[];
   attachment?: ChatAttachment;
+  provider?: ConsultantMessageInputProvider;
 }

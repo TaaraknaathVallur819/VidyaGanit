@@ -1,4 +1,23 @@
 const dict: Record<string, string> = {
+  // Brain games & AI model
+  "games.title": "दमागी खेड्डां",
+  "games.subtitle": "दमाग तेज़ करने आह्ले झटपट गणित खेड्ड!",
+  "games.play": "खेड्डो",
+  "games.close": "बंद करो",
+  "games.score": "स्कोर",
+  "games.time": "समां",
+  "games.playAgain": "फ्ही खेड्डो",
+  "games.result": "तुसें {score} अंक बनाए!",
+  "games.xpEarned": "+{xp} XP मिले!",
+  "games.pick": "इक खेड्ड चुनो",
+  "games.speed.name": "तेज़ गणित",
+  "games.speed.desc": "30 सेकंड च जिन्ने हो सकन हल करो!",
+  "games.truefalse.name": "सही जां गलत",
+  "games.truefalse.desc": "समीकरण सही ऐ? ✓ जां ✗ दबाओ",
+  "games.missing.name": "गुम्म संख्या",
+  "games.missing.desc": "सही संख्या तोपो!",
+  "games.offer": "इक झटपट खेड्ड खेड्डचैए? 🎮",
+  "chat.aiModel": "AI मॉडल",
   "dashboard.title": "माता-पिता डैशबोर्ड",
   "language.label": "भाशा",
 

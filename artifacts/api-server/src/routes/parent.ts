@@ -1,7 +1,6 @@
 import { Router, type IRouter } from "express";
 import { randomUUID } from "node:crypto";
 import { and, asc, eq } from "drizzle-orm";
-import type OpenAI from "openai";
 import {
   db,
   usersTable,
@@ -32,7 +31,7 @@ import {
   normalizeLanguage,
   type CounselorTopicSummary,
 } from "../lib/counselor";
-import { openai } from "@workspace/integrations-openai-ai-server";
+import { streamChat, normalizeProvider, type ChatImage } from "../lib/aiChat";
 import { speechToText, ensureCompatibleFormat } from "@workspace/integrations-openai-ai-server/audio";
 import { requireAuth, requireSelf } from "../middlewares/auth";
 import { rateLimit } from "../middlewares/rateLimit";
@@ -574,58 +573,39 @@ router.post(
       res.write(`data: ${JSON.stringify(obj)}\n\n`);
     };
 
-    let userContent: OpenAI.Chat.Completions.ChatCompletionUserMessageParam["content"];
+    let userText: string;
+    let image: ChatImage | null = null;
     if (attachment && attachment.mimeType.startsWith("image/")) {
-      userContent = [
-        {
-          type: "text",
-          text: message || "I've attached an image. Please take a look and advise me.",
-        },
-        { type: "image_url", image_url: { url: attachment.dataUrl } },
-      ];
+      userText = message || "I've attached an image. Please take a look and advise me.";
+      image = { mimeType: attachment.mimeType, dataUrl: attachment.dataUrl };
     } else if (attachment) {
       const fileText = decodeTextAttachment(attachment.mimeType, attachment.dataUrl);
-      userContent = fileText
+      userText = fileText
         ? `${message || "Please look at this file and advise me."}\n\n[The parent attached a file named "${attachment.name}". Its contents are:]\n${fileText}`
         : `${message || "I tried to attach a file."}\n\n[The parent attached a file named "${attachment.name}" (type ${attachment.mimeType}) that can't be read here. Acknowledge it and ask them to describe it or paste the text.]`;
     } else {
-      userContent = message;
+      userText = message;
     }
 
-    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-      {
-        role: "system",
-        content: buildCounselorSystemPrompt({
-          parentName: parent.name,
-          language,
-          student: studentSummary,
-        }),
-      },
-      ...history.map(
-        (h): OpenAI.Chat.Completions.ChatCompletionMessageParam =>
-          h.role === "assistant"
-            ? { role: "assistant", content: h.content }
-            : { role: "user", content: h.content },
-      ),
-      { role: "user", content: userContent },
-    ];
+    const provider = normalizeProvider(parsed.data.provider);
 
     let full = "";
     let fallbackText: string | null = null;
     try {
-      const stream = await openai.chat.completions.create({
-        model: "gpt-5-mini",
-        reasoning_effort: "low",
-        max_completion_tokens: 8192,
-        stream: true,
-        messages,
+      const stream = streamChat({
+        provider,
+        system: buildCounselorSystemPrompt({
+          parentName: parent.name,
+          language,
+          student: studentSummary,
+        }),
+        history,
+        userText,
+        image,
       });
-      for await (const part of stream) {
-        const content = part.choices[0]?.delta?.content;
-        if (content) {
-          full += content;
-          send({ chunk: content });
-        }
+      for await (const delta of stream) {
+        full += delta;
+        send({ chunk: delta });
       }
     } catch (err) {
       req.log.error({ err }, "parent consultant completion failed");

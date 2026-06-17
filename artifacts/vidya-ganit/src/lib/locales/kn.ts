@@ -1,4 +1,23 @@
 const dict: Record<string, string> = {
+  // Brain games & AI model
+  "games.title": "ಮೆದುಳಿನ ಆಟಗಳು",
+  "games.subtitle": "ಮೆದುಳನ್ನು ಚುರುಕುಗೊಳಿಸುವ ತ್ವರಿತ ಗಣಿತ ಆಟಗಳು!",
+  "games.play": "ಆಡು",
+  "games.close": "ಮುಚ್ಚು",
+  "games.score": "ಸ್ಕೋರ್",
+  "games.time": "ಸಮಯ",
+  "games.playAgain": "ಮತ್ತೆ ಆಡು",
+  "games.result": "ನೀನು {score} ಅಂಕಗಳನ್ನು ಗಳಿಸಿದೆ!",
+  "games.xpEarned": "+{xp} XP ಸಿಕ್ಕಿತು!",
+  "games.pick": "ಒಂದು ಆಟ ಆರಿಸು",
+  "games.speed.name": "ವೇಗದ ಗಣಿತ",
+  "games.speed.desc": "30 ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಸಾಧ್ಯವಾದಷ್ಟು ಬಿಡಿಸು!",
+  "games.truefalse.name": "ಸರಿ ಅಥವಾ ತಪ್ಪು",
+  "games.truefalse.desc": "ಸಮೀಕರಣ ಸರಿಯೇ? ✓ ಅಥವಾ ✗ ಒತ್ತು",
+  "games.missing.name": "ಕಾಣೆಯಾದ ಸಂಖ್ಯೆ",
+  "games.missing.desc": "ಸರಿಯಾದ ಸಂಖ್ಯೆ ಹುಡುಕು!",
+  "games.offer": "ಒಂದು ತ್ವರಿತ ಆಟ ಆಡೋಣವೇ? 🎮",
+  "chat.aiModel": "AI ಮಾದರಿ",
   "dashboard.title": "ಪೋಷಕರ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
   "language.label": "ಭಾಷೆ",
 

@@ -9,10 +9,13 @@ import {
   Zap,
   FileText,
   X,
+  Gamepad2,
 } from "lucide-react";
 
 import { BADGE_CATALOG } from "@/lib/badges";
 import { useLanguage } from "@/lib/i18n";
+import MiniGames from "@/components/MiniGames";
+import AiModelSelect, { type ChatProvider } from "@/components/AiModelSelect";
 
 const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 MB
 
@@ -228,6 +231,9 @@ export default function SocraticChat({
   const [attachment, setAttachment] = useState<Attachment | null>(null);
   const [attachError, setAttachError] = useState<string | null>(null);
   const [isListening, setIsListening] = useState(false);
+  const [provider, setProvider] = useState<ChatProvider>("openai");
+  const [gameOffered, setGameOffered] = useState(false);
+  const [gamesOpen, setGamesOpen] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -399,6 +405,7 @@ export default function SocraticChat({
           sessionId: sessionIdRef.current,
           history,
           language: lang,
+          provider,
           ...(currentAttachment
             ? {
                 attachment: {
@@ -451,7 +458,12 @@ export default function SocraticChat({
               image?: string;
               imageAlt?: string;
               imageError?: boolean;
+              game?: boolean;
             };
+
+            if (data.game) {
+              setGameOffered(true);
+            }
 
             if (typeof data.chunk === "string") {
               fullContent += data.chunk;
@@ -551,6 +563,7 @@ export default function SocraticChat({
     setInput("");
     setAttachment(null);
     setAttachError(null);
+    setGameOffered(false);
     sessionIdRef.current = crypto.randomUUID();
   };
 
@@ -579,6 +592,7 @@ export default function SocraticChat({
             </p>
           </div>
         </div>
+        <AiModelSelect value={provider} onChange={setProvider} disabled={isStreaming} />
         <button
           type="button"
           onClick={clearChat}
@@ -671,6 +685,21 @@ export default function SocraticChat({
           className="hidden"
           onChange={handleFilePicked}
         />
+
+        {gameOffered && (
+          <button
+            type="button"
+            data-testid="button-play-game-offer"
+            onClick={() => {
+              setGamesOpen(true);
+              setGameOffered(false);
+            }}
+            className="mb-2 w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:opacity-90 transition-opacity"
+          >
+            <Gamepad2 className="w-4 h-4" />
+            {t("games.offer")}
+          </button>
+        )}
 
         {attachment && (
           <div className="mb-2 flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-xl px-2.5 py-2">
@@ -824,6 +853,13 @@ export default function SocraticChat({
           </motion.div>
         ))}
       </AnimatePresence>
+
+      <MiniGames
+        open={gamesOpen}
+        onClose={() => setGamesOpen(false)}
+        vidyaId={vidyaId}
+        onXpAwarded={onXpAwarded}
+      />
     </div>
   );
 }

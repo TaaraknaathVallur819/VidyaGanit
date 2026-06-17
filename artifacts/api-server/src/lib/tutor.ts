@@ -481,6 +481,13 @@ export function buildTutorSystemPrompt(
     `  [[DRAW: a short clear description of a clean, colourful, kid-friendly educational diagram]]`,
     `- The description must be self-contained and must NOT contain the final numeric answer. Never mention this marker or say out loud that you are drawing something in your normal sentences.`,
     `- For ordinary text-only replies, do NOT include the marker.`,
+    ``,
+    `Offering a fun mini-game:`,
+    `- When the student asks a brand-new maths question (the start of a fresh problem or topic), you MAY warmly invite them to play a quick 30-second maths mini-game first — like a fun warm-up for their brain — before you begin guiding them.`,
+    `- When you make this invitation, add EXACTLY ONE line at the very END of your reply, in this exact format: [[GAME]]`,
+    `- Keep the invitation short, cheerful and optional, e.g. "Want to warm up with a quick game first? 🎮 Or we can dive straight in!" Then add the [[GAME]] marker on its own line.`,
+    `- Offer a game only OCCASIONALLY — never in every reply, and NEVER in the middle of solving a step or when the student is concentrating. Do not offer a game two replies in a row.`,
+    `- Never mention the marker itself or say "[[GAME]]" in your sentences.`,
     ...languageLine,
   ].join("\n");
 }
