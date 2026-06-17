@@ -230,6 +230,16 @@ const dict: Record<string, string> = {
     "ওহো, খরা তপ্থরো! 😅 খরা পোৎথদুনা মতম খরগী মতুংদা অমুক হন্না হোৎনবিয়ু।",
   "chat.err.connect": "অইয়ো! শম্নবদা অৱাবা লৈ। 😅 চানবিদুনা অমুক হন্না হোৎনবিয়ু!",
   "chat.badgeUnlocked": "🎉 বেজ হাংদোকখ্রে!",
+
+  // Tutor accounts & image model
+  "chat.imageModel": "মꯥꯏ মোডেল",
+  "auth.iAmTutor": "ঐ অমা ওজা নি",
+  "auth.batch": "বেচ",
+  "auth.batchPlaceholder": "খুদম ক্লাস ৬ – অয়ুক",
+  "auth.loginAs": "ঐ লোগ ইন তৌরি",
+  "auth.roleMismatch": "আইডি অসি অদুগী থৌদাংগীদমক রেজিস্টার তৌদে। চানবীদুনা অচুম্বা খনবীয়ু।",
+  "tutor.title": "ওজা ড্যাশবোর্ড",
+  "tutor.batch": "বেচ",
 };
 
 export default dict;

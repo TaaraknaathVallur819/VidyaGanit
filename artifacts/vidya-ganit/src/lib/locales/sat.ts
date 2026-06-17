@@ -230,6 +230,16 @@ const dict: Record<string, string> = {
     "ᱣᱟᱦ, ᱴᱷᱤᱠᱟᱜ ᱞᱟᱦᱟ! 😅 ᱴᱷᱤᱠᱟᱜ ᱥᱟᱦᱟ ᱦᱟᱛᱟᱣ ᱢᱮ ᱟᱨ ᱴᱷᱤᱠᱟᱜ ᱛᱟᱭᱳᱢ ᱫᱩᱦᱲᱟᱹ ᱠᱩᱨᱩᱢᱩᱴᱩ ᱢᱮ।",
   "chat.err.connect": "ᱟᱹᱭᱳ! ᱤᱧ ᱡᱩᱲᱟᱣ ᱨᱮ ᱫᱤᱠᱠᱚᱛ ᱦᱩᱭᱮᱱᱟ। 😅 ᱫᱟᱭᱟᱠᱟᱛᱮ ᱫᱩᱦᱲᱟᱹ ᱠᱩᱨᱩᱢᱩᱴᱩ ᱢᱮ!",
   "chat.badgeUnlocked": "🎉 ᱵᱮᱡ ᱠᱷᱩᱞᱮᱱᱟ!",
+
+  // Tutor accounts & image model
+  "chat.imageModel": "ᱪᱤᱛᱟᱹᱨ ᱢᱳᱰᱮᱞ",
+  "auth.iAmTutor": "ᱤᱧ ᱢᱤᱫ ᱢᱟᱪᱮᱛ ᱠᱟᱱᱟᱹᱧ",
+  "auth.batch": "ᱵᱮᱪ",
+  "auth.batchPlaceholder": "ᱡᱮᱞᱮᱠᱟ ᱠᱞᱟᱥ ᱖ – ᱥᱮᱛᱟᱜ",
+  "auth.loginAs": "ᱤᱧ ᱞᱚᱜ ᱤᱱ ᱮᱢ ᱠᱟᱱᱟᱹᱧ",
+  "auth.roleMismatch": "ᱱᱚᱣᱟ ᱟᱭᱰᱤ ᱚᱱᱟ ᱠᱟᱹᱢᱤ ᱞᱟᱹᱜᱤᱫ ᱵᱟᱝ ᱨᱮᱡᱤᱥᱴᱟᱨ ᱠᱟᱱᱟ᱾ ᱫᱟᱭᱟ ᱠᱟᱛᱮ ᱴᱷᱤᱠ ᱵᱟᱪᱷᱟᱣ ᱢᱮ᱾",
+  "tutor.title": "ᱢᱟᱪᱮᱛ ᱰᱮᱥᱵᱳᱨᱰ",
+  "tutor.batch": "ᱵᱮᱪ",
 };
 
 export default dict;

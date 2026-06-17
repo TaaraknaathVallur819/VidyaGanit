@@ -12,4 +12,5 @@ export type UserRegistrationInputRole = typeof UserRegistrationInputRole[keyof t
 export const UserRegistrationInputRole = {
   student: 'student',
   parent: 'parent',
+  tutor: 'tutor',
 } as const;

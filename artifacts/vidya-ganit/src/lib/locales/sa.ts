@@ -230,6 +230,16 @@ const dict: Record<string, string> = {
     "अरे, किञ्चित् मन्दं गच्छतु! 😅 किञ्चित् विश्रम्य क्षणानन्तरं पुनः प्रयतताम्।",
   "chat.err.connect": "अहो! संयोजने मम कष्टम् आसीत्। 😅 कृपया पुनः प्रयतताम्!",
   "chat.badgeUnlocked": "🎉 पदकम् उद्घाटितम्!",
+
+  // Tutor accounts & image model
+  "chat.imageModel": "चित्र-प्रतिरूपम्",
+  "auth.iAmTutor": "अहम् एकः अध्यापकः अस्मि",
+  "auth.batch": "वर्गः",
+  "auth.batchPlaceholder": "यथा कक्षा ६ – प्रातः",
+  "auth.loginAs": "अहं प्रवेशं करोमि",
+  "auth.roleMismatch": "एषा संज्ञा तस्यै भूमिकायै न पञ्जीकृता। कृपया सम्यक् चिनोतु।",
+  "tutor.title": "अध्यापक-फलकम्",
+  "tutor.batch": "वर्गः",
 };
 
 export default dict;

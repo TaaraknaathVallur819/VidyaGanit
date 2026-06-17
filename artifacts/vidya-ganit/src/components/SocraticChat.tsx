@@ -16,6 +16,7 @@ import { BADGE_CATALOG } from "@/lib/badges";
 import { useLanguage } from "@/lib/i18n";
 import MiniGames from "@/components/MiniGames";
 import AiModelSelect, { type ChatProvider } from "@/components/AiModelSelect";
+import ImageModelSelect, { type ImageModel } from "@/components/ImageModelSelect";
 
 const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 MB
 
@@ -232,6 +233,7 @@ export default function SocraticChat({
   const [attachError, setAttachError] = useState<string | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [provider, setProvider] = useState<ChatProvider>("openai");
+  const [imageModel, setImageModel] = useState<ImageModel>("openai");
   const [gameOffered, setGameOffered] = useState(false);
   const [gamesOpen, setGamesOpen] = useState(false);
 
@@ -406,6 +408,7 @@ export default function SocraticChat({
           history,
           language: lang,
           provider,
+          imageModel,
           ...(currentAttachment
             ? {
                 attachment: {
@@ -593,6 +596,7 @@ export default function SocraticChat({
           </div>
         </div>
         <AiModelSelect value={provider} onChange={setProvider} disabled={isStreaming} />
+        <ImageModelSelect value={imageModel} onChange={setImageModel} disabled={isStreaming} />
         <button
           type="button"
           onClick={clearChat}

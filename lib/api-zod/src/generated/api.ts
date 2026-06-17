@@ -28,12 +28,13 @@ export const registerUserBodyPasswordMin = 8;
 export const RegisterUserBody = zod.object({
   "name": zod.string().min(1),
   "password": zod.string().min(registerUserBodyPasswordMin),
-  "role": zod.enum(['student', 'parent']),
+  "role": zod.enum(['student', 'parent', 'tutor']),
   "gender": zod.enum(['male', 'female']),
   "studentClass": zod.union([zod.literal('4'),zod.literal('5'),zod.literal('6'),zod.literal('7'),zod.literal(null)]).nullish(),
   "board": zod.string().nullish(),
   "parentType": zod.union([zod.literal('father'),zod.literal('mother'),zod.literal(null)]).nullish(),
-  "contact": zod.string().nullish()
+  "contact": zod.string().nullish(),
+  "batch": zod.string().nullish()
 })
 
 
@@ -50,12 +51,13 @@ export const loginUserResponseXpDefault = 0;
 export const LoginUserResponse = zod.object({
   "vidyaId": zod.string(),
   "name": zod.string(),
-  "role": zod.enum(['student', 'parent']),
+  "role": zod.enum(['student', 'parent', 'tutor']),
   "gender": zod.enum(['male', 'female']),
   "studentClass": zod.string().nullish(),
   "board": zod.string().nullish(),
   "parentType": zod.string().nullish(),
   "contact": zod.string().nullish(),
+  "batch": zod.string().nullish(),
   "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
   "xp": zod.number().default(loginUserResponseXpDefault),
   "badges": zod.array(zod.string())
@@ -74,12 +76,13 @@ export const getProfileResponseXpDefault = 0;
 export const GetProfileResponse = zod.object({
   "vidyaId": zod.string(),
   "name": zod.string(),
-  "role": zod.enum(['student', 'parent']),
+  "role": zod.enum(['student', 'parent', 'tutor']),
   "gender": zod.enum(['male', 'female']),
   "studentClass": zod.string().nullish(),
   "board": zod.string().nullish(),
   "parentType": zod.string().nullish(),
   "contact": zod.string().nullish(),
+  "batch": zod.string().nullish(),
   "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
   "xp": zod.number().default(getProfileResponseXpDefault),
   "badges": zod.array(zod.string())
@@ -108,12 +111,13 @@ export const updateProfileResponseXpDefault = 0;
 export const UpdateProfileResponse = zod.object({
   "vidyaId": zod.string(),
   "name": zod.string(),
-  "role": zod.enum(['student', 'parent']),
+  "role": zod.enum(['student', 'parent', 'tutor']),
   "gender": zod.enum(['male', 'female']),
   "studentClass": zod.string().nullish(),
   "board": zod.string().nullish(),
   "parentType": zod.string().nullish(),
   "contact": zod.string().nullish(),
+  "batch": zod.string().nullish(),
   "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
   "xp": zod.number().default(updateProfileResponseXpDefault),
   "badges": zod.array(zod.string())
@@ -209,7 +213,8 @@ export const SendChatMessageBody = zod.object({
   "mimeType": zod.string(),
   "dataUrl": zod.string().describe('Base64 data URL of the attached file (data:<mime>;base64,...)')
 }).optional(),
-  "provider": zod.enum(['openai', 'anthropic', 'gemini']).optional()
+  "provider": zod.enum(['openai', 'anthropic', 'gemini']).optional(),
+  "imageModel": zod.enum(['openai', 'gemini-nano-banana', 'gemini-nano-banana-pro']).optional()
 })
 
 
@@ -243,6 +248,23 @@ export const ForgotPasswordBody = zod.object({
 })
 
 export const ForgotPasswordResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
+ * @summary Reset a password using a reset token
+ */
+export const resetPasswordBodyNewPasswordMin = 8;
+
+
+
+export const ResetPasswordBody = zod.object({
+  "token": zod.string(),
+  "newPassword": zod.string().min(resetPasswordBodyNewPasswordMin)
+})
+
+export const ResetPasswordResponse = zod.object({
   "message": zod.string()
 })
 

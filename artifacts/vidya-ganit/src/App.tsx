@@ -11,6 +11,7 @@ import Success from "@/pages/Success";
 import ForgotPassword from "@/pages/ForgotPassword";
 import StudentDashboard from "@/pages/StudentDashboard";
 import ParentDashboard from "@/pages/ParentDashboard";
+import TutorDashboard from "@/pages/TutorDashboard";
 import Header from "@/components/layout/Header";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ function Router() {
           <Route path="/forgot-password" component={ForgotPassword} />
           <Route path="/dashboard/student" component={StudentDashboard} />
           <Route path="/dashboard/parent" component={ParentDashboard} />
+          <Route path="/dashboard/tutor" component={TutorDashboard} />
           <Route component={NotFound} />
         </Switch>
       </main>

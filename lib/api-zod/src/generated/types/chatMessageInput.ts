@@ -7,6 +7,7 @@
  */
 import type { ChatAttachment } from './chatAttachment';
 import type { ChatHistoryItem } from './chatHistoryItem';
+import type { ChatMessageInputImageModel } from './chatMessageInputImageModel';
 import type { ChatMessageInputLanguage } from './chatMessageInputLanguage';
 import type { ChatMessageInputProvider } from './chatMessageInputProvider';
 
@@ -18,4 +19,5 @@ export interface ChatMessageInput {
   history?: ChatHistoryItem[];
   attachment?: ChatAttachment;
   provider?: ChatMessageInputProvider;
+  imageModel?: ChatMessageInputImageModel;
 }

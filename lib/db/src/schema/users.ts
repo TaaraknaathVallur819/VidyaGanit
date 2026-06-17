@@ -14,9 +14,12 @@ export const usersTable = pgTable("users", {
   board: text("board"),
   parentType: text("parent_type"),
   contact: text("contact"),
+  batch: text("batch"),
   language: text("language"),
   xp: integer("xp").notNull().default(0),
   badges: text("badges").array().notNull().default(sql`ARRAY[]::text[]`),
+  resetTokenHash: text("reset_token_hash"),
+  resetTokenExpiresAt: timestamp("reset_token_expires_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

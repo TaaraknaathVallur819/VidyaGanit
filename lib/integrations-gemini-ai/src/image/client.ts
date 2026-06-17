@@ -21,10 +21,11 @@ export const ai = new GoogleGenAI({
 });
 
 export async function generateImage(
-  prompt: string
+  prompt: string,
+  model: string = "gemini-2.5-flash-image"
 ): Promise<{ b64_json: string; mimeType: string }> {
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash-image",
+    model,
     contents: [{ role: "user", parts: [{ text: prompt }] }],
     config: {
       responseModalities: [Modality.TEXT, Modality.IMAGE],

@@ -25,4 +25,6 @@ export interface UserRegistrationInput {
   parentType?: UserRegistrationInputParentType;
   /** @nullable */
   contact?: string | null;
+  /** @nullable */
+  batch?: string | null;
 }

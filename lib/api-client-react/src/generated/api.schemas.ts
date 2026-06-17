@@ -15,6 +15,7 @@ export type UserRegistrationInputRole = typeof UserRegistrationInputRole[keyof t
 export const UserRegistrationInputRole = {
   student: 'student',
   parent: 'parent',
+  tutor: 'tutor',
 } as const;
 
 export type UserRegistrationInputGender = typeof UserRegistrationInputGender[keyof typeof UserRegistrationInputGender];
@@ -64,6 +65,8 @@ export interface UserRegistrationInput {
   parentType?: UserRegistrationInputParentType;
   /** @nullable */
   contact?: string | null;
+  /** @nullable */
+  batch?: string | null;
 }
 
 export interface LoginInput {
@@ -76,12 +79,19 @@ export interface ForgotPasswordInput {
   contact: string;
 }
 
+export interface ResetPasswordInput {
+  token: string;
+  /** @minLength 8 */
+  newPassword: string;
+}
+
 export type UserProfileRole = typeof UserProfileRole[keyof typeof UserProfileRole];
 
 
 export const UserProfileRole = {
   student: 'student',
   parent: 'parent',
+  tutor: 'tutor',
 } as const;
 
 export type UserProfileGender = typeof UserProfileGender[keyof typeof UserProfileGender];
@@ -137,6 +147,8 @@ export interface UserProfile {
   parentType?: string | null;
   /** @nullable */
   contact?: string | null;
+  /** @nullable */
+  batch?: string | null;
   /** @nullable */
   language?: UserProfileLanguage;
   xp: number;
@@ -237,6 +249,15 @@ export const ChatMessageInputProvider = {
   gemini: 'gemini',
 } as const;
 
+export type ChatMessageInputImageModel = typeof ChatMessageInputImageModel[keyof typeof ChatMessageInputImageModel];
+
+
+export const ChatMessageInputImageModel = {
+  openai: 'openai',
+  'gemini-nano-banana': 'gemini-nano-banana',
+  'gemini-nano-banana-pro': 'gemini-nano-banana-pro',
+} as const;
+
 export type ChatHistoryItemRole = typeof ChatHistoryItemRole[keyof typeof ChatHistoryItemRole];
 
 
@@ -265,6 +286,7 @@ export interface ChatMessageInput {
   history?: ChatHistoryItem[];
   attachment?: ChatAttachment;
   provider?: ChatMessageInputProvider;
+  imageModel?: ChatMessageInputImageModel;
 }
 
 export interface LinkStudentInput {

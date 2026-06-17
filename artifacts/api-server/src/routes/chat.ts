@@ -7,7 +7,7 @@ import { detectTopic, buildTutorSystemPrompt, type ChatEntry } from "../lib/tuto
 import { normalizeLanguage } from "../lib/counselor";
 import { computeXpAndBadges } from "../lib/xp";
 import { streamChat, normalizeProvider, type ChatImage } from "../lib/aiChat";
-import { generateImageBuffer } from "@workspace/integrations-openai-ai-server/image";
+import { generateImageDataUrl, normalizeImageModel } from "../lib/aiImage";
 import { requireAuth } from "../middlewares/auth";
 import { rateLimit } from "../middlewares/rateLimit";
 
@@ -208,6 +208,7 @@ router.post(
   }
 
   const provider = normalizeProvider(parsed.data.provider);
+  const imageModel = normalizeImageModel(parsed.data.imageModel);
 
   try {
     const stream = streamChat({
@@ -250,7 +251,8 @@ router.post(
   if (imagePrompt) {
     send({ drawing: true });
     try {
-      const buffer = await generateImageBuffer(
+      const dataUrl = await generateImageDataUrl(
+        imageModel,
         [
           "Create ONE accurate educational maths diagram for a primary-school child (ages 9–13).",
           "Draw EXACTLY and ONLY what the description says, with the correct quantities, groupings, divisions, shading and labels. The diagram must be mathematically correct: counts must match exactly (if it says 3 rows of 4, draw exactly 3 rows of 4), shapes and proportions must be right, and every required label must be present and legible.",
@@ -260,10 +262,9 @@ router.post(
           "",
           `Diagram to draw: ${imagePrompt}`,
         ].join("\n"),
-        "1024x1024",
       );
       send({
-        image: `data:image/png;base64,${buffer.toString("base64")}`,
+        image: dataUrl,
         imageAlt: imagePrompt,
       });
     } catch (err) {

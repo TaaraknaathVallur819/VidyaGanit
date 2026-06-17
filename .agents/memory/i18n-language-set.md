@@ -28,6 +28,6 @@ code, the AI tutor/counselor silently replies in English.
 **How to apply:** When adding/removing a UI language, update all three places
 together and regenerate codegen. Per-language UI strings live one-file-per-code
 in `src/lib/locales/`; the English dict inside `i18n.tsx` (`const en`) is the
-source of truth for keys (currently 182). Missing keys fall back to English via
+source of truth for keys (~190). Missing keys fall back to English via
 `DICTS[lang][key] ?? en[key] ?? key`, so partial dicts won't crash but won't be
 fully translated.

@@ -212,6 +212,16 @@ const dict: Record<string, string> = {
   "chat.err.rateLimit": "वाह, थोड़ा हौले! 😅 छोटा जेहा साह् लेओ ते इक पल बाद फ्ही कोशिश करो।",
   "chat.err.connect": "ओह्ओ! मिगी जुड़ने च दिक्कत आई। 😅 किरपा करियै फ्ही कोशिश करो!",
   "chat.badgeUnlocked": "🎉 बैज अनलॉक होई गेआ!",
+
+  // Tutor accounts & image model
+  "chat.imageModel": "तस्वीर मॉडल",
+  "auth.iAmTutor": "मैं इक अध्यापक आं",
+  "auth.batch": "बैच",
+  "auth.batchPlaceholder": "जि’यां जमात ६ – सवेर",
+  "auth.loginAs": "मैं लॉग इन करा’रा आं",
+  "auth.roleMismatch": "एह आईडी उस भूमिका लेई रजिस्टर नेईं ऐ। किरपा करियै सही चुनो।",
+  "tutor.title": "अध्यापक डैशबोर्ड",
+  "tutor.batch": "बैच",
 };
 
 export default dict;

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { UserCircle, Users } from "lucide-react";
+import { UserCircle, Users, GraduationCap } from "lucide-react";
 import { useRegisterUser, useLoginUser } from "@workspace/api-client-react";
 import { useAuth } from "@/lib/auth";
 import { useLanguage } from "@/lib/i18n";
@@ -38,7 +38,7 @@ const MAJOR_BOARDS = [
 ];
 
 type Mode = "login" | "register";
-type Role = "student" | "parent";
+type Role = "student" | "parent" | "tutor";
 type Gender = "male" | "female";
 type ParentType = "father" | "mother";
 type StudentClass = "4" | "5" | "6" | "7";
@@ -81,6 +81,7 @@ export default function Auth() {
   const [role, setRole] = useState<Role>("student");
 
   // Login state
+  const [loginRole, setLoginRole] = useState<Role>("student");
   const [loginId, setLoginId] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -88,6 +89,7 @@ export default function Auth() {
   // Register state
   const [regName, setRegName] = useState("");
   const [regContact, setRegContact] = useState("");
+  const [regBatch, setRegBatch] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [nameError, setNameError] = useState("");
   const [gender, setGender] = useState<Gender | null>(null);
@@ -101,7 +103,7 @@ export default function Auth() {
 
   useEffect(() => {
     setLoginError("");
-  }, [loginId, loginPassword]);
+  }, [loginId, loginPassword, loginRole]);
 
   const getPasswordStrength = (pwd: string) => {
     if (!pwd) return { label: "", color: "", barColor: "", level: 0 };
@@ -134,7 +136,9 @@ export default function Auth() {
     gender !== null &&
     (role === "student"
       ? studentClass !== null && resolvedBoard.length > 0
-      : parentType !== null);
+      : role === "parent"
+        ? parentType !== null
+        : regBatch.trim().length > 0 && regContact.trim().length > 0);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,6 +147,10 @@ export default function Auth() {
       { data: { vidyaId: loginId.trim(), password: loginPassword } },
       {
         onSuccess: (user) => {
+          if (user.role !== loginRole) {
+            setLoginError(t("auth.roleMismatch"));
+            return;
+          }
           setUser(user);
           syncFromAccount(user.language);
           setLocation(`/dashboard/${user.role}`);
@@ -170,7 +178,11 @@ export default function Auth() {
           studentClass: role === "student" ? studentClass : null,
           board: role === "student" ? resolvedBoard || null : null,
           parentType: role === "parent" ? parentType : null,
-          contact: role === "parent" ? regContact.trim() || null : null,
+          contact:
+            role === "parent" || role === "tutor"
+              ? regContact.trim() || null
+              : null,
+          batch: role === "tutor" ? regBatch.trim() || null : null,
         },
       },
       {
@@ -222,6 +234,15 @@ export default function Auth() {
                 <div className="text-center space-y-2 mb-8">
                   <h2 className="text-2xl font-bold text-foreground">{t("auth.welcomeBack")}</h2>
                   <p className="text-muted-foreground text-sm">{t("auth.welcomeBackSub")}</p>
+                </div>
+
+                <div className="space-y-2 mb-4">
+                  <Label className="text-foreground font-medium">{t("auth.loginAs")}</Label>
+                  <div className="flex gap-2">
+                    <TileButton selected={loginRole === "student"} onClick={() => setLoginRole("student")} testId="tile-login-student">{t("auth.iAmStudent")}</TileButton>
+                    <TileButton selected={loginRole === "parent"} onClick={() => setLoginRole("parent")} testId="tile-login-parent">{t("auth.iAmParent")}</TileButton>
+                    <TileButton selected={loginRole === "tutor"} onClick={() => setLoginRole("tutor")} testId="tile-login-tutor">{t("auth.iAmTutor")}</TileButton>
+                  </div>
                 </div>
 
                 <div className="space-y-4">
@@ -298,15 +319,15 @@ export default function Auth() {
                 </div>
 
                 {/* Role tiles */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-3">
                   <button
                     type="button"
                     data-testid="tile-role-student"
                     onClick={() => setRole("student")}
                     className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all gap-2 ${role === "student" ? "border-primary bg-primary/5 text-primary" : "border-muted bg-white text-muted-foreground hover:border-primary/30"}`}
                   >
-                    <UserCircle className="w-8 h-8" />
-                    <span className="font-semibold">{t("auth.iAmStudent")}</span>
+                    <UserCircle className="w-7 h-7" />
+                    <span className="font-semibold text-sm text-center">{t("auth.iAmStudent")}</span>
                   </button>
                   <button
                     type="button"
@@ -314,8 +335,17 @@ export default function Auth() {
                     onClick={() => setRole("parent")}
                     className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all gap-2 ${role === "parent" ? "border-primary bg-primary/5 text-primary" : "border-muted bg-white text-muted-foreground hover:border-primary/30"}`}
                   >
-                    <Users className="w-8 h-8" />
-                    <span className="font-semibold">{t("auth.iAmParent")}</span>
+                    <Users className="w-7 h-7" />
+                    <span className="font-semibold text-sm text-center">{t("auth.iAmParent")}</span>
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="tile-role-tutor"
+                    onClick={() => setRole("tutor")}
+                    className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all gap-2 ${role === "tutor" ? "border-primary bg-primary/5 text-primary" : "border-muted bg-white text-muted-foreground hover:border-primary/30"}`}
+                  >
+                    <GraduationCap className="w-7 h-7" />
+                    <span className="font-semibold text-sm text-center">{t("auth.iAmTutor")}</span>
                   </button>
                 </div>
 
@@ -414,8 +444,24 @@ export default function Auth() {
                   </div>
                 </div>
 
-                {/* Parent contact */}
-                {role === "parent" && (
+                {/* Tutor batch */}
+                {role === "tutor" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-batch" className="text-foreground font-medium">{t("auth.batch")}</Label>
+                    <Input
+                      id="reg-batch"
+                      data-testid="input-register-batch"
+                      value={regBatch}
+                      onChange={(e) => setRegBatch(e.target.value)}
+                      placeholder={t("auth.batchPlaceholder")}
+                      className="h-12 text-lg px-4 bg-gray-50 border-gray-200"
+                      required
+                    />
+                  </div>
+                )}
+
+                {/* Parent / Tutor contact */}
+                {(role === "parent" || role === "tutor") && (
                   <div className="space-y-2">
                     <Label htmlFor="reg-contact" className="text-foreground font-medium">{t("auth.emailOrPhone")}</Label>
                     <Input

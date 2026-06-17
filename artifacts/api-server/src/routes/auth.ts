@@ -1,20 +1,39 @@
-import { Router, type IRouter, type Response } from "express";
+import { Router, type IRouter, type Response, type Request } from "express";
 import bcrypt from "bcryptjs";
-import { eq } from "drizzle-orm";
+import { randomBytes, createHash } from "node:crypto";
+import { and, eq, gt } from "drizzle-orm";
 import { db, usersTable } from "@workspace/db";
 import {
   RegisterUserBody,
   LoginUserBody,
   ForgotPasswordBody,
+  ResetPasswordBody,
   LoginUserResponse,
 } from "@workspace/api-zod";
 import { signSession, SESSION_COOKIE, SESSION_MAX_AGE_MS } from "../lib/session";
+import { sendPasswordResetEmail } from "../lib/email";
 
 const router: IRouter = Router();
 
-function generateVidyaId(role: "student" | "parent"): string {
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+function generateVidyaId(role: "student" | "parent" | "tutor"): string {
   const digits = Math.floor(10000 + Math.random() * 90000).toString();
-  return role === "student" ? `VG-STU-${digits}` : `VG-PAR-${digits}`;
+  const prefix = role === "student" ? "VG-STU-" : role === "parent" ? "VG-PAR-" : "VG-TUT-";
+  return `${prefix}${digits}`;
+}
+
+function hashResetToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+/** Derive the public origin the browser used, so reset links point back to the app. */
+function publicOrigin(req: Request): string {
+  return (
+    process.env.PUBLIC_APP_URL ||
+    req.get("origin") ||
+    `${req.protocol}://${req.get("host")}`
+  ).replace(/\/$/, "");
 }
 
 function setSessionCookie(res: Response, vidyaId: string): void {
@@ -27,6 +46,23 @@ function setSessionCookie(res: Response, vidyaId: string): void {
   });
 }
 
+function profileResponse(user: typeof usersTable.$inferSelect) {
+  return LoginUserResponse.parse({
+    vidyaId: user.vidyaId,
+    name: user.name,
+    role: user.role,
+    gender: user.gender,
+    studentClass: user.studentClass ?? null,
+    board: user.board ?? null,
+    parentType: user.parentType ?? null,
+    contact: user.contact ?? null,
+    batch: user.batch ?? null,
+    language: user.language ?? null,
+    xp: user.xp ?? 0,
+    badges: user.badges ?? [],
+  });
+}
+
 router.post("/auth/register", async (req, res): Promise<void> => {
   const parsed = RegisterUserBody.safeParse(req.body);
   if (!parsed.success) {
@@ -34,7 +70,8 @@ router.post("/auth/register", async (req, res): Promise<void> => {
     return;
   }
 
-  const { name, password, role, gender, studentClass, board, parentType, contact } = parsed.data;
+  const { name, password, role, gender, studentClass, board, parentType, contact, batch } =
+    parsed.data;
 
   const [existing] = await db
     .select()
@@ -61,27 +98,14 @@ router.post("/auth/register", async (req, res): Promise<void> => {
       board: board ?? null,
       parentType: parentType ?? null,
       contact: contact ?? null,
+      batch: batch ?? null,
     })
     .returning();
 
-  req.log.info({ vidyaId }, "New account registered");
+  req.log.info({ vidyaId, role }, "New account registered");
 
   setSessionCookie(res, user.vidyaId);
-  res.status(201).json(
-    LoginUserResponse.parse({
-      vidyaId: user.vidyaId,
-      name: user.name,
-      role: user.role,
-      gender: user.gender,
-      studentClass: user.studentClass ?? null,
-      board: user.board ?? null,
-      parentType: user.parentType ?? null,
-      contact: user.contact ?? null,
-      language: user.language ?? null,
-      xp: user.xp ?? 0,
-      badges: user.badges ?? [],
-    }),
-  );
+  res.status(201).json(profileResponse(user));
 });
 
 router.post("/auth/login", async (req, res): Promise<void> => {
@@ -112,21 +136,7 @@ router.post("/auth/login", async (req, res): Promise<void> => {
   req.log.info({ vidyaId }, "User logged in");
 
   setSessionCookie(res, user.vidyaId);
-  res.json(
-    LoginUserResponse.parse({
-      vidyaId: user.vidyaId,
-      name: user.name,
-      role: user.role,
-      gender: user.gender,
-      studentClass: user.studentClass ?? null,
-      board: user.board ?? null,
-      parentType: user.parentType ?? null,
-      contact: user.contact ?? null,
-      language: user.language ?? null,
-      xp: user.xp ?? 0,
-      badges: user.badges ?? [],
-    }),
-  );
+  res.json(profileResponse(user));
 });
 
 router.post("/auth/forgot-password", async (req, res): Promise<void> => {
@@ -138,25 +148,94 @@ router.post("/auth/forgot-password", async (req, res): Promise<void> => {
 
   const { vidyaId, contact } = parsed.data;
 
+  // Uniform response for every branch so this endpoint never reveals whether an
+  // account exists, whether it has a recovery contact, or whether the supplied
+  // contact matched — preventing account enumeration.
+  const genericResponse = () => {
+    res.json({
+      message:
+        "If those details match an account, a password reset link has been sent to your registered contact.",
+    });
+  };
+
   const [user] = await db
     .select()
     .from(usersTable)
     .where(eq(usersTable.vidyaId, vidyaId));
 
-  if (!user) {
-    res.status(404).json({ error: "We couldn't find an account with those details." });
+  // A reset link is only ever sent when (a) the account exists, (b) it has a
+  // stored recovery contact, and (c) the supplied contact matches that stored
+  // contact. The link is always sent to the *stored* contact, never to the
+  // request-supplied value — otherwise anyone could redirect a reset to an
+  // address they control and take over the account.
+  const normalised = (s: string) => s.trim().toLowerCase();
+  if (
+    !user ||
+    !user.contact ||
+    normalised(user.contact) !== normalised(contact)
+  ) {
+    genericResponse();
     return;
   }
 
-  if (user.contact) {
-    const normalised = (s: string) => s.trim().toLowerCase();
-    if (normalised(user.contact) !== normalised(contact)) {
-      res.status(404).json({ error: "We couldn't find an account with those details." });
-      return;
-    }
+  // Generate a single-use reset token; only its SHA-256 hash is persisted.
+  const token = randomBytes(32).toString("hex");
+  const resetTokenHash = hashResetToken(token);
+  const resetTokenExpiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS);
+
+  await db
+    .update(usersTable)
+    .set({ resetTokenHash, resetTokenExpiresAt })
+    .where(eq(usersTable.vidyaId, user.vidyaId));
+
+  const link = `${publicOrigin(req)}/forgot-password?token=${token}`;
+
+  try {
+    await sendPasswordResetEmail({ to: user.contact.trim(), link, log: req.log });
+  } catch (err) {
+    req.log.error({ err, vidyaId }, "failed to send password reset email");
   }
 
-  res.json({ message: "A password reset link has been sent to your registered contact! (Mock feature for now)." });
+  genericResponse();
+});
+
+router.post("/auth/reset-password", async (req, res): Promise<void> => {
+  const parsed = ResetPasswordBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  const { token, newPassword } = parsed.data;
+  const resetTokenHash = hashResetToken(token);
+
+  const [user] = await db
+    .select()
+    .from(usersTable)
+    .where(
+      and(
+        eq(usersTable.resetTokenHash, resetTokenHash),
+        gt(usersTable.resetTokenExpiresAt, new Date()),
+      ),
+    );
+
+  if (!user) {
+    res.status(400).json({
+      error: "This reset link is invalid or has expired. Please request a new one.",
+    });
+    return;
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+
+  await db
+    .update(usersTable)
+    .set({ passwordHash, resetTokenHash: null, resetTokenExpiresAt: null })
+    .where(eq(usersTable.vidyaId, user.vidyaId));
+
+  req.log.info({ vidyaId: user.vidyaId }, "Password reset via token");
+
+  res.json({ message: "Your password has been reset! You can now log in with your new password." });
 });
 
 export default router;

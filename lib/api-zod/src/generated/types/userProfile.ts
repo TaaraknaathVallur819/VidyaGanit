@@ -23,6 +23,8 @@ export interface UserProfile {
   /** @nullable */
   contact?: string | null;
   /** @nullable */
+  batch?: string | null;
+  /** @nullable */
   language?: UserProfileLanguage;
   xp: number;
   badges: string[];
