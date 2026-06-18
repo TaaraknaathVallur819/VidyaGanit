@@ -417,6 +417,25 @@ const en: Dict = {
   // AI Coach (tutor) + read-aloud
   "chat.readAloud": "Read aloud",
   "tab.coach": "AI Coach",
+
+  // Recommended next lesson
+  "recommend.title": "Recommended Next Lesson",
+  "recommend.subtitle": "Where to focus next, based on practice and tests.",
+  "recommend.focus": "Suggested lesson",
+  "recommend.reason.not_started": "Not started yet",
+  "recommend.reason.needs_practice": "Needs more practice",
+  "recommend.reason.low_score": "Recent test score was low",
+  "recommend.reason.next_up": "Ready for the next challenge",
+  "recommend.allMastered": "Brilliant! Every topic this year is looking strong.",
+  "recommend.empty": "Once practice begins, a tailored next lesson will appear here.",
+
+  // Curriculum planner (tutor)
+  "tab.curriculum": "Curriculum",
+  "curriculum.title": "Curriculum Planner",
+  "curriculum.subtitle": "Browse the maths syllabus class by class to plan your lessons.",
+  "curriculum.class": "Class",
+  "curriculum.lessonsLabel": "Lessons",
+  "curriculum.loading": "Loading curriculum…",
   "coach.title": "Ask your Coach",
   "coach.placeholder": "Ask for teaching ideas…",
   "coach.welcome":
@@ -755,6 +774,25 @@ const ta: Dict = {
   // AI Coach (tutor) + read-aloud
   "chat.readAloud": "உரக்கப் படியுங்கள்",
   "tab.coach": "AI பயிற்சியாளர்",
+
+  // Recommended next lesson
+  "recommend.title": "பரிந்துரைக்கப்பட்ட அடுத்த பாடம்",
+  "recommend.subtitle": "பயிற்சி மற்றும் தேர்வுகளின் அடிப்படையில் அடுத்து எங்கே கவனம் செலுத்த வேண்டும்.",
+  "recommend.focus": "பரிந்துரைக்கப்பட்ட பாடம்",
+  "recommend.reason.not_started": "இன்னும் தொடங்கவில்லை",
+  "recommend.reason.needs_practice": "மேலும் பயிற்சி தேவை",
+  "recommend.reason.low_score": "சமீபத்திய தேர்வு மதிப்பெண் குறைவாக இருந்தது",
+  "recommend.reason.next_up": "அடுத்த சவாலுக்குத் தயார்",
+  "recommend.allMastered": "அருமை! இந்த ஆண்டின் அனைத்து தலைப்புகளும் வலுவாக உள்ளன.",
+  "recommend.empty": "பயிற்சி தொடங்கியதும், ஏற்ற அடுத்த பாடம் இங்கே தோன்றும்.",
+
+  // Curriculum planner (tutor)
+  "tab.curriculum": "பாடத்திட்டம்",
+  "curriculum.title": "பாடத்திட்ட திட்டமிடல்",
+  "curriculum.subtitle": "உங்கள் பாடங்களைத் திட்டமிட வகுப்பு வாரியாக கணிதப் பாடத்திட்டத்தைப் பாருங்கள்.",
+  "curriculum.class": "வகுப்பு",
+  "curriculum.lessonsLabel": "பாடங்கள்",
+  "curriculum.loading": "பாடத்திட்டம் ஏற்றப்படுகிறது…",
   "coach.title": "உங்கள் பயிற்சியாளரிடம் கேளுங்கள்",
   "coach.placeholder": "கற்பித்தல் யோசனைகளைக் கேளுங்கள்…",
   "coach.welcome":
@@ -1093,6 +1131,25 @@ const hi: Dict = {
   // AI Coach (tutor) + read-aloud
   "chat.readAloud": "ज़ोर से पढ़ें",
   "tab.coach": "AI कोच",
+
+  // Recommended next lesson
+  "recommend.title": "अनुशंसित अगला पाठ",
+  "recommend.subtitle": "अभ्यास और परीक्षाओं के आधार पर आगे कहाँ ध्यान दें।",
+  "recommend.focus": "सुझाया गया पाठ",
+  "recommend.reason.not_started": "अभी शुरू नहीं किया",
+  "recommend.reason.needs_practice": "और अभ्यास की ज़रूरत है",
+  "recommend.reason.low_score": "हाल की परीक्षा का स्कोर कम था",
+  "recommend.reason.next_up": "अगली चुनौती के लिए तैयार",
+  "recommend.allMastered": "शानदार! इस साल के सभी विषय मज़बूत दिख रहे हैं।",
+  "recommend.empty": "अभ्यास शुरू होते ही यहाँ एक उपयुक्त अगला पाठ दिखेगा।",
+
+  // Curriculum planner (tutor)
+  "tab.curriculum": "पाठ्यक्रम",
+  "curriculum.title": "पाठ्यक्रम योजनाकार",
+  "curriculum.subtitle": "अपने पाठ की योजना के लिए कक्षा-दर-कक्षा गणित पाठ्यक्रम देखें।",
+  "curriculum.class": "कक्षा",
+  "curriculum.lessonsLabel": "पाठ",
+  "curriculum.loading": "पाठ्यक्रम लोड हो रहा है…",
   "coach.title": "अपने कोच से पूछें",
   "coach.placeholder": "पढ़ाने के तरीके पूछें…",
   "coach.welcome":
@@ -1431,6 +1488,25 @@ const te: Dict = {
   // AI Coach (tutor) + read-aloud
   "chat.readAloud": "గట్టిగా చదవండి",
   "tab.coach": "AI కోచ్",
+
+  // Recommended next lesson
+  "recommend.title": "సిఫార్సు చేయబడిన తదుపరి పాఠం",
+  "recommend.subtitle": "అభ్యాసం మరియు పరీక్షల ఆధారంగా తదుపరి ఎక్కడ దృష్టి పెట్టాలి.",
+  "recommend.focus": "సూచించిన పాఠం",
+  "recommend.reason.not_started": "ఇంకా ప్రారంభించలేదు",
+  "recommend.reason.needs_practice": "మరింత అభ్యాసం అవసరం",
+  "recommend.reason.low_score": "ఇటీవలి పరీక్ష స్కోరు తక్కువగా ఉంది",
+  "recommend.reason.next_up": "తదుపరి సవాలుకు సిద్ధం",
+  "recommend.allMastered": "అద్భుతం! ఈ సంవత్సరం అన్ని అంశాలు బలంగా కనిపిస్తున్నాయి.",
+  "recommend.empty": "అభ్యాసం ప్రారంభమైన తర్వాత, తగిన తదుపరి పాఠం ఇక్కడ కనిపిస్తుంది.",
+
+  // Curriculum planner (tutor)
+  "tab.curriculum": "పాఠ్యప్రణాళిక",
+  "curriculum.title": "పాఠ్యప్రణాళిక ప్లానర్",
+  "curriculum.subtitle": "మీ పాఠాలను ప్లాన్ చేయడానికి తరగతి వారీగా గణిత సిలబస్‌ను చూడండి.",
+  "curriculum.class": "తరగతి",
+  "curriculum.lessonsLabel": "పాఠాలు",
+  "curriculum.loading": "పాఠ్యప్రణాళిక లోడ్ అవుతోంది…",
   "coach.title": "మీ కోచ్‌ను అడగండి",
   "coach.placeholder": "బోధన ఆలోచనల కోసం అడగండి…",
   "coach.welcome":

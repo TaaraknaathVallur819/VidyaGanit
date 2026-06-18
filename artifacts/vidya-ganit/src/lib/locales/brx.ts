@@ -331,6 +331,25 @@ const dict: Record<string, string> = {
   "report.points": "points",
   "report.myScores": "My Test Scores",
   "report.testReports": "Test Reports",
+  // Recommended next lesson
+  "recommend.title": "Recommended Next Lesson",
+  "recommend.subtitle": "Where to focus next, based on practice and tests.",
+  "recommend.focus": "Suggested lesson",
+  "recommend.reason.not_started": "Not started yet",
+  "recommend.reason.needs_practice": "Needs more practice",
+  "recommend.reason.low_score": "Recent test score was low",
+  "recommend.reason.next_up": "Ready for the next challenge",
+  "recommend.allMastered": "Brilliant! Every topic this year is looking strong.",
+  "recommend.empty": "Once practice begins, a tailored next lesson will appear here.",
+
+  // Curriculum planner (tutor)
+  "tab.curriculum": "Curriculum",
+  "curriculum.title": "Curriculum Planner",
+  "curriculum.subtitle": "Browse the maths syllabus class by class to plan your lessons.",
+  "curriculum.class": "Class",
+  "curriculum.lessonsLabel": "Lessons",
+  "curriculum.loading": "Loading curriculum…",
+
 };
 
 export default dict;

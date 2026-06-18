@@ -30,6 +30,7 @@ import type {
   ConsultantHistoryResponse,
   ConsultantMessageInput,
   ConsultantSessionsResponse,
+  CurriculumResponse,
   ErrorResponse,
   ForgotPasswordInput,
   GameScoreInput,
@@ -43,6 +44,7 @@ import type {
   LoginInput,
   MessageResponse,
   ProfileUpdate,
+  RecommendationResponse,
   ResetPasswordInput,
   StudentAnalytics,
   StudentHistoryResponse,
@@ -2002,6 +2004,165 @@ export function useGetStudentAssessments<TData = Awaited<ReturnType<typeof getSt
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetStudentAssessmentsQueryOptions(vidyaId,studentVidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetStudentRecommendationUrl = (vidyaId: string,
+    studentVidyaId: string,) => {
+
+
+
+
+  return `/api/parent/${vidyaId}/students/${studentVidyaId}/recommendation`
+}
+
+/**
+ * @summary Recommended next lesson(s) for a linked student, based on progress
+ */
+export const getStudentRecommendation = async (vidyaId: string,
+    studentVidyaId: string, options?: RequestInit): Promise<RecommendationResponse> => {
+
+  return customFetch<RecommendationResponse>(getGetStudentRecommendationUrl(vidyaId,studentVidyaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStudentRecommendationQueryKey = (vidyaId: string,
+    studentVidyaId: string,) => {
+    return [
+    `/api/parent/${vidyaId}/students/${studentVidyaId}/recommendation`
+    ] as const;
+    }
+
+
+export const getGetStudentRecommendationQueryOptions = <TData = Awaited<ReturnType<typeof getStudentRecommendation>>, TError = ErrorType<ErrorResponse>>(vidyaId: string,
+    studentVidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentRecommendation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentRecommendationQueryKey(vidyaId,studentVidyaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentRecommendation>>> = ({ signal }) => getStudentRecommendation(vidyaId,studentVidyaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId && studentVidyaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStudentRecommendation>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStudentRecommendationQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentRecommendation>>>
+export type GetStudentRecommendationQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Recommended next lesson(s) for a linked student, based on progress
+ */
+
+export function useGetStudentRecommendation<TData = Awaited<ReturnType<typeof getStudentRecommendation>>, TError = ErrorType<ErrorResponse>>(
+ vidyaId: string,
+    studentVidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentRecommendation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStudentRecommendationQueryOptions(vidyaId,studentVidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetClassCurriculumUrl = (studentClass: '4' | '5' | '6' | '7',) => {
+
+
+
+
+  return `/api/curriculum/${studentClass}`
+}
+
+/**
+ * @summary Maths curriculum units for a class (4–7)
+ */
+export const getClassCurriculum = async (studentClass: '4' | '5' | '6' | '7', options?: RequestInit): Promise<CurriculumResponse> => {
+
+  return customFetch<CurriculumResponse>(getGetClassCurriculumUrl(studentClass),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetClassCurriculumQueryKey = (studentClass: '4' | '5' | '6' | '7',) => {
+    return [
+    `/api/curriculum/${studentClass}`
+    ] as const;
+    }
+
+
+export const getGetClassCurriculumQueryOptions = <TData = Awaited<ReturnType<typeof getClassCurriculum>>, TError = ErrorType<ErrorResponse>>(studentClass: '4' | '5' | '6' | '7', options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getClassCurriculum>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetClassCurriculumQueryKey(studentClass);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getClassCurriculum>>> = ({ signal }) => getClassCurriculum(studentClass, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(studentClass), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getClassCurriculum>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetClassCurriculumQueryResult = NonNullable<Awaited<ReturnType<typeof getClassCurriculum>>>
+export type GetClassCurriculumQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Maths curriculum units for a class (4–7)
+ */
+
+export function useGetClassCurriculum<TData = Awaited<ReturnType<typeof getClassCurriculum>>, TError = ErrorType<ErrorResponse>>(
+ studentClass: '4' | '5' | '6' | '7', options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getClassCurriculum>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetClassCurriculumQueryOptions(studentClass,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

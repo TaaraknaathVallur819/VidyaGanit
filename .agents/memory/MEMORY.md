@@ -1,4 +1,5 @@
 - [AI tutor chat](ai-tutor-chat.md) — SSE chat contract, gpt-5.4/gpt-image-1, [[DRAW]] marker stripping, vidyaId-trust caveat
+- [Recommendation mastery weighting](recommendation-mastery-weighting.md) — next-lesson engine weights graded test 0.7 over chat practice 0.3; equal-average regressed perfect-test topics
 - [Password reset flow](password-reset-flow.md) — reset link goes to STORED contact only; uniform response; no-contact accounts get no link (anti-takeover/enumeration)
 - [api-server externals](api-server-externals.md) — packages matched by build.mjs `external` (e.g. @google/genai) must be DIRECT api-server deps or dist crashes with ERR_MODULE_NOT_FOUND
 - [i18n language set](i18n-language-set.md) — 23-code UI language set must stay synced across i18n.tsx, counselor.ts, and 5 openapi.yaml enums (then regen codegen)

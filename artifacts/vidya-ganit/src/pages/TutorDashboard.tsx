@@ -24,6 +24,7 @@ import ProgressAnalytics from "@/components/parent/ProgressAnalytics";
 import VoiceSettings from "@/components/VoiceSettings";
 import SavedHistory from "@/components/parent/SavedHistory";
 import ParentConsultantChat from "@/components/parent/ParentConsultantChat";
+import CurriculumPlanner from "@/components/tutor/CurriculumPlanner";
 import {
   useGetProfile,
   getGetProfileQueryKey,
@@ -271,6 +272,10 @@ export default function TutorDashboard() {
                 <Users2 className="w-4 h-4" />
                 {t("tab.students")}
               </TabsTrigger>
+              <TabsTrigger value="curriculum" className={tabTriggerClass}>
+                <BookOpen className="w-4 h-4" />
+                {t("tab.curriculum")}
+              </TabsTrigger>
               <TabsTrigger value="progress" className={tabTriggerClass}>
                 <TrendingUp className="w-4 h-4" />
                 {t("tab.progress")}
@@ -495,6 +500,13 @@ export default function TutorDashboard() {
                 </CardContent>
               </Card>
             </motion.div>
+          </div>
+        </TabsContent>
+
+        {/* ── Curriculum Tab (tutor only) ── */}
+        <TabsContent value="curriculum" className="mt-0 p-6">
+          <div className="max-w-3xl mx-auto">
+            <CurriculumPlanner />
           </div>
         </TabsContent>
 

@@ -1,4 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
+import { eq } from "drizzle-orm";
+import { db, usersTable } from "@workspace/db";
 import { verifySession, SESSION_COOKIE } from "../lib/session";
 
 /**
@@ -33,6 +35,33 @@ export function requireSelf(
 ): void {
   if (req.vidyaId !== req.params.vidyaId) {
     res.status(403).json({ error: "You can only access your own account." });
+    return;
+  }
+  next();
+}
+
+/**
+ * Must run after `requireAuth`. Rejects authenticated users whose account role
+ * is not `tutor`, so tutor-only surfaces (e.g. curriculum planning) cannot be
+ * reached by parents or students even if they call the API directly.
+ */
+export async function requireTutor(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  const vidyaId = req.vidyaId;
+  if (!vidyaId) {
+    res.status(401).json({ error: "Please log in to continue." });
+    return;
+  }
+  const rows = await db
+    .select({ role: usersTable.role })
+    .from(usersTable)
+    .where(eq(usersTable.vidyaId, vidyaId))
+    .limit(1);
+  if (rows[0]?.role !== "tutor") {
+    res.status(403).json({ error: "This area is for tutors only." });
     return;
   }
   next();

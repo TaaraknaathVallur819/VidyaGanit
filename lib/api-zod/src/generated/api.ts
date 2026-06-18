@@ -593,3 +593,46 @@ export const GetStudentAssessmentsResponse = zod.object({
 })
 
 
+/**
+ * @summary Recommended next lesson(s) for a linked student, based on progress
+ */
+export const GetStudentRecommendationParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "studentVidyaId": zod.coerce.string()
+})
+
+export const GetStudentRecommendationResponse = zod.object({
+  "studentVidyaId": zod.string(),
+  "name": zod.string(),
+  "studentClass": zod.string().nullable(),
+  "allMastered": zod.boolean(),
+  "recommendations": zod.array(zod.object({
+  "unitId": zod.string(),
+  "topic": zod.string(),
+  "title": zod.string(),
+  "lesson": zod.string(),
+  "reason": zod.enum(['not_started', 'needs_practice', 'low_score', 'next_up']),
+  "mastery": zod.number()
+}))
+})
+
+
+/**
+ * @summary Maths curriculum units for a class (4–7)
+ */
+export const GetClassCurriculumParams = zod.object({
+  "studentClass": zod.enum(['4', '5', '6', '7'])
+})
+
+export const GetClassCurriculumResponse = zod.object({
+  "studentClass": zod.string(),
+  "units": zod.array(zod.object({
+  "id": zod.string(),
+  "topic": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "lessons": zod.array(zod.string())
+}))
+})
+
+

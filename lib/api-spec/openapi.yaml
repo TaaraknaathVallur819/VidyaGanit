@@ -722,6 +722,80 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /parent/{vidyaId}/students/{studentVidyaId}/recommendation:
+    get:
+      operationId: getStudentRecommendation
+      tags: [parent]
+      summary: Recommended next lesson(s) for a linked student, based on progress
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: studentVidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Recommended next lessons
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecommendationResponse"
+        "403":
+          description: Student not linked to this parent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Student not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /curriculum/{studentClass}:
+    get:
+      operationId: getClassCurriculum
+      tags: [curriculum]
+      summary: Maths curriculum units for a class (4–7)
+      parameters:
+        - in: path
+          name: studentClass
+          required: true
+          schema:
+            type: string
+            enum: ["4", "5", "6", "7"]
+      responses:
+        "200":
+          description: Curriculum units for the class
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurriculumResponse"
+        "400":
+          description: Unknown class
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Authenticated user is not a tutor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -1363,3 +1437,66 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/AssessmentSummary"
+
+    CurriculumUnit:
+      type: object
+      required: [id, topic, title, description, lessons]
+      properties:
+        id:
+          type: string
+        topic:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        lessons:
+          type: array
+          items:
+            type: string
+
+    CurriculumResponse:
+      type: object
+      required: [studentClass, units]
+      properties:
+        studentClass:
+          type: string
+        units:
+          type: array
+          items:
+            $ref: "#/components/schemas/CurriculumUnit"
+
+    LessonRecommendation:
+      type: object
+      required: [unitId, topic, title, lesson, reason, mastery]
+      properties:
+        unitId:
+          type: string
+        topic:
+          type: string
+        title:
+          type: string
+        lesson:
+          type: string
+        reason:
+          type: string
+          enum: [not_started, needs_practice, low_score, next_up]
+        mastery:
+          type: integer
+
+    RecommendationResponse:
+      type: object
+      required: [studentVidyaId, name, studentClass, allMastered, recommendations]
+      properties:
+        studentVidyaId:
+          type: string
+        name:
+          type: string
+        studentClass:
+          type: ["string", "null"]
+        allMastered:
+          type: boolean
+        recommendations:
+          type: array
+          items:
+            $ref: "#/components/schemas/LessonRecommendation"

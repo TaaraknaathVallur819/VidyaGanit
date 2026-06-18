@@ -664,3 +664,44 @@ export interface AssessmentResultsResponse {
   results: AssessmentSummary[];
 }
 
+export interface CurriculumUnit {
+  id: string;
+  topic: string;
+  title: string;
+  description: string;
+  lessons: string[];
+}
+
+export interface CurriculumResponse {
+  studentClass: string;
+  units: CurriculumUnit[];
+}
+
+export type LessonRecommendationReason = typeof LessonRecommendationReason[keyof typeof LessonRecommendationReason];
+
+
+export const LessonRecommendationReason = {
+  not_started: 'not_started',
+  needs_practice: 'needs_practice',
+  low_score: 'low_score',
+  next_up: 'next_up',
+} as const;
+
+export interface LessonRecommendation {
+  unitId: string;
+  topic: string;
+  title: string;
+  lesson: string;
+  reason: LessonRecommendationReason;
+  mastery: number;
+}
+
+export interface RecommendationResponse {
+  studentVidyaId: string;
+  name: string;
+  /** @nullable */
+  studentClass: string | null;
+  allMastered: boolean;
+  recommendations: LessonRecommendation[];
+}
+

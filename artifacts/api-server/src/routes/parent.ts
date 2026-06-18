@@ -16,6 +16,8 @@ import {
   GetStudentHistoryResponse,
   GetStudentAssessmentsParams,
   GetStudentAssessmentsResponse,
+  GetStudentRecommendationParams,
+  GetStudentRecommendationResponse,
   GetConsultantHistoryParams,
   GetConsultantHistoryResponse,
   ListConsultantSessionsParams,
@@ -29,6 +31,7 @@ import {
   TranscribeConsultantAudioResponse,
 } from "@workspace/api-zod";
 import { detectTopic } from "../lib/tutor";
+import { recommendNextLessons } from "../lib/curriculum";
 import {
   buildCounselorSystemPrompt,
   normalizeLanguage,
@@ -292,6 +295,84 @@ router.get(
           maxScore: r.totalQuestions * r.pointsPerCorrect,
           completedAt: (r.completedAt ?? r.createdAt).toISOString(),
         })),
+      }),
+    );
+  },
+);
+
+// ── Recommended next lesson(s) ──────────────────────────────────────
+router.get(
+  "/parent/:vidyaId/students/:studentVidyaId/recommendation",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = GetStudentRecommendationParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+
+    const student = await getLinkedStudent(params.data.vidyaId, params.data.studentVidyaId);
+    if (!student) {
+      res.status(403).json({ error: "This student is not linked to your account." });
+      return;
+    }
+
+    // 1. Practice activity per topic, across ALL detected topics.
+    const messageRows = await db
+      .select({ content: chatMessagesTable.content })
+      .from(chatMessagesTable)
+      .where(
+        and(
+          eq(chatMessagesTable.studentVidyaId, student.vidyaId),
+          eq(chatMessagesTable.role, "user"),
+        ),
+      );
+
+    const topicCounts = new Map<string, number>();
+    for (const row of messageRows) {
+      const topic = detectTopic(row.content);
+      topicCounts.set(topic, (topicCounts.get(topic) ?? 0) + 1);
+    }
+
+    // 2. Best graded-test percentage per topic (a stronger mastery signal).
+    const assessmentRows = await db
+      .select({
+        topic: assessmentsTable.topic,
+        score: assessmentsTable.score,
+        totalQuestions: assessmentsTable.totalQuestions,
+        pointsPerCorrect: assessmentsTable.pointsPerCorrect,
+      })
+      .from(assessmentsTable)
+      .where(
+        and(
+          eq(assessmentsTable.studentVidyaId, student.vidyaId),
+          eq(assessmentsTable.status, "completed"),
+        ),
+      );
+
+    const assessmentPctByTopic = new Map<string, number>();
+    for (const r of assessmentRows) {
+      const maxScore = r.totalQuestions * r.pointsPerCorrect;
+      if (maxScore <= 0) continue;
+      const pct = Math.round(((r.score ?? 0) / maxScore) * 100);
+      const prev = assessmentPctByTopic.get(r.topic);
+      if (prev === undefined || pct > prev) assessmentPctByTopic.set(r.topic, pct);
+    }
+
+    const { recommendations, allMastered } = recommendNextLessons(
+      student.studentClass,
+      topicCounts,
+      assessmentPctByTopic,
+    );
+
+    res.json(
+      GetStudentRecommendationResponse.parse({
+        studentVidyaId: student.vidyaId,
+        name: student.name,
+        studentClass: student.studentClass ?? null,
+        allMastered,
+        recommendations,
       }),
     );
   },

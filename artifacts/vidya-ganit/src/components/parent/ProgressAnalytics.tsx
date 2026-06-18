@@ -9,6 +9,7 @@ import {
 } from "@workspace/api-client-react";
 import { useLanguage } from "@/lib/i18n";
 import AssessmentReport from "@/components/AssessmentReport";
+import RecommendedLesson from "@/components/parent/RecommendedLesson";
 
 const TOPIC_COLORS: Record<string, string> = {
   fraction: "from-rose-500 to-pink-500",
@@ -66,6 +67,8 @@ export default function ProgressAnalytics({
         </h2>
         <p className="text-sm text-muted-foreground mt-1">{t("progress.subtitle")}</p>
       </div>
+
+      <RecommendedLesson vidyaId={vidyaId} studentVidyaId={studentVidyaId} />
 
       {!hasActivity ? (
         <div className="flex flex-col items-center justify-center py-12 text-center space-y-3 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
