@@ -314,6 +314,60 @@ export function getCurriculum(studentClass: unknown): CurriculumUnit[] {
   return cls ? CURRICULUM[cls] : [];
 }
 
+/** Render one class's units either fully (with lessons) or as a topic list. */
+function renderClassSyllabus(cls: CurriculumClass, detailed: boolean): string {
+  const units = CURRICULUM[cls];
+  if (detailed) {
+    return units.map((u) => `  • ${u.title}: ${u.lessons.join("; ")}`).join("\n");
+  }
+  return units.map((u) => u.title).join(", ");
+}
+
+/**
+ * Builds a compact, board-aware summary of the real Classes 4–7 Indian maths
+ * syllabus to anchor the AI prompts (student tutor, parent counsellor, tutor
+ * coach) in the actual curriculum.
+ *
+ * When `studentClass` is a known class, that class is detailed in full and the
+ * other classes are summarised as topic lists (so the AI understands the
+ * progression). When it is null/unknown (e.g. a tutor with no student selected),
+ * all four classes are detailed in full.
+ */
+export function buildSyllabusKnowledge(
+  studentClass: string | null,
+  board: string | null,
+): string {
+  const cls = normalizeCurriculumClass(studentClass);
+  const boardName = (board ?? "").trim() || "CBSE";
+
+  const lines: string[] = [
+    `INDIAN MATHS SYLLABUS KNOWLEDGE (Classes 4–7):`,
+    `Across Indian school boards — CBSE/NCERT, ICSE (CISCE) and the State Boards (e.g. Maharashtra SSC, Tamil Nadu, Karnataka, UP, West Bengal, etc.) — the core Classes 4–7 maths topics are broadly common, though depth, sequencing, vocabulary and real-life contexts vary by board. The standard topic coverage is:`,
+  ];
+
+  for (const c of CURRICULUM_CLASSES) {
+    if (cls && c === cls) {
+      lines.push(`- Class ${c} (THIS LEARNER'S CLASS — know this in detail):`);
+      lines.push(renderClassSyllabus(c, true));
+    } else if (cls) {
+      lines.push(`- Class ${c}: ${renderClassSyllabus(c, false)}`);
+    } else {
+      lines.push(`- Class ${c}:`);
+      lines.push(renderClassSyllabus(c, true));
+    }
+  }
+
+  lines.push(
+    ``,
+    `BOARD AWARENESS:`,
+    `- This learner follows the ${boardName} board. Tailor the topics, depth, vocabulary and examples to what the ${boardName} board expects at this class level.`,
+    `- CBSE/NCERT is the most common and is the baseline above. ICSE (CISCE) generally covers the same topics with a little more breadth and earlier formal vocabulary. State Boards follow the same NCERT-aligned core but often localise examples, currency and contexts and may reorder chapters across the year.`,
+    `- Stay within the learner's class level: build only on what they would already have met in earlier classes, and do not jump ahead to topics meant for higher classes.`,
+  );
+
+  return lines.join("\n");
+}
+
 /** Why a particular lesson is recommended — the frontend localises this code. */
 export type RecommendationReason =
   | "not_started"

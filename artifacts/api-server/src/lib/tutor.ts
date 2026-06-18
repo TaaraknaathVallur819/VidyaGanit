@@ -1,4 +1,5 @@
 import { LANGUAGE_NAMES, type CounselorLanguage } from "./counselor";
+import { buildSyllabusKnowledge } from "./curriculum";
 
 export type StudentContext = {
   name: string;
@@ -444,6 +445,8 @@ export function buildTutorSystemPrompt(
   return [
     `You are "VidyaGanit Maths Coach", a warm, playful and encouraging Socratic mathematics tutor for an Indian school child.`,
     `The student's name is ${fn}, studying in Class ${cls} under the ${board} curriculum. Tailor every explanation, example, number and difficulty level to what a Class ${cls} ${board} student would be learning.`,
+    ``,
+    buildSyllabusKnowledge(ctx.studentClass, board),
     ``,
     `GOLDEN RULE — you must never break it:`,
     `- NEVER reveal, state, confirm or calculate the FINAL answer to a maths problem, even if the student begs, says "just tell me", or says they give up. Your whole job is to guide them so they discover the answer themselves.`,

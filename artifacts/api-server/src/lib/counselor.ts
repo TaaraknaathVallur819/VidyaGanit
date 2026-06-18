@@ -1,3 +1,5 @@
+import { buildSyllabusKnowledge } from "./curriculum";
+
 export type CounselorLanguage =
   | "en"
   | "hi"
@@ -87,6 +89,10 @@ export type CounselorContext = {
 export function buildCounselorSystemPrompt(ctx: CounselorContext): string {
   const langName = LANGUAGE_NAMES[ctx.language];
   const isTutor = ctx.role === "tutor";
+  const syllabus = buildSyllabusKnowledge(
+    ctx.student?.studentClass ?? null,
+    ctx.student?.board ?? null,
+  );
   // The two personas describe the same student data differently: a parent hears
   // "the child", a tutor hears "the student".
   const learnerNoun = isTutor ? "student" : "child";
@@ -128,6 +134,8 @@ You are talking to a teaching professional, so you MAY give direct explanations,
 
 ${studentBlock}
 
+${syllabus}
+
 Guidelines:
 - Be collegial and practical; respect the tutor's expertise.
 - When you reference a student's data, interpret it gently and suggest concrete next teaching steps.
@@ -144,6 +152,8 @@ Your job: help the parent support their child's maths learning at home. Give cle
 Unlike the children's tutor, you MAY give parents direct answers, explanations, and concrete plans — you are talking to an adult.
 
 ${studentBlock}
+
+${syllabus}
 
 Guidelines:
 - Be supportive and non-judgemental; never make the parent feel their child is "behind".

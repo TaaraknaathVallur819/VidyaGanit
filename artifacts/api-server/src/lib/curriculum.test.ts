@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildSyllabusKnowledge,
   CURRICULUM,
   CURRICULUM_CLASSES,
   getCurriculum,
@@ -104,5 +105,42 @@ describe("recommendNextLessons", () => {
   it("caps recommendations at three", () => {
     const { recommendations } = recommendNextLessons("7", new Map(), new Map());
     expect(recommendations.length).toBeLessThanOrEqual(3);
+  });
+});
+
+describe("buildSyllabusKnowledge", () => {
+  it("names the major Indian boards", () => {
+    const text = buildSyllabusKnowledge("5", "CBSE");
+    expect(text).toContain("CBSE");
+    expect(text).toContain("ICSE");
+    expect(text).toContain("State Board");
+  });
+
+  it("reflects the learner's own board", () => {
+    const text = buildSyllabusKnowledge("6", "ICSE");
+    expect(text).toContain("follows the ICSE board");
+  });
+
+  it("defaults to CBSE when no board is given", () => {
+    const text = buildSyllabusKnowledge("4", null);
+    expect(text).toContain("follows the CBSE board");
+  });
+
+  it("details the learner's class and covers every class 4–7", () => {
+    const text = buildSyllabusKnowledge("6", "CBSE");
+    expect(text).toContain("Class 6 (THIS LEARNER'S CLASS");
+    for (const cls of CURRICULUM_CLASSES) {
+      expect(text).toContain(`Class ${cls}`);
+    }
+    // A class-6 unit title should appear in full detail.
+    expect(text).toContain(CURRICULUM["6"][0].title);
+  });
+
+  it("details all classes when no class is specified (e.g. tutor with no student)", () => {
+    const text = buildSyllabusKnowledge(null, null);
+    // Every class's first unit title should be present in full-detail mode.
+    for (const cls of CURRICULUM_CLASSES) {
+      expect(text).toContain(CURRICULUM[cls][0].title);
+    }
   });
 });
