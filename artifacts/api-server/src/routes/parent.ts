@@ -37,7 +37,7 @@ import {
   normalizeLanguage,
   type CounselorTopicSummary,
 } from "../lib/counselor";
-import { streamChat, normalizeProvider, type ChatImage } from "../lib/aiChat";
+import { streamChat, normalizeChatModel, type ChatImage } from "../lib/aiChat";
 import { generateImageDataUrl, normalizeImageModel } from "../lib/aiImage";
 import { speechToText, ensureCompatibleFormat } from "@workspace/integrations-openai-ai-server/audio";
 import { requireAuth, requireSelf } from "../middlewares/auth";
@@ -722,7 +722,7 @@ router.post(
       userText = message;
     }
 
-    const provider = normalizeProvider(parsed.data.provider);
+    const chatModel = normalizeChatModel(parsed.data.chatModel);
     const imageModel = normalizeImageModel(parsed.data.imageModel);
 
     // The counselor may append a `[[DRAW: ...]]` marker at the very end to
@@ -759,7 +759,8 @@ router.post(
 
     try {
       const stream = streamChat({
-        provider,
+        provider: chatModel.provider,
+        model: chatModel.model,
         system: buildCounselorSystemPrompt({
           parentName: parent.name,
           language,

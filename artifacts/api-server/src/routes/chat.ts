@@ -17,7 +17,7 @@ import {
 } from "../lib/tutor";
 import { normalizeLanguage } from "../lib/counselor";
 import { computeXpAndBadges } from "../lib/xp";
-import { streamChat, normalizeProvider, type ChatImage } from "../lib/aiChat";
+import { streamChat, normalizeChatModel, type ChatImage } from "../lib/aiChat";
 import { generateImageDataUrl, normalizeImageModel } from "../lib/aiImage";
 import { requireAuth, requireSelf } from "../middlewares/auth";
 import { rateLimit } from "../middlewares/rateLimit";
@@ -242,12 +242,13 @@ router.post(
     userText = message;
   }
 
-  const provider = normalizeProvider(parsed.data.provider);
+  const chatModel = normalizeChatModel(parsed.data.chatModel);
   const imageModel = normalizeImageModel(parsed.data.imageModel);
 
   try {
     const stream = streamChat({
-      provider,
+      provider: chatModel.provider,
+      model: chatModel.model,
       system: buildTutorSystemPrompt(context, language),
       history: chatHistory,
       userText,

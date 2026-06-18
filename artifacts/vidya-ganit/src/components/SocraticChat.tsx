@@ -25,7 +25,7 @@ import { BADGE_CATALOG } from "@/lib/badges";
 import { useLanguage } from "@/lib/i18n";
 import MiniGames from "@/components/MiniGames";
 import AssessmentTest from "@/components/AssessmentTest";
-import AiModelSelect, { type ChatProvider } from "@/components/AiModelSelect";
+import AiModelSelect, { type ChatModelKey } from "@/components/AiModelSelect";
 import ImageModelSelect, { type ImageModel } from "@/components/ImageModelSelect";
 import SpeakButton from "@/components/SpeakButton";
 
@@ -248,7 +248,7 @@ export default function SocraticChat({
   const [attachment, setAttachment] = useState<Attachment | null>(null);
   const [attachError, setAttachError] = useState<string | null>(null);
   const [isListening, setIsListening] = useState(false);
-  const [provider, setProvider] = useState<ChatProvider>("openai");
+  const [chatModel, setChatModel] = useState<ChatModelKey>("gpt-5-mini");
   const [imageModel, setImageModel] = useState<ImageModel>("openai");
   const [gameOffered, setGameOffered] = useState(false);
   const [gamesOpen, setGamesOpen] = useState(false);
@@ -491,7 +491,7 @@ export default function SocraticChat({
           sessionId: sessionIdRef.current,
           history,
           language: lang,
-          provider,
+          chatModel,
           imageModel,
           ...(currentAttachment
             ? {
@@ -690,7 +690,7 @@ export default function SocraticChat({
             </p>
           </div>
         </div>
-        <AiModelSelect value={provider} onChange={setProvider} disabled={isStreaming} />
+        <AiModelSelect value={chatModel} onChange={setChatModel} disabled={isStreaming} />
         <ImageModelSelect value={imageModel} onChange={setImageModel} disabled={isStreaming} />
         <button
           type="button"

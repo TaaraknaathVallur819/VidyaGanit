@@ -21,7 +21,7 @@ import {
   getConsultantSession,
 } from "@workspace/api-client-react";
 import { useLanguage } from "@/lib/i18n";
-import AiModelSelect, { type ChatProvider } from "@/components/AiModelSelect";
+import AiModelSelect, { type ChatModelKey } from "@/components/AiModelSelect";
 import ImageModelSelect, { type ImageModel } from "@/components/ImageModelSelect";
 import SpeakButton from "@/components/SpeakButton";
 
@@ -103,7 +103,7 @@ export default function ParentConsultantChat({
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
   const [isContinuing, setIsContinuing] = useState(false);
-  const [provider, setProvider] = useState<ChatProvider>("openai");
+  const [chatModel, setChatModel] = useState<ChatModelKey>("gpt-5-mini");
   const [imageModel, setImageModel] = useState<ImageModel>("openai");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -333,7 +333,7 @@ export default function ParentConsultantChat({
           sessionId: mySessionId,
           studentVidyaId: selectedStudentId,
           language: lang,
-          provider,
+          chatModel,
           imageModel,
           history,
           ...(currentAttachment
@@ -508,7 +508,7 @@ export default function ParentConsultantChat({
                 : t("strategy.general")}
           </p>
         </div>
-        <AiModelSelect value={provider} onChange={setProvider} disabled={isStreaming} />
+        <AiModelSelect value={chatModel} onChange={setChatModel} disabled={isStreaming} />
         <ImageModelSelect value={imageModel} onChange={setImageModel} disabled={isStreaming} />
         <button
           type="button"

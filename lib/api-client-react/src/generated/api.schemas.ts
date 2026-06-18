@@ -268,13 +268,19 @@ export const ChatMessageInputLanguage = {
   sd: 'sd',
 } as const;
 
-export type ChatMessageInputProvider = typeof ChatMessageInputProvider[keyof typeof ChatMessageInputProvider];
+export type ChatMessageInputChatModel = typeof ChatMessageInputChatModel[keyof typeof ChatMessageInputChatModel];
 
 
-export const ChatMessageInputProvider = {
-  openai: 'openai',
-  anthropic: 'anthropic',
-  gemini: 'gemini',
+export const ChatMessageInputChatModel = {
+  'gpt-54': 'gpt-5.4',
+  'gpt-5-mini': 'gpt-5-mini',
+  'gpt-5-nano': 'gpt-5-nano',
+  'claude-opus-4-8': 'claude-opus-4-8',
+  'claude-sonnet-4-6': 'claude-sonnet-4-6',
+  'claude-haiku-4-5': 'claude-haiku-4-5',
+  'gemini-3-pro': 'gemini-3-pro',
+  'gemini-3-flash': 'gemini-3-flash',
+  'gemini-25-flash': 'gemini-2.5-flash',
 } as const;
 
 export type ChatMessageInputImageModel = typeof ChatMessageInputImageModel[keyof typeof ChatMessageInputImageModel];
@@ -313,7 +319,7 @@ export interface ChatMessageInput {
   language?: ChatMessageInputLanguage;
   history?: ChatHistoryItem[];
   attachment?: ChatAttachment;
-  provider?: ChatMessageInputProvider;
+  chatModel?: ChatMessageInputChatModel;
   imageModel?: ChatMessageInputImageModel;
 }
 
@@ -490,13 +496,19 @@ export const ConsultantMessageInputLanguage = {
   sd: 'sd',
 } as const;
 
-export type ConsultantMessageInputProvider = typeof ConsultantMessageInputProvider[keyof typeof ConsultantMessageInputProvider];
+export type ConsultantMessageInputChatModel = typeof ConsultantMessageInputChatModel[keyof typeof ConsultantMessageInputChatModel];
 
 
-export const ConsultantMessageInputProvider = {
-  openai: 'openai',
-  anthropic: 'anthropic',
-  gemini: 'gemini',
+export const ConsultantMessageInputChatModel = {
+  'gpt-54': 'gpt-5.4',
+  'gpt-5-mini': 'gpt-5-mini',
+  'gpt-5-nano': 'gpt-5-nano',
+  'claude-opus-4-8': 'claude-opus-4-8',
+  'claude-sonnet-4-6': 'claude-sonnet-4-6',
+  'claude-haiku-4-5': 'claude-haiku-4-5',
+  'gemini-3-pro': 'gemini-3-pro',
+  'gemini-3-flash': 'gemini-3-flash',
+  'gemini-25-flash': 'gemini-2.5-flash',
 } as const;
 
 export type ConsultantMessageInputImageModel = typeof ConsultantMessageInputImageModel[keyof typeof ConsultantMessageInputImageModel];
@@ -516,7 +528,7 @@ export interface ConsultantMessageInput {
   language?: ConsultantMessageInputLanguage;
   history?: ChatHistoryItem[];
   attachment?: ChatAttachment;
-  provider?: ConsultantMessageInputProvider;
+  chatModel?: ConsultantMessageInputChatModel;
   imageModel?: ConsultantMessageInputImageModel;
 }
 

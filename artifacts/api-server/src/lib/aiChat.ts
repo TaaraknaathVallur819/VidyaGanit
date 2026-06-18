@@ -11,22 +11,55 @@ import { ai as gemini } from "@workspace/integrations-gemini-ai";
  */
 export type ChatProvider = "openai" | "anthropic" | "gemini";
 
-export const CHAT_PROVIDERS: readonly ChatProvider[] = [
-  "openai",
-  "anthropic",
-  "gemini",
-];
+/** Stable key sent by the client (kept in sync with the OpenAPI `chatModel` enum). */
+export type ChatModelKey =
+  | "gpt-5.4"
+  | "gpt-5-mini"
+  | "gpt-5-nano"
+  | "claude-opus-4-8"
+  | "claude-sonnet-4-6"
+  | "claude-haiku-4-5"
+  | "gemini-3-pro"
+  | "gemini-3-flash"
+  | "gemini-2.5-flash";
 
-/** Coerce an untrusted value into a valid provider, defaulting to OpenAI. */
-export function normalizeProvider(value: unknown): ChatProvider {
-  return value === "anthropic" || value === "gemini" ? value : "openai";
+export interface ChatModelDef {
+  /** Client-facing key (matches the OpenAPI enum). */
+  key: ChatModelKey;
+  /** Which provider branch in `streamChat` handles this model. */
+  provider: ChatProvider;
+  /** The actual model id sent to the provider's API. */
+  model: string;
 }
 
-const MODEL_BY_PROVIDER: Record<ChatProvider, string> = {
-  openai: "gpt-5-mini",
-  anthropic: "claude-sonnet-4-6",
-  gemini: "gemini-2.5-flash",
-};
+/**
+ * Catalog of selectable chat models across all three providers. The client picks
+ * a `key`; the server resolves it to a `{provider, model}` pair so a single field
+ * switches the underlying model without changing any route logic.
+ */
+export const CHAT_MODELS: readonly ChatModelDef[] = [
+  { key: "gpt-5.4", provider: "openai", model: "gpt-5.4" },
+  { key: "gpt-5-mini", provider: "openai", model: "gpt-5-mini" },
+  { key: "gpt-5-nano", provider: "openai", model: "gpt-5-nano" },
+  { key: "claude-opus-4-8", provider: "anthropic", model: "claude-opus-4-8" },
+  { key: "claude-sonnet-4-6", provider: "anthropic", model: "claude-sonnet-4-6" },
+  { key: "claude-haiku-4-5", provider: "anthropic", model: "claude-haiku-4-5" },
+  { key: "gemini-3-pro", provider: "gemini", model: "gemini-3.1-pro-preview" },
+  { key: "gemini-3-flash", provider: "gemini", model: "gemini-3-flash-preview" },
+  { key: "gemini-2.5-flash", provider: "gemini", model: "gemini-2.5-flash" },
+];
+
+/** Default model — kept on gpt-5-mini for low chat latency + credit conservation. */
+const DEFAULT_CHAT_MODEL: ChatModelDef = CHAT_MODELS[1];
+
+/** Coerce an untrusted value into a known chat model, defaulting to gpt-5-mini. */
+export function normalizeChatModel(value: unknown): ChatModelDef {
+  if (typeof value === "string") {
+    const found = CHAT_MODELS.find((m) => m.key === value);
+    if (found) return found;
+  }
+  return DEFAULT_CHAT_MODEL;
+}
 
 export interface UnifiedTurn {
   role: "user" | "assistant";
@@ -41,6 +74,8 @@ export interface ChatImage {
 
 export interface StreamChatInput {
   provider: ChatProvider;
+  /** Concrete provider model id (resolved from a `ChatModelKey` via `normalizeChatModel`). */
+  model: string;
   system: string;
   history: UnifiedTurn[];
   userText: string;
@@ -65,8 +100,7 @@ function fallbackText(userText: string): string {
 export async function* streamChat(
   input: StreamChatInput,
 ): AsyncGenerator<string, void, unknown> {
-  const { provider, system, history, userText, image } = input;
-  const model = MODEL_BY_PROVIDER[provider];
+  const { provider, model, system, history, userText, image } = input;
 
   if (provider === "anthropic") {
     type AnthropicMediaType =

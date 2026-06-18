@@ -7,9 +7,9 @@
  */
 import type { ChatAttachment } from './chatAttachment';
 import type { ChatHistoryItem } from './chatHistoryItem';
+import type { ChatMessageInputChatModel } from './chatMessageInputChatModel';
 import type { ChatMessageInputImageModel } from './chatMessageInputImageModel';
 import type { ChatMessageInputLanguage } from './chatMessageInputLanguage';
-import type { ChatMessageInputProvider } from './chatMessageInputProvider';
 
 export interface ChatMessageInput {
   vidyaId: string;
@@ -18,6 +18,6 @@ export interface ChatMessageInput {
   language?: ChatMessageInputLanguage;
   history?: ChatHistoryItem[];
   attachment?: ChatAttachment;
-  provider?: ChatMessageInputProvider;
+  chatModel?: ChatMessageInputChatModel;
   imageModel?: ChatMessageInputImageModel;
 }
