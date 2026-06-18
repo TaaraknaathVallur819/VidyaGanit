@@ -1,3 +1,4 @@
+import { summarizeBoardsForPrompt } from "@workspace/india-boards";
 import type { Topic } from "./tutor";
 
 /**
@@ -360,9 +361,10 @@ export function buildSyllabusKnowledge(
   lines.push(
     ``,
     `BOARD AWARENESS:`,
+    summarizeBoardsForPrompt(),
     `- This learner follows the ${boardName} board. Tailor the topics, depth, vocabulary and examples to what the ${boardName} board expects at this class level.`,
-    `- CBSE/NCERT is the most common and is the baseline above. ICSE (CISCE) generally covers the same topics with a little more breadth and earlier formal vocabulary. State Boards follow the same NCERT-aligned core but often localise examples, currency and contexts and may reorder chapters across the year.`,
-    `- Stay within the learner's class level: build only on what they would already have met in earlier classes, and do not jump ahead to topics meant for higher classes.`,
+    `- CBSE/NCERT is the most common and is the baseline above. ICSE (CISCE) generally covers the same topics with a little more breadth and earlier formal vocabulary. State, UT, open-schooling, madrasa and Sanskrit boards all follow the same NCERT-aligned Classes 4–7 maths core but often localise examples, currency, names and contexts and may reorder chapters across the year. International boards (IB, IGCSE) use enquiry-led framing but cover the same arithmetic, fractions, geometry and data foundations at this level.`,
+    `- Whatever Indian board the learner names, you know its Classes 4–7 maths syllabus: map it to this NCERT-aligned core and adjust depth, sequencing and vocabulary to that board. Stay within the learner's class level: build only on what they would already have met in earlier classes, and do not jump ahead to topics meant for higher classes.`,
   );
 
   return lines.join("\n");

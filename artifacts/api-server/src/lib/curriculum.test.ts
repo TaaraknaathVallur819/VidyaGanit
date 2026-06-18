@@ -116,6 +116,21 @@ describe("buildSyllabusKnowledge", () => {
     expect(text).toContain("State Board");
   });
 
+  it("primes the AI with the full landscape of Indian boards, not just major ones", () => {
+    const text = buildSyllabusKnowledge("5", "Tripura State Board (TBSE)");
+    // National + every-state/UT/madrasa coverage flows in from the shared catalog.
+    for (const needle of [
+      "Tripura",
+      "Manipur",
+      "Jammu & Kashmir",
+      "Madrasa",
+      "NIOS",
+    ]) {
+      expect(text).toContain(needle);
+    }
+    expect(text).toContain("follows the Tripura State Board (TBSE) board");
+  });
+
   it("reflects the learner's own board", () => {
     const text = buildSyllabusKnowledge("6", "ICSE");
     expect(text).toContain("follows the ICSE board");

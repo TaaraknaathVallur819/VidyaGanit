@@ -12,30 +12,15 @@ import { useLanguage } from "@/lib/i18n";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { boardsByCategory } from "@workspace/india-boards";
 
-const MAJOR_BOARDS = [
-  { value: "CBSE", label: "CBSE – Central Board of Secondary Education" },
-  { value: "ICSE", label: "ICSE – Indian Certificate of Secondary Education" },
-  { value: "IB", label: "IB – International Baccalaureate" },
-  { value: "IGCSE", label: "IGCSE – Cambridge International" },
-  { value: "Maharashtra State Board", label: "Maharashtra State Board" },
-  { value: "Karnataka State Board", label: "Karnataka State Board" },
-  { value: "Tamil Nadu State Board", label: "Tamil Nadu State Board" },
-  { value: "Andhra Pradesh State Board", label: "Andhra Pradesh State Board" },
-  { value: "Telangana State Board", label: "Telangana State Board" },
-  { value: "Kerala State Board", label: "Kerala State Board" },
-  { value: "Gujarat State Board", label: "Gujarat State Board" },
-  { value: "Rajasthan State Board", label: "Rajasthan State Board" },
-  { value: "UP Board (UPMSP)", label: "UP Board – UPMSP" },
-  { value: "West Bengal Board", label: "West Bengal Board" },
-  { value: "Bihar Board (BSEB)", label: "Bihar Board – BSEB" },
-  { value: "MP Board (MPBSE)", label: "MP Board – MPBSE" },
-  { value: "Other", label: "Other (please specify below)" },
-];
+const BOARD_GROUPS = boardsByCategory();
 
 type Mode = "login" | "register";
 type Role = "student" | "parent" | "tutor";
@@ -393,12 +378,22 @@ export default function Auth() {
                       >
                         <SelectValue placeholder={t("auth.selectBoard")} />
                       </SelectTrigger>
-                      <SelectContent>
-                        {MAJOR_BOARDS.map((b) => (
-                          <SelectItem key={b.value} value={b.value}>
-                            {b.label}
-                          </SelectItem>
+                      <SelectContent className="max-h-80">
+                        {BOARD_GROUPS.map((group) => (
+                          <SelectGroup key={group.category}>
+                            <SelectLabel>{group.label}</SelectLabel>
+                            {group.boards.map((b) => (
+                              <SelectItem key={b.value} value={b.value}>
+                                {b.label}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
                         ))}
+                        <SelectGroup>
+                          <SelectItem value="Other">
+                            Other (please specify below)
+                          </SelectItem>
+                        </SelectGroup>
                       </SelectContent>
                     </Select>
 

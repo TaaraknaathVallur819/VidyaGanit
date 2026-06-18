@@ -175,6 +175,9 @@ importers:
       '@workspace/db':
         specifier: workspace:*
         version: link:../../lib/db
+      '@workspace/india-boards':
+        specifier: workspace:*
+        version: link:../../lib/india-boards
       '@workspace/integrations-anthropic-ai':
         specifier: workspace:*
         version: link:../../lib/integrations-anthropic-ai
@@ -548,6 +551,9 @@ importers:
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
+      '@workspace/india-boards':
+        specifier: workspace:*
+        version: link:../../lib/india-boards
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -666,6 +672,8 @@ importers:
       drizzle-kit:
         specifier: ^0.31.10
         version: 0.31.10
+
+  lib/india-boards: {}
 
   lib/integrations-anthropic-ai:
     dependencies:
