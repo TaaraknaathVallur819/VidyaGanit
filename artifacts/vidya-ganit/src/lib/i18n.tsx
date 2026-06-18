@@ -282,7 +282,7 @@ const en: Dict = {
   "home.title1": "Math tutoring that",
   "home.title2": "makes sense.",
   "home.subtitle":
-    "Rigorous curriculum for parents' peace of mind. Engaging, conversational lessons that kids actually look forward to. Classes 4–7.",
+    "Rigorous curriculum for parents' and tutors' peace of mind. Engaging, conversational lessons that kids actually look forward to. Classes 4–7.",
   "home.createAccount": "Create a New Account",
   "home.login": "Log In to Existing Account",
 
