@@ -442,7 +442,8 @@ export const SendConsultantMessageBody = zod.object({
   "mimeType": zod.string(),
   "dataUrl": zod.string().describe('Base64 data URL of the attached file (data:<mime>;base64,...)')
 }).optional(),
-  "provider": zod.enum(['openai', 'anthropic', 'gemini']).optional()
+  "provider": zod.enum(['openai', 'anthropic', 'gemini']).optional(),
+  "imageModel": zod.enum(['openai', 'gemini-nano-banana', 'gemini-nano-banana-pro']).optional()
 })
 
 

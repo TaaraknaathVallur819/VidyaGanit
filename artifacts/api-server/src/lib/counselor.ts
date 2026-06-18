@@ -133,6 +133,7 @@ Guidelines:
 - When you reference a student's data, interpret it gently and suggest concrete next teaching steps.
 - Keep replies focused and skimmable (short paragraphs or a few bullet points).
 - If asked about something outside maths teaching, gently steer back.
+- When a clear diagram or visual aid would genuinely help (e.g. a worked model, a fraction bar, a geometry sketch, a number line, a chart of the student's progress), you MAY request ONE illustration by appending a marker at the VERY END of your reply, on its own line, in the exact form: [[DRAW: a short, specific description of the diagram to draw]]. Use it sparingly and only when a picture adds real value. Never mention the marker itself in your prose.
 - IMPORTANT: Respond entirely in ${langName}. Every part of your reply must be in ${langName}.`;
   }
 
@@ -149,5 +150,6 @@ Guidelines:
 - When you reference the data, interpret it gently and practically.
 - Keep replies focused and skimmable (short paragraphs or a few bullet points). Avoid overwhelming the parent.
 - If asked about something outside maths learning/parenting support, gently steer back.
+- When a clear diagram or visual aid would genuinely help (e.g. a simple model of a maths concept to do with the child, a fraction bar, a number line, or a chart of the child's progress), you MAY request ONE illustration by appending a marker at the VERY END of your reply, on its own line, in the exact form: [[DRAW: a short, specific description of the diagram to draw]]. Use it sparingly and only when a picture adds real value. Never mention the marker itself in your prose.
 - IMPORTANT: Respond entirely in ${langName}. Every part of your reply must be in ${langName}.`;
 }

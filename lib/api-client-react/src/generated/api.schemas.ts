@@ -499,6 +499,15 @@ export const ConsultantMessageInputProvider = {
   gemini: 'gemini',
 } as const;
 
+export type ConsultantMessageInputImageModel = typeof ConsultantMessageInputImageModel[keyof typeof ConsultantMessageInputImageModel];
+
+
+export const ConsultantMessageInputImageModel = {
+  openai: 'openai',
+  'gemini-nano-banana': 'gemini-nano-banana',
+  'gemini-nano-banana-pro': 'gemini-nano-banana-pro',
+} as const;
+
 export interface ConsultantMessageInput {
   message?: string;
   sessionId?: string;
@@ -508,6 +517,7 @@ export interface ConsultantMessageInput {
   history?: ChatHistoryItem[];
   attachment?: ChatAttachment;
   provider?: ConsultantMessageInputProvider;
+  imageModel?: ConsultantMessageInputImageModel;
 }
 
 export interface GameScoreInput {

@@ -1182,6 +1182,9 @@ components:
         provider:
           type: string
           enum: [openai, anthropic, gemini]
+        imageModel:
+          type: string
+          enum: [openai, gemini-nano-banana, gemini-nano-banana-pro]
 
     GameScoreInput:
       type: object

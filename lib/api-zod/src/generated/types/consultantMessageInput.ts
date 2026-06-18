@@ -7,6 +7,7 @@
  */
 import type { ChatAttachment } from './chatAttachment';
 import type { ChatHistoryItem } from './chatHistoryItem';
+import type { ConsultantMessageInputImageModel } from './consultantMessageInputImageModel';
 import type { ConsultantMessageInputLanguage } from './consultantMessageInputLanguage';
 import type { ConsultantMessageInputProvider } from './consultantMessageInputProvider';
 
@@ -19,4 +20,5 @@ export interface ConsultantMessageInput {
   history?: ChatHistoryItem[];
   attachment?: ChatAttachment;
   provider?: ConsultantMessageInputProvider;
+  imageModel?: ConsultantMessageInputImageModel;
 }

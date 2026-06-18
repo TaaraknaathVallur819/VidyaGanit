@@ -35,6 +35,7 @@ import {
   type CounselorTopicSummary,
 } from "../lib/counselor";
 import { streamChat, normalizeProvider, type ChatImage } from "../lib/aiChat";
+import { generateImageDataUrl, normalizeImageModel } from "../lib/aiImage";
 import { speechToText, ensureCompatibleFormat } from "@workspace/integrations-openai-ai-server/audio";
 import { requireAuth, requireSelf } from "../middlewares/auth";
 import { rateLimit } from "../middlewares/rateLimit";
@@ -48,6 +49,10 @@ const MAX_ATTACHMENT_DATAURL_LEN = 11_500_000;
 const MAX_ATTACHMENT_TEXT_LEN = 8000;
 // Audio data URL: ~30s of webm/opus is well under this; cap generously.
 const MAX_AUDIO_DATAURL_LEN = 11_500_000;
+
+// The counselor may request an illustration with a trailing [[DRAW: ...]] marker.
+const DRAW_MARKER_RE = /\[\[DRAW:\s*([\s\S]*?)\]\]/;
+const DRAW_MARKER_START = "[[DRAW:";
 
 // The three curriculum focus areas surfaced on the Progress Analytics tab.
 const ANALYTICS_TOPICS: { key: "fraction" | "decimal" | "divide"; label: string }[] = [
@@ -637,9 +642,40 @@ router.post(
     }
 
     const provider = normalizeProvider(parsed.data.provider);
+    const imageModel = normalizeImageModel(parsed.data.imageModel);
 
+    // The counselor may append a `[[DRAW: ...]]` marker at the very end to
+    // request an illustration. We stream conversational text as it arrives but
+    // withhold any trailing run that could still grow into the marker so it
+    // never leaks to the parent/tutor.
     let full = "";
+    let sent = 0;
+    let imagePrompt: string | null = null;
     let fallbackText: string | null = null;
+
+    const streamFlush = (): void => {
+      const idx = full.indexOf(DRAW_MARKER_START);
+      let safeEnd: number;
+      if (idx !== -1) {
+        safeEnd = idx;
+      } else {
+        // Withhold the longest suffix of `full` that is a prefix of the marker.
+        let hold = 0;
+        const maxHold = Math.min(DRAW_MARKER_START.length - 1, full.length);
+        for (let k = maxHold; k > 0; k--) {
+          if (full.slice(full.length - k) === DRAW_MARKER_START.slice(0, k)) {
+            hold = k;
+            break;
+          }
+        }
+        safeEnd = full.length - hold;
+      }
+      if (safeEnd > sent) {
+        send({ chunk: full.slice(sent, safeEnd) });
+        sent = safeEnd;
+      }
+    };
+
     try {
       const stream = streamChat({
         provider,
@@ -655,17 +691,50 @@ router.post(
       });
       for await (const delta of stream) {
         full += delta;
-        send({ chunk: delta });
+        streamFlush();
+      }
+
+      const drawMatch = full.match(DRAW_MARKER_RE);
+      const visibleEnd = drawMatch ? (drawMatch.index ?? full.length) : full.length;
+      if (drawMatch) imagePrompt = drawMatch[1].trim();
+      if (visibleEnd > sent) {
+        send({ chunk: full.slice(sent, visibleEnd) });
+        sent = visibleEnd;
       }
     } catch (err) {
       req.log.error({ err }, "parent consultant completion failed");
-      if (full.length === 0) {
+      if (sent === 0) {
         fallbackText = "Sorry, I had trouble answering just now. Please try asking again.";
         send({ chunk: fallbackText });
       }
     }
 
-    const assistantText = full.trim() || (fallbackText ?? "");
+    if (imagePrompt) {
+      send({ drawing: true });
+      try {
+        const dataUrl = await generateImageDataUrl(
+          imageModel,
+          [
+            "Create ONE clear, accurate educational maths diagram or illustration for explaining a concept to a parent/tutor of a primary-school child (ages 9–13).",
+            "Draw EXACTLY and ONLY what the description says, with correct quantities, groupings, proportions and labels. The diagram must be mathematically correct.",
+            "Do NOT add extra, decorative or unrelated objects, cartoon characters, mascots, busy backgrounds, or scenery — only the maths concept being illustrated.",
+            "Style: clean flat vector, bright friendly colours, bold simple shapes, large clear labels, plain white background. Keep any text very short and spelled correctly.",
+            "",
+            `Diagram to draw: ${imagePrompt}`,
+          ].join("\n"),
+        );
+        send({ image: dataUrl, imageAlt: imagePrompt });
+      } catch (err) {
+        req.log.error({ err }, "parent consultant image generation failed");
+        send({ imageError: true });
+      }
+    }
+
+    // Persist exactly what was safely streamed to the client: `sent` already
+    // excludes the [[DRAW]] marker (and any withheld partial-marker suffix), so
+    // no marker text can leak into saved history even if the stream errored
+    // mid-marker. Falls back to the error message actually shown.
+    const assistantText = full.slice(0, sent).trim() || (fallbackText ?? "");
     if (assistantText) {
       try {
         await db.insert(parentChatMessagesTable).values({

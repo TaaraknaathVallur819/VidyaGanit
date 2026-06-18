@@ -29,6 +29,7 @@ export * from './consultantAudioInputLanguage';
 export * from './consultantHistoryResponse';
 export * from './consultantMessage';
 export * from './consultantMessageInput';
+export * from './consultantMessageInputImageModel';
 export * from './consultantMessageInputLanguage';
 export * from './consultantMessageInputProvider';
 export * from './consultantMessageRole';

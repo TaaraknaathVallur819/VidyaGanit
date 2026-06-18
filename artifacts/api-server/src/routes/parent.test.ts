@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   chatCreate: vi.fn(),
   speechToText: vi.fn(),
   ensureCompatibleFormat: vi.fn(),
+  generateImageBuffer: vi.fn(),
 }));
 
 vi.mock("@workspace/integrations-openai-ai-server", () => ({
@@ -16,6 +17,10 @@ vi.mock("@workspace/integrations-openai-ai-server", () => ({
 vi.mock("@workspace/integrations-openai-ai-server/audio", () => ({
   speechToText: mocks.speechToText,
   ensureCompatibleFormat: mocks.ensureCompatibleFormat,
+}));
+
+vi.mock("@workspace/integrations-openai-ai-server/image", () => ({
+  generateImageBuffer: mocks.generateImageBuffer,
 }));
 
 import app from "../app";
@@ -131,6 +136,7 @@ beforeEach(async () => {
   mocks.chatCreate.mockResolvedValue(makeStream(["Here ", "is some advice."]));
   mocks.ensureCompatibleFormat.mockResolvedValue({ buffer: Buffer.from("audio"), format: "wav" });
   mocks.speechToText.mockResolvedValue("transcribed text");
+  mocks.generateImageBuffer.mockResolvedValue(Buffer.from("fake-png"));
   await clearRateLimitBuckets();
 });
 
@@ -231,6 +237,30 @@ describe("POST /parent/:vidyaId/consultant/message", () => {
 
     expect(res.status).toBe(200);
     expect(res.text).toContain('"done":true');
+  });
+
+  it("suppresses a [[DRAW]] marker from the stream and saved history", async () => {
+    mocks.chatCreate.mockResolvedValueOnce(
+      makeStream(["Try this at home. ", "[[DRAW: a fraction bar split into 3 equal parts]]"]),
+    );
+    const res = await request(app)
+      .post(url(PARENT_A))
+      .set("Cookie", cookieFor(PARENT_A))
+      .send({ message: "Show me a fraction picture", imageModel: "openai" });
+
+    expect(res.status).toBe(200);
+    // Visible prose streams; the marker never leaks to the client.
+    expect(res.text).toContain("Try this at home.");
+    expect(res.text).not.toContain("[[DRAW");
+
+    // The persisted assistant reply must also be free of the marker.
+    const saved = await db
+      .select()
+      .from(parentChatMessagesTable)
+      .where(eq(parentChatMessagesTable.parentVidyaId, PARENT_A));
+    const lastAssistant = saved.filter((m) => m.role === "assistant").at(-1);
+    expect(lastAssistant?.content).toContain("Try this at home.");
+    expect(lastAssistant?.content).not.toContain("[[DRAW");
   });
 
   it("rejects unauthenticated requests with 401", async () => {

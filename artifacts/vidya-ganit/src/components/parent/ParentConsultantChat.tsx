@@ -22,6 +22,7 @@ import {
 } from "@workspace/api-client-react";
 import { useLanguage } from "@/lib/i18n";
 import AiModelSelect, { type ChatProvider } from "@/components/AiModelSelect";
+import ImageModelSelect, { type ImageModel } from "@/components/ImageModelSelect";
 import SpeakButton from "@/components/SpeakButton";
 
 const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 MB
@@ -38,6 +39,9 @@ type Message = {
   role: "user" | "assistant";
   content: string;
   isStreaming?: boolean;
+  isDrawing?: boolean;
+  imageUrl?: string;
+  imageAlt?: string;
   attachment?: Attachment;
   attachmentName?: string | null;
   attachmentType?: string | null;
@@ -100,6 +104,7 @@ export default function ParentConsultantChat({
   const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
   const [isContinuing, setIsContinuing] = useState(false);
   const [provider, setProvider] = useState<ChatProvider>("openai");
+  const [imageModel, setImageModel] = useState<ImageModel>("openai");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -329,6 +334,7 @@ export default function ParentConsultantChat({
           studentVidyaId: selectedStudentId,
           language: lang,
           provider,
+          imageModel,
           history,
           ...(currentAttachment
             ? {
@@ -377,11 +383,34 @@ export default function ParentConsultantChat({
               chunk?: string;
               done?: boolean;
               sessionId?: string;
+              drawing?: boolean;
+              image?: string;
+              imageAlt?: string;
+              imageError?: boolean;
             };
             if (typeof data.chunk === "string") {
               fullContent += data.chunk;
               setMessages((prev) =>
                 prev.map((m) => (m.id === aiMsgId ? { ...m, content: fullContent } : m)),
+              );
+            }
+            if (data.drawing) {
+              setMessages((prev) =>
+                prev.map((m) => (m.id === aiMsgId ? { ...m, isDrawing: true } : m)),
+              );
+            }
+            if (typeof data.image === "string") {
+              const imageUrl = data.image;
+              const imageAlt = data.imageAlt;
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === aiMsgId ? { ...m, isDrawing: false, imageUrl, imageAlt } : m,
+                ),
+              );
+            }
+            if (data.imageError) {
+              setMessages((prev) =>
+                prev.map((m) => (m.id === aiMsgId ? { ...m, isDrawing: false } : m)),
               );
             }
             if (data.done) {
@@ -480,6 +509,7 @@ export default function ParentConsultantChat({
           </p>
         </div>
         <AiModelSelect value={provider} onChange={setProvider} disabled={isStreaming} />
+        <ImageModelSelect value={imageModel} onChange={setImageModel} disabled={isStreaming} />
         <button
           type="button"
           onClick={() => setShowHistory((v) => !v)}
@@ -641,10 +671,23 @@ export default function ParentConsultantChat({
                         </span>
                       )
                     )}
-                    {msg.isStreaming && msg.content && (
+                    {msg.isStreaming && msg.content && !msg.isDrawing && (
                       <span className="inline-block w-0.5 h-[14px] bg-emerald-400/60 ml-0.5 animate-pulse align-middle rounded-full" />
                     )}
-                    {!msg.isStreaming && msg.content && (
+                    {msg.imageUrl && (
+                      <img
+                        src={msg.imageUrl}
+                        alt={msg.imageAlt ?? "Illustration"}
+                        className="mt-2.5 rounded-xl w-full max-w-[280px] bg-white border border-emerald-100 shadow-sm"
+                      />
+                    )}
+                    {msg.isDrawing && !msg.imageUrl && (
+                      <div className="mt-2.5 flex items-center gap-2 text-emerald-600 text-xs">
+                        <span className="inline-block w-3.5 h-3.5 border-2 border-emerald-200 border-t-emerald-500 rounded-full animate-spin" />
+                        <span>{t("chat.drawing")}</span>
+                      </div>
+                    )}
+                    {!msg.isStreaming && !msg.isDrawing && msg.content && (
                       <div className="mt-1.5 -mb-1 -ml-1">
                         <SpeakButton text={msg.content} tone="dark" />
                       </div>
