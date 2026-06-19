@@ -423,7 +423,7 @@ export default function TutorDashboard() {
                     {displayed.academyName && (
                       <InfoChip label={t("auth.academyName")} value={displayed.academyName} icon={<School className="w-3.5 h-3.5" />} />
                     )}
-                    <InfoChip label={t("tutor.batch")} value={displayed.batch ?? "—"} icon={<Users2 className="w-3.5 h-3.5" />} />
+                    <InfoChip label={t("tutor.batch")} value={tutorBatches.length > 0 ? tutorBatches.join(", ") : "—"} icon={<Users2 className="w-3.5 h-3.5" />} />
                     <InfoChip label={t("auth.emailOrPhone")} value={displayed.contact ?? "—"} icon={<Mail className="w-3.5 h-3.5" />} />
                   </div>
                 </CardContent>

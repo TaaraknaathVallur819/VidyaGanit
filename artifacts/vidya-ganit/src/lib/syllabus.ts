@@ -155,3 +155,18 @@ export function gameForTopic(
   }
   return null;
 }
+
+/**
+ * Like {@link gameForTopic} but NEVER returns null when the student has any
+ * available games: when the topic has no class/board-appropriate match (or no
+ * mapping at all), it falls back to the first game available for the student's
+ * class & board. Used by the "play a game?" offer so that tapping "Yes" ALWAYS
+ * launches a game immediately instead of dropping the student on the menu.
+ */
+export function gameForTopicOrDefault(
+  topic: string | null | undefined,
+  cls: number | null | undefined,
+  board: string | null | undefined,
+): GameId | null {
+  return gameForTopic(topic, cls, board) ?? gamesForClassBoard(cls, board)[0]?.id ?? null;
+}

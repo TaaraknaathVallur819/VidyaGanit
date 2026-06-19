@@ -57,14 +57,21 @@ export default function StudentProgress({ vidyaId }: { vidyaId: string }) {
     );
   }
 
-  if (!data) return null;
+  // Be resilient to a missing/failed analytics fetch: show the empty state
+  // rather than a blank page so the student always sees their Progress screen.
+  const totalSessions = data?.totalSessions ?? 0;
+  const totalMessages = data?.totalMessages ?? 0;
+  const topics = data?.topics ?? [];
+  const hasActivity = totalMessages > 0;
 
-  const hasActivity = data.totalMessages > 0;
-
-  const handleExportPdf = () =>
+  const handleExportPdf = () => {
+    if (!data) return;
     exportReportPdf({ t, analytics: data, assessments: assessments?.results ?? [] });
-  const handleExportCsv = () =>
+  };
+  const handleExportCsv = () => {
+    if (!data) return;
     exportReportCsv({ t, analytics: data, assessments: assessments?.results ?? [] });
+  };
 
   return (
     <div className="space-y-6">
@@ -120,7 +127,7 @@ export default function StudentProgress({ vidyaId }: { vidyaId: string }) {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground leading-none">
-                    {data.totalSessions}
+                    {totalSessions}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {t("progress.totalSessions")}
@@ -135,7 +142,7 @@ export default function StudentProgress({ vidyaId }: { vidyaId: string }) {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground leading-none">
-                    {data.totalMessages}
+                    {totalMessages}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {t("progress.totalMessages")}
@@ -147,7 +154,7 @@ export default function StudentProgress({ vidyaId }: { vidyaId: string }) {
 
           <Card className="border-0 shadow-md rounded-2xl">
             <CardContent className="p-6 space-y-5">
-              {data.topics.map((topic, i) => (
+              {topics.map((topic, i) => (
                 <motion.div
                   key={topic.key}
                   initial={{ opacity: 0, y: 12 }}

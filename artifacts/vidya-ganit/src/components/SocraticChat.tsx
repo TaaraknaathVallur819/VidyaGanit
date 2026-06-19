@@ -22,7 +22,7 @@ import {
   getChatSession,
 } from "@workspace/api-client-react";
 import { BADGE_CATALOG } from "@/lib/badges";
-import { gameForTopic } from "@/lib/syllabus";
+import { gameForTopicOrDefault } from "@/lib/syllabus";
 import { type GameId } from "@/lib/games";
 import { useLanguage } from "@/lib/i18n";
 import MiniGames from "@/components/MiniGames";
@@ -877,7 +877,7 @@ export default function SocraticChat({
                 data-testid="button-play-game-yes"
                 onClick={() => {
                   setInitialGame(
-                    gameForTopic(
+                    gameForTopicOrDefault(
                       gameTopic,
                       studentClass == null ? null : Number(studentClass),
                       board,
