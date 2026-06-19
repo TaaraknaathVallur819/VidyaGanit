@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { randomUUID } from "node:crypto";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { db, usersTable, chatMessagesTable } from "@workspace/db";
 import {
   SendChatMessageBody,
@@ -18,6 +18,7 @@ import {
 } from "../lib/tutor";
 import { normalizeLanguage } from "../lib/counselor";
 import { computeStudentAnalytics } from "../lib/analytics";
+import { buildPastConversationDigest } from "../lib/chatMemory";
 import { computeXpAndBadges } from "../lib/xp";
 import { streamChat, normalizeChatModel, type ChatImage } from "../lib/aiChat";
 import { generateImageDataUrl, normalizeImageModel } from "../lib/aiImage";
@@ -177,12 +178,37 @@ router.post(
     req.log.error({ err }, "failed to compute student analytics for tutor prompt");
   }
 
+  // Long-term memory: let the tutor refer back to earlier chats (across past
+  // sessions) even in a brand-new conversation. Best-effort — never block chat.
+  let pastMemory: { sessionCount: number; transcript: string } | null = null;
+  try {
+    const memRows = await db
+      .select({
+        role: chatMessagesTable.role,
+        content: chatMessagesTable.content,
+        createdAt: chatMessagesTable.createdAt,
+        sessionId: chatMessagesTable.sessionId,
+      })
+      .from(chatMessagesTable)
+      .where(eq(chatMessagesTable.studentVidyaId, vidyaId))
+      .orderBy(desc(chatMessagesTable.createdAt))
+      .limit(300);
+    memRows.reverse();
+    pastMemory = buildPastConversationDigest(memRows, sessionId, {
+      user: user.name.split(" ")[0] || "Student",
+      assistant: "Coach",
+    });
+  } catch (err) {
+    req.log.error({ err }, "failed to load past chat memory for tutor prompt");
+  }
+
   const context = {
     name: user.name,
     studentClass: user.studentClass ?? null,
     board: user.board ?? null,
     aboutMe: user.aboutMe ?? null,
     progress,
+    pastMemory,
   };
 
   const chatHistory: ChatEntry[] = (history ?? []).map((h) => ({

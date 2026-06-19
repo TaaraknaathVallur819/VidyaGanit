@@ -38,6 +38,7 @@ import {
   normalizeLanguage,
   type CounselorTopicSummary,
 } from "../lib/counselor";
+import { buildPastConversationDigest } from "../lib/chatMemory";
 import { streamChat, normalizeChatModel, type ChatImage } from "../lib/aiChat";
 import { generateImageDataUrl, normalizeImageModel } from "../lib/aiImage";
 import { speechToText, ensureCompatibleFormat } from "@workspace/integrations-openai-ai-server/audio";
@@ -654,6 +655,30 @@ router.post(
       req.log.error({ err }, "failed to persist parent consultant message");
     }
 
+    // Long-term memory: let the counselor refer back to earlier conversations
+    // (across past sessions) even in a brand-new chat. Best-effort.
+    let pastMemory: { sessionCount: number; transcript: string } | null = null;
+    try {
+      const memRows = await db
+        .select({
+          role: parentChatMessagesTable.role,
+          content: parentChatMessagesTable.content,
+          createdAt: parentChatMessagesTable.createdAt,
+          sessionId: parentChatMessagesTable.sessionId,
+        })
+        .from(parentChatMessagesTable)
+        .where(eq(parentChatMessagesTable.parentVidyaId, parentVidyaId))
+        .orderBy(desc(parentChatMessagesTable.createdAt))
+        .limit(300);
+      memRows.reverse();
+      pastMemory = buildPastConversationDigest(memRows, sessionId, {
+        user: parent.name.split(" ")[0] || "They",
+        assistant: "You",
+      });
+    } catch (err) {
+      req.log.error({ err }, "failed to load past consultant memory");
+    }
+
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
@@ -720,6 +745,7 @@ router.post(
           parentName: parent.name,
           language,
           aboutMe: parent.aboutMe ?? null,
+          pastMemory,
           role: parent.role === "tutor" ? "tutor" : "parent",
           student: studentSummary,
         }),
