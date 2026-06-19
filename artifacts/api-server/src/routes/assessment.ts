@@ -9,12 +9,15 @@ import {
   SubmitAssessmentResponse,
   ListOwnAssessmentsParams,
   ListOwnAssessmentsResponse,
+  GetOwnMistakesParams,
+  GetOwnMistakesResponse,
 } from "@workspace/api-zod";
 import { requireAuth, requireSelf } from "../middlewares/auth";
 import { rateLimit } from "../middlewares/rateLimit";
 import {
   generateAssessment,
   topicLabel,
+  collectMistakes,
   POINTS_PER_CORRECT,
 } from "../lib/assessment";
 
@@ -138,6 +141,7 @@ router.post(
           status: "completed",
           correctCount,
           score,
+          submittedAnswers: review.map((r) => r.chosenIndex),
           completedAt: new Date(),
         })
         .where(eq(assessmentsTable.testId, testId));
@@ -201,6 +205,44 @@ router.get(
         })),
       }),
     );
+  },
+);
+
+// ── A student's own missed questions (Mistake Notebook) ─────────────
+router.get(
+  "/assessment/:vidyaId/mistakes",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = GetOwnMistakesParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+
+    const rows = await db
+      .select()
+      .from(assessmentsTable)
+      .where(
+        and(
+          eq(assessmentsTable.studentVidyaId, params.data.vidyaId),
+          eq(assessmentsTable.status, "completed"),
+        ),
+      )
+      .orderBy(desc(assessmentsTable.completedAt));
+
+    const mistakes = collectMistakes(
+      rows.map((r) => ({
+        testId: r.testId,
+        topic: r.topic,
+        topicLabel: r.topicLabel,
+        completedAt: (r.completedAt ?? r.createdAt).toISOString(),
+        questions: r.questions as AssessmentQuestion[],
+        submittedAnswers: r.submittedAnswers as number[] | null,
+      })),
+    );
+
+    res.json(GetOwnMistakesResponse.parse({ mistakes }));
   },
 );
 

@@ -35,6 +35,10 @@ export const assessmentsTable = pgTable(
     status: text("status").notNull().default("pending"),
     correctCount: integer("correct_count"),
     score: integer("score"),
+    // The student's chosen option index per question, captured on submit. Used
+    // to reconstruct missed questions for the Mistake Notebook. Null for tests
+    // that were generated before this column existed or never submitted.
+    submittedAnswers: jsonb("submitted_answers").$type<number[]>(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     completedAt: timestamp("completed_at", { withTimezone: true }),
   },

@@ -800,6 +800,22 @@ export interface AssessmentResultsResponse {
   results: AssessmentSummary[];
 }
 
+export interface MistakeItem {
+  testId: string;
+  topic: string;
+  topicLabel: string;
+  completedAt: string;
+  prompt: string;
+  options: string[];
+  correctIndex: number;
+  /** Option the student picked; -1 means left blank. */
+  chosenIndex: number;
+}
+
+export interface MistakesResponse {
+  mistakes: MistakeItem[];
+}
+
 export interface CurriculumUnit {
   id: string;
   topic: string;

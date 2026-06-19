@@ -892,6 +892,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/AssessmentResultsResponse"
 
+  /assessment/{vidyaId}/mistakes:
+    get:
+      operationId: getOwnMistakes
+      tags: [assessment]
+      summary: The student's own incorrectly-answered questions
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Missed questions, newest first
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MistakesResponse"
+
   /parent/{vidyaId}/students/{studentVidyaId}/assessments:
     get:
       operationId: getStudentAssessments
@@ -1768,6 +1787,41 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/AssessmentSummary"
+
+    MistakeItem:
+      type: object
+      required:
+        [testId, topic, topicLabel, completedAt, prompt, options, correctIndex, chosenIndex]
+      properties:
+        testId:
+          type: string
+        topic:
+          type: string
+        topicLabel:
+          type: string
+        completedAt:
+          type: string
+          format: date-time
+        prompt:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correctIndex:
+          type: integer
+        chosenIndex:
+          type: integer
+          description: Option the student picked; -1 means left blank.
+
+    MistakesResponse:
+      type: object
+      required: [mistakes]
+      properties:
+        mistakes:
+          type: array
+          items:
+            $ref: "#/components/schemas/MistakeItem"
 
     CurriculumUnit:
       type: object

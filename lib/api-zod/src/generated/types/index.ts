@@ -67,6 +67,8 @@ export * from './messageFeedbackInputFeedback';
 export * from './messageFeedbackResponse';
 export * from './messageFeedbackResponseFeedback';
 export * from './messageResponse';
+export * from './mistakeItem';
+export * from './mistakesResponse';
 export * from './profileUpdate';
 export * from './profileUpdateGender';
 export * from './profileUpdateLanguage';

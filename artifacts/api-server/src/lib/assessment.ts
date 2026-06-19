@@ -32,6 +32,60 @@ export function topicLabel(topic: string): string {
   return (TOPIC_LABELS as Record<string, string>)[topic] ?? "Mixed Maths";
 }
 
+export interface MistakeItem {
+  testId: string;
+  topic: string;
+  topicLabel: string;
+  completedAt: string;
+  prompt: string;
+  options: string[];
+  correctIndex: number;
+  chosenIndex: number;
+}
+
+export interface CompletedAssessmentRow {
+  testId: string;
+  topic: string;
+  topicLabel: string;
+  completedAt: string;
+  questions: AssessmentQuestion[];
+  submittedAnswers: number[] | null;
+}
+
+/**
+ * Flatten completed assessments into the individual questions the student got
+ * wrong (chosen option !== correct option). Rows are expected newest-first; the
+ * output preserves that order so the notebook shows the most recent mistakes
+ * first. Tests with no captured answers (legacy/pending) are skipped.
+ */
+export function collectMistakes(
+  rows: CompletedAssessmentRow[],
+  limit = 50,
+): MistakeItem[] {
+  const out: MistakeItem[] = [];
+  for (const row of rows) {
+    const chosen = row.submittedAnswers;
+    if (!chosen) continue;
+    row.questions.forEach((q, i) => {
+      const chosenIndex = Number.isInteger(chosen[i]) ? chosen[i] : -1;
+      if (chosenIndex === q.answerIndex) return;
+      if (out.length >= limit) return;
+      out.push({
+        testId: row.testId,
+        topic: row.topic,
+        topicLabel: row.topicLabel,
+        completedAt: row.completedAt,
+        prompt: q.prompt,
+        options: q.options,
+        correctIndex: q.answerIndex,
+        chosenIndex,
+      });
+    });
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
 function randInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }

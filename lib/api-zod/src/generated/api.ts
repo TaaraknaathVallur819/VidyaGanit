@@ -718,6 +718,27 @@ export const ListOwnAssessmentsResponse = zod.object({
 
 
 /**
+ * @summary The student's own incorrectly-answered questions
+ */
+export const GetOwnMistakesParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetOwnMistakesResponse = zod.object({
+  "mistakes": zod.array(zod.object({
+  "testId": zod.string(),
+  "topic": zod.string(),
+  "topicLabel": zod.string(),
+  "completedAt": zod.coerce.date(),
+  "prompt": zod.string(),
+  "options": zod.array(zod.string()),
+  "correctIndex": zod.number(),
+  "chosenIndex": zod.number().describe('Option the student picked; -1 means left blank.')
+}))
+})
+
+
+/**
  * @summary Completed test results for a linked student
  */
 export const GetStudentAssessmentsParams = zod.object({

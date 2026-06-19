@@ -19,6 +19,7 @@ import {
 } from "@workspace/api-client-react";
 import { useLanguage } from "@/lib/i18n";
 import AssessmentReport from "@/components/AssessmentReport";
+import MistakeNotebook from "@/components/MistakeNotebook";
 import { exportReportPdf, exportReportCsv } from "@/lib/exportReport";
 
 const TOPIC_COLORS: Record<string, string> = {
@@ -208,6 +209,9 @@ export default function StudentProgress({ vidyaId }: { vidyaId: string }) {
           variant="kid"
         />
       </div>
+
+      {/* Mistake Notebook — questions to review and learn from */}
+      <MistakeNotebook vidyaId={vidyaId} />
     </div>
   );
 }

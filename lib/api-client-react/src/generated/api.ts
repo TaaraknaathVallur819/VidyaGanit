@@ -48,6 +48,7 @@ import type {
   MessageFeedbackInput,
   MessageFeedbackResponse,
   MessageResponse,
+  MistakesResponse,
   ProfileUpdate,
   RecommendationResponse,
   ResetPasswordInput,
@@ -2374,6 +2375,83 @@ export function useListOwnAssessments<TData = Awaited<ReturnType<typeof listOwnA
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getListOwnAssessmentsQueryOptions(vidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetOwnMistakesUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/assessment/${vidyaId}/mistakes`
+}
+
+/**
+ * @summary The student's own incorrectly-answered questions
+ */
+export const getOwnMistakes = async (vidyaId: string, options?: RequestInit): Promise<MistakesResponse> => {
+
+  return customFetch<MistakesResponse>(getGetOwnMistakesUrl(vidyaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetOwnMistakesQueryKey = (vidyaId: string,) => {
+    return [
+    `/api/assessment/${vidyaId}/mistakes`
+    ] as const;
+    }
+
+
+export const getGetOwnMistakesQueryOptions = <TData = Awaited<ReturnType<typeof getOwnMistakes>>, TError = ErrorType<unknown>>(vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOwnMistakes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetOwnMistakesQueryKey(vidyaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getOwnMistakes>>> = ({ signal }) => getOwnMistakes(vidyaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getOwnMistakes>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetOwnMistakesQueryResult = NonNullable<Awaited<ReturnType<typeof getOwnMistakes>>>
+export type GetOwnMistakesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary The student's own incorrectly-answered questions
+ */
+
+export function useGetOwnMistakes<TData = Awaited<ReturnType<typeof getOwnMistakes>>, TError = ErrorType<unknown>>(
+ vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOwnMistakes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetOwnMistakesQueryOptions(vidyaId,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

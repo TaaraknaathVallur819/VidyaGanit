@@ -40,6 +40,12 @@ VidyaGanit is a Socratic math tuition web app for Indian school kids (Classes 4�
 - The model appends a `[[DRAW: ...]]` marker to request an illustration; the server strips it from the streamed text and emits the image as a base64 data-URL SSE event.
 - Required env (provisioned by the integration): `AI_INTEGRATIONS_OPENAI_BASE_URL`, `AI_INTEGRATIONS_OPENAI_API_KEY`.
 
+## Mistake Notebook
+
+- Graded tests now capture the student's chosen option per question (`assessments.submitted_answers`, nullable jsonb int[]) on `POST /api/assessment/submit`.
+- `GET /api/assessment/:vidyaId/mistakes` (requireAuth + requireSelf) returns missed questions newest-first, derived on read by `collectMistakes` (`artifacts/api-server/src/lib/assessment.ts`) — there is no separate mistakes table. Only the student's own `status="completed"` tests are exposed; the answer key never leaves the server otherwise.
+- UI: `MistakeNotebook.tsx` in the student Progress tab. i18n keys `student.notebook.*` (×23).
+
 ## Auth & abuse controls
 
 - Login/registration are unchanged in flow but now also set a stateless HMAC-signed `vg_session` httpOnly cookie (`src/lib/session.ts`, signed with `SESSION_SECRET`).

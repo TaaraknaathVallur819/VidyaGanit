@@ -1,4 +1,4 @@
-- [AI tutor chat](ai-tutor-chat.md) — SSE chat contract, gpt-5.4/gpt-image-1, [[DRAW]] marker stripping, vidyaId-trust caveat
+- [AI tutor chat](ai-tutor-chat.md) — SSE chat contract, gpt-5.4/gpt-image-1, [[DRAW]] marker stripping
 - [Student-linking authz](student-linking-authz.md) — link/unlink routes need requireParentOrTutor (not just requireSelf); batches/bulk-add/report-export shape; types come from @workspace/api-client-react
 - [Brain Games tailoring](brain-games-tailoring.md) — board tailoring is sequencing+pacing only (not fake topic pools); complexity-driven timerFor; symbolic prompts
 - [Indian education boards](india-boards.md) — `@workspace/india-boards` is the single catalog shared by the picker + AI prompt; keep stored board values backward-compatible
@@ -9,3 +9,4 @@
 - [i18n parity guard](i18n-parity.md) — all DICTS languages must key-match English; enforced by vitest in web artifact; `test` validation runs all packages
 - [Assessment tests & voice settings](assessment-and-voice.md) — topic tests have NO negative marking; VoiceSettings must sit in "My Profile" for all 3 roles
 - [Daily streaks](daily-streaks.md) — streaks use IST calendar days; advance-on-activity persists, read-side reports 0 if stale without mutating
+- [Mistake Notebook](mistake-notebook.md) — missed questions DERIVED (collectMistakes) from assessments' nullable submittedAnswers; own+completed only; never store a mistakes table
