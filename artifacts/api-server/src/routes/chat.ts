@@ -324,7 +324,9 @@ router.post(
     offerGame = true;
   }
   if (offerGame) {
-    send({ game: true });
+    // Include the detected topic so the client can auto-launch a game tailored
+    // to what the student just asked about (instead of opening the menu).
+    send({ game: true, topic });
   }
 
   // The model emits [[TEST]] only when the student is clearly comfortable with

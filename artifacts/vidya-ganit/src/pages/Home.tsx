@@ -42,6 +42,81 @@ const FloatingSymbol = ({
   );
 };
 
+// Floating kid-friendly emoji that gently bobs and sways — adds playful life to
+// the page alongside the math symbols (stars, rocket, pencil, balloon, etc.).
+const FloatingEmoji = ({
+  emoji,
+  delay,
+  duration,
+  xOffset,
+  yOffset,
+  size,
+}: {
+  emoji: string,
+  delay: number,
+  duration: number,
+  xOffset: string | number,
+  yOffset: string | number,
+  size: string,
+}) => {
+  return (
+    <motion.div
+      className={`absolute ${size} select-none pointer-events-none drop-shadow-sm`}
+      style={{ left: xOffset, top: yOffset }}
+      animate={{
+        y: [0, -28, 0],
+        x: [0, 10, -10, 0],
+        rotate: [0, 8, -8, 0],
+      }}
+      transition={{
+        duration,
+        delay,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+      aria-hidden="true"
+    >
+      {emoji}
+    </motion.div>
+  );
+};
+
+// A twinkling star that pulses in place — scattered sparkle accents.
+const TwinkleStar = ({
+  delay,
+  xOffset,
+  yOffset,
+  size,
+  color,
+}: {
+  delay: number,
+  xOffset: string | number,
+  yOffset: string | number,
+  size: string,
+  color: string,
+}) => {
+  return (
+    <motion.div
+      className={`absolute ${size} ${color} select-none pointer-events-none`}
+      style={{ left: xOffset, top: yOffset }}
+      animate={{
+        scale: [0.6, 1.2, 0.6],
+        opacity: [0.3, 1, 0.3],
+        rotate: [0, 90, 180],
+      }}
+      transition={{
+        duration: 3,
+        delay,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+      aria-hidden="true"
+    >
+      <Sparkles className="w-full h-full" />
+    </motion.div>
+  );
+};
+
 export default function Home() {
   const { t } = useLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -78,6 +153,20 @@ export default function Home() {
       <FloatingSymbol symbol="=" delay={0.5} xOffset="80%" yOffset="70%" color="text-amber-500" size="text-7xl" />
       <FloatingSymbol symbol="π" delay={1.5} xOffset="50%" yOffset="10%" color="text-cyan-500" size="text-5xl" />
       <FloatingSymbol symbol="%" delay={2.5} xOffset="5%" yOffset="40%" color="text-violet-500" size="text-4xl" />
+
+      {/* Playful kid-friendly floaters — a little fun beyond the maths symbols */}
+      <FloatingEmoji emoji="🚀" delay={0.3} duration={6} xOffset="88%" yOffset="45%" size="text-5xl" />
+      <FloatingEmoji emoji="✏️" delay={1.2} duration={5} xOffset="7%" yOffset="78%" size="text-4xl" />
+      <FloatingEmoji emoji="🎈" delay={0.8} duration={7} xOffset="92%" yOffset="82%" size="text-5xl" />
+      <FloatingEmoji emoji="🧮" delay={2} duration={6.5} xOffset="22%" yOffset="12%" size="text-4xl" />
+      <FloatingEmoji emoji="🌟" delay={1.6} duration={5.5} xOffset="70%" yOffset="30%" size="text-3xl" />
+      <FloatingEmoji emoji="📐" delay={2.4} duration={6} xOffset="40%" yOffset="80%" size="text-4xl" />
+
+      {/* Twinkling sparkle accents */}
+      <TwinkleStar delay={0} xOffset="30%" yOffset="35%" size="w-6 h-6" color="text-amber-400" />
+      <TwinkleStar delay={1} xOffset="65%" yOffset="55%" size="w-5 h-5" color="text-pink-400" />
+      <TwinkleStar delay={2} xOffset="48%" yOffset="68%" size="w-7 h-7" color="text-cyan-400" />
+      <TwinkleStar delay={1.5} xOffset="78%" yOffset="22%" size="w-5 h-5" color="text-violet-400" />
 
       {/* Main Hero Content */}
       <motion.div 

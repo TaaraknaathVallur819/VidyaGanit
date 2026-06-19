@@ -25,6 +25,7 @@ export default function MiniGames({
   studentClass,
   board,
   onXpAwarded,
+  initialGame,
 }: {
   open: boolean;
   onClose: () => void;
@@ -32,6 +33,7 @@ export default function MiniGames({
   studentClass?: number | string | null;
   board?: string | null;
   onXpAwarded?: () => void;
+  initialGame?: GameId | null;
 }) {
   const { t } = useLanguage();
 
@@ -139,16 +141,28 @@ export default function MiniGames({
     }, 350);
   };
 
-  // Reset to menu whenever the dialog is opened fresh.
+  // When the dialog opens fresh, either auto-launch a game tailored to what the
+  // student just asked the coach (`initialGame`, when it's available for this
+  // class/board) or fall back to the menu. `autoStartedRef` guarantees we only
+  // act once per open, so re-renders (e.g. class/board changes) never restart a
+  // game mid-play.
+  const autoStartedRef = useRef(false);
   useEffect(() => {
     if (open) {
-      setPhase("menu");
+      if (autoStartedRef.current) return;
+      autoStartedRef.current = true;
       setScore(0);
       scoreRef.current = 0;
+      if (initialGame && defById.has(initialGame)) {
+        startGame(initialGame);
+      } else {
+        setPhase("menu");
+      }
     } else {
+      autoStartedRef.current = false;
       clearTimer();
     }
-  }, [open, clearTimer]);
+  }, [open, initialGame, defById, startGame, clearTimer]);
 
   useEffect(() => () => clearTimer(), [clearTimer]);
 

@@ -22,6 +22,8 @@ import {
   getChatSession,
 } from "@workspace/api-client-react";
 import { BADGE_CATALOG } from "@/lib/badges";
+import { gameForTopic } from "@/lib/syllabus";
+import { type GameId } from "@/lib/games";
 import { useLanguage } from "@/lib/i18n";
 import MiniGames from "@/components/MiniGames";
 import AssessmentTest from "@/components/AssessmentTest";
@@ -251,7 +253,9 @@ export default function SocraticChat({
   const [chatModel, setChatModel] = useState<ChatModelKey>("gpt-5-mini");
   const [imageModel, setImageModel] = useState<ImageModel>("openai");
   const [gameOffered, setGameOffered] = useState(false);
+  const [gameTopic, setGameTopic] = useState<string | null>(null);
   const [gamesOpen, setGamesOpen] = useState(false);
+  const [initialGame, setInitialGame] = useState<GameId | null>(null);
   const [testOffer, setTestOffer] = useState<string | null>(null);
   const [testOpen, setTestOpen] = useState(false);
   const [testTopic, setTestTopic] = useState<string | null>(null);
@@ -552,6 +556,7 @@ export default function SocraticChat({
 
             if (data.game) {
               setGameOffered(true);
+              setGameTopic(data.topic ?? null);
             }
 
             if (data.test) {
@@ -871,6 +876,13 @@ export default function SocraticChat({
                 type="button"
                 data-testid="button-play-game-yes"
                 onClick={() => {
+                  setInitialGame(
+                    gameForTopic(
+                      gameTopic,
+                      studentClass == null ? null : Number(studentClass),
+                      board,
+                    ),
+                  );
                   setGamesOpen(true);
                   setGameOffered(false);
                 }}
@@ -1081,11 +1093,15 @@ export default function SocraticChat({
 
       <MiniGames
         open={gamesOpen}
-        onClose={() => setGamesOpen(false)}
+        onClose={() => {
+          setGamesOpen(false);
+          setInitialGame(null);
+        }}
         vidyaId={vidyaId}
         studentClass={studentClass}
         board={board}
         onXpAwarded={onXpAwarded}
+        initialGame={initialGame}
       />
 
       <AssessmentTest

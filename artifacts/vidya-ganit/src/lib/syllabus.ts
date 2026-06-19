@@ -118,3 +118,40 @@ export function gamesForClassBoard(
     return ra - rb;
   });
 }
+
+/**
+ * Map a tutor-detected topic (the `Topic` strings the API server sends with a
+ * game offer) to an ordered list of game candidates, best match first. Used to
+ * auto-launch a game tailored to what the student just asked about.
+ */
+const TOPIC_GAME_CANDIDATES: Record<string, GameId[]> = {
+  fraction: ["fractions"],
+  multiply: ["multiples", "speed"],
+  divide: ["factors", "hcflcm", "speed"],
+  add_subtract: ["speed", "integers", "missing"],
+  percent: ["percent", "interest"],
+  geometry: ["geometry", "mensuration"],
+  algebra: ["algebra"],
+  decimal: ["decimals"],
+  ratio: ["ratio", "percent"],
+};
+
+/**
+ * Pick the game that best matches a topic AND is available for the student's
+ * class/board. Returns null when the topic has no mapping or none of its
+ * candidate games are available (e.g. an age-inappropriate topic) — the caller
+ * should then fall back to the game menu.
+ */
+export function gameForTopic(
+  topic: string | null | undefined,
+  cls: number | null | undefined,
+  board: string | null | undefined,
+): GameId | null {
+  const candidates = TOPIC_GAME_CANDIDATES[(topic ?? "").trim()];
+  if (!candidates || candidates.length === 0) return null;
+  const available = new Set(gamesForClassBoard(cls, board).map((g) => g.id));
+  for (const id of candidates) {
+    if (available.has(id)) return id;
+  }
+  return null;
+}
