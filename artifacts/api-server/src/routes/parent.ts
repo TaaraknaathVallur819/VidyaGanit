@@ -29,6 +29,9 @@ import {
   TranscribeConsultantAudioParams,
   TranscribeConsultantAudioBody,
   TranscribeConsultantAudioResponse,
+  SetConsultantMessageFeedbackParams,
+  SetConsultantMessageFeedbackBody,
+  SetConsultantMessageFeedbackResponse,
 } from "@workspace/api-zod";
 import { detectTopic } from "../lib/tutor";
 import { ANALYTICS_TOPICS, computeStudentAnalytics } from "../lib/analytics";
@@ -358,9 +361,11 @@ router.get(
       GetConsultantHistoryResponse.parse({
         sessionId,
         messages: rows.map((r) => ({
+          id: r.id,
           role: r.role === "assistant" ? "assistant" : "user",
           content: r.content,
           createdAt: r.createdAt.toISOString(),
+          feedback: r.feedback === "up" || r.feedback === "down" ? r.feedback : null,
           attachmentName: r.attachmentName ?? null,
           attachmentType: r.attachmentType ?? null,
         })),
@@ -457,12 +462,65 @@ router.get(
       GetConsultantSessionResponse.parse({
         sessionId: params.data.sessionId,
         messages: rows.map((r) => ({
+          id: r.id,
           role: r.role === "assistant" ? "assistant" : "user",
           content: r.content,
           createdAt: r.createdAt.toISOString(),
+          feedback: r.feedback === "up" || r.feedback === "down" ? r.feedback : null,
           attachmentName: r.attachmentName ?? null,
           attachmentType: r.attachmentType ?? null,
         })),
+      }),
+    );
+  },
+);
+
+// ── Like / dislike (or clear) one of the parent's own strategy replies ─
+router.post(
+  "/parent/:vidyaId/consultant/messages/:messageId/feedback",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = SetConsultantMessageFeedbackParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+    const body = SetConsultantMessageFeedbackBody.safeParse(req.body);
+    if (!body.success) {
+      res.status(400).json({ error: body.error.message });
+      return;
+    }
+
+    // Only assistant turns the parent owns can be rated. The ownership filter
+    // (parentVidyaId) means a user can never rate someone else's reply.
+    const [updated] = await db
+      .update(parentChatMessagesTable)
+      .set({ feedback: body.data.feedback })
+      .where(
+        and(
+          eq(parentChatMessagesTable.id, params.data.messageId),
+          eq(parentChatMessagesTable.parentVidyaId, params.data.vidyaId),
+          eq(parentChatMessagesTable.role, "assistant"),
+        ),
+      )
+      .returning({
+        id: parentChatMessagesTable.id,
+        feedback: parentChatMessagesTable.feedback,
+      });
+
+    if (!updated) {
+      res.status(404).json({ error: "Message not found" });
+      return;
+    }
+
+    res.json(
+      SetConsultantMessageFeedbackResponse.parse({
+        id: updated.id,
+        feedback:
+          updated.feedback === "up" || updated.feedback === "down"
+            ? updated.feedback
+            : null,
       }),
     );
   },
@@ -799,21 +857,26 @@ router.post(
     // no marker text can leak into saved history even if the stream errored
     // mid-marker. Falls back to the error message actually shown.
     const assistantText = full.slice(0, sent).trim() || (fallbackText ?? "");
+    let assistantMessageId: number | null = null;
     if (assistantText) {
       try {
-        await db.insert(parentChatMessagesTable).values({
-          parentVidyaId,
-          sessionId,
-          studentVidyaId: linkedStudentVidyaId,
-          role: "assistant",
-          content: assistantText,
-        });
+        const [inserted] = await db
+          .insert(parentChatMessagesTable)
+          .values({
+            parentVidyaId,
+            sessionId,
+            studentVidyaId: linkedStudentVidyaId,
+            role: "assistant",
+            content: assistantText,
+          })
+          .returning({ id: parentChatMessagesTable.id });
+        assistantMessageId = inserted?.id ?? null;
       } catch (err) {
         req.log.error({ err }, "failed to persist parent consultant reply");
       }
     }
 
-    send({ done: true, sessionId });
+    send({ done: true, sessionId, messageId: assistantMessageId });
     res.end();
   },
 );

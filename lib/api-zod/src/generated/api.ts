@@ -438,9 +438,11 @@ export const GetConsultantHistoryParams = zod.object({
 export const GetConsultantHistoryResponse = zod.object({
   "sessionId": zod.string(),
   "messages": zod.array(zod.object({
+  "id": zod.number(),
   "role": zod.enum(['user', 'assistant']),
   "content": zod.string(),
   "createdAt": zod.coerce.date(),
+  "feedback": zod.union([zod.literal('up'),zod.literal('down'),zod.literal(null)]).nullish(),
   "attachmentName": zod.string().nullish(),
   "attachmentType": zod.string().nullish()
 }))
@@ -476,12 +478,32 @@ export const GetConsultantSessionParams = zod.object({
 export const GetConsultantSessionResponse = zod.object({
   "sessionId": zod.string(),
   "messages": zod.array(zod.object({
+  "id": zod.number(),
   "role": zod.enum(['user', 'assistant']),
   "content": zod.string(),
   "createdAt": zod.coerce.date(),
+  "feedback": zod.union([zod.literal('up'),zod.literal('down'),zod.literal(null)]).nullish(),
   "attachmentName": zod.string().nullish(),
   "attachmentType": zod.string().nullish()
 }))
+})
+
+
+/**
+ * @summary Like / dislike (or clear) a strategy-AI assistant reply
+ */
+export const SetConsultantMessageFeedbackParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "messageId": zod.coerce.number()
+})
+
+export const SetConsultantMessageFeedbackBody = zod.object({
+  "feedback": zod.union([zod.literal('up'),zod.literal('down'),zod.literal(null)]).nullable()
+})
+
+export const SetConsultantMessageFeedbackResponse = zod.object({
+  "id": zod.number(),
+  "feedback": zod.union([zod.literal('up'),zod.literal('down'),zod.literal(null)]).nullable()
 })
 
 
@@ -558,10 +580,30 @@ export const GetChatSessionParams = zod.object({
 export const GetChatSessionResponse = zod.object({
   "sessionId": zod.string(),
   "messages": zod.array(zod.object({
+  "id": zod.number(),
   "role": zod.enum(['user', 'assistant']),
   "content": zod.string(),
-  "createdAt": zod.coerce.date()
+  "createdAt": zod.coerce.date(),
+  "feedback": zod.union([zod.literal('up'),zod.literal('down'),zod.literal(null)]).nullish()
 }))
+})
+
+
+/**
+ * @summary Like / dislike (or clear) a tutor assistant reply
+ */
+export const SetChatMessageFeedbackParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "messageId": zod.coerce.number()
+})
+
+export const SetChatMessageFeedbackBody = zod.object({
+  "feedback": zod.union([zod.literal('up'),zod.literal('down'),zod.literal(null)]).nullable()
+})
+
+export const SetChatMessageFeedbackResponse = zod.object({
+  "id": zod.number(),
+  "feedback": zod.union([zod.literal('up'),zod.literal('down'),zod.literal(null)]).nullable()
 })
 
 

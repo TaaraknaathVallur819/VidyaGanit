@@ -19,6 +19,8 @@ export const parentChatMessagesTable = pgTable(
     studentVidyaId: text("student_vidya_id"),
     role: text("role").notNull(),
     content: text("content").notNull(),
+    // Optional parent/tutor feedback on an assistant turn: "up" | "down" | null.
+    feedback: text("feedback"),
     attachmentName: text("attachment_name"),
     attachmentType: text("attachment_type"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

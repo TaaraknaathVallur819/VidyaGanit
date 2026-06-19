@@ -16,6 +16,8 @@ export const chatMessagesTable = pgTable(
       .references(() => usersTable.vidyaId, { onDelete: "cascade" }),
     role: text("role").notNull(),
     content: text("content").notNull(),
+    // Optional learner feedback on an assistant turn: "up" | "down" | null.
+    feedback: text("feedback"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [

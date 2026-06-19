@@ -5,12 +5,16 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { ConsultantMessageFeedback } from './consultantMessageFeedback';
 import type { ConsultantMessageRole } from './consultantMessageRole';
 
 export interface ConsultantMessage {
+  id: number;
   role: ConsultantMessageRole;
   content: string;
   createdAt: Date;
+  /** @nullable */
+  feedback?: ConsultantMessageFeedback;
   /** @nullable */
   attachmentName?: string | null;
   /** @nullable */

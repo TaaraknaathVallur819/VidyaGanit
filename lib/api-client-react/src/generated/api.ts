@@ -44,6 +44,8 @@ import type {
   LinkedStudentProfile,
   LinkedStudentsResponse,
   LoginInput,
+  MessageFeedbackInput,
+  MessageFeedbackResponse,
   MessageResponse,
   ProfileUpdate,
   RecommendationResponse,
@@ -1563,6 +1565,80 @@ export function useGetConsultantSession<TData = Awaited<ReturnType<typeof getCon
 
 
 
+export const getSetConsultantMessageFeedbackUrl = (vidyaId: string,
+    messageId: number,) => {
+
+
+
+
+  return `/api/parent/${vidyaId}/consultant/messages/${messageId}/feedback`
+}
+
+/**
+ * @summary Like / dislike (or clear) a strategy-AI assistant reply
+ */
+export const setConsultantMessageFeedback = async (vidyaId: string,
+    messageId: number,
+    messageFeedbackInput: MessageFeedbackInput, options?: RequestInit): Promise<MessageFeedbackResponse> => {
+
+  return customFetch<MessageFeedbackResponse>(getSetConsultantMessageFeedbackUrl(vidyaId,messageId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      messageFeedbackInput,)
+  }
+);}
+
+
+
+
+export const getSetConsultantMessageFeedbackMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setConsultantMessageFeedback>>, TError,{vidyaId: string;messageId: number;data: BodyType<MessageFeedbackInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setConsultantMessageFeedback>>, TError,{vidyaId: string;messageId: number;data: BodyType<MessageFeedbackInput>}, TContext> => {
+
+const mutationKey = ['setConsultantMessageFeedback'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setConsultantMessageFeedback>>, {vidyaId: string;messageId: number;data: BodyType<MessageFeedbackInput>}> = (props) => {
+          const {vidyaId,messageId,data} = props ?? {};
+
+          return  setConsultantMessageFeedback(vidyaId,messageId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetConsultantMessageFeedbackMutationResult = NonNullable<Awaited<ReturnType<typeof setConsultantMessageFeedback>>>
+    export type SetConsultantMessageFeedbackMutationBody = BodyType<MessageFeedbackInput>
+    export type SetConsultantMessageFeedbackMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Like / dislike (or clear) a strategy-AI assistant reply
+ */
+export const useSetConsultantMessageFeedback = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setConsultantMessageFeedback>>, TError,{vidyaId: string;messageId: number;data: BodyType<MessageFeedbackInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof setConsultantMessageFeedback>>,
+        TError,
+        {vidyaId: string;messageId: number;data: BodyType<MessageFeedbackInput>},
+        TContext
+      > => {
+      return useMutation(getSetConsultantMessageFeedbackMutationOptions(options));
+    }
+
 export const getSendConsultantMessageUrl = (vidyaId: string,) => {
 
 
@@ -1865,6 +1941,80 @@ export function useGetChatSession<TData = Awaited<ReturnType<typeof getChatSessi
 
 
 
+
+export const getSetChatMessageFeedbackUrl = (vidyaId: string,
+    messageId: number,) => {
+
+
+
+
+  return `/api/chat/${vidyaId}/messages/${messageId}/feedback`
+}
+
+/**
+ * @summary Like / dislike (or clear) a tutor assistant reply
+ */
+export const setChatMessageFeedback = async (vidyaId: string,
+    messageId: number,
+    messageFeedbackInput: MessageFeedbackInput, options?: RequestInit): Promise<MessageFeedbackResponse> => {
+
+  return customFetch<MessageFeedbackResponse>(getSetChatMessageFeedbackUrl(vidyaId,messageId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      messageFeedbackInput,)
+  }
+);}
+
+
+
+
+export const getSetChatMessageFeedbackMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setChatMessageFeedback>>, TError,{vidyaId: string;messageId: number;data: BodyType<MessageFeedbackInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setChatMessageFeedback>>, TError,{vidyaId: string;messageId: number;data: BodyType<MessageFeedbackInput>}, TContext> => {
+
+const mutationKey = ['setChatMessageFeedback'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setChatMessageFeedback>>, {vidyaId: string;messageId: number;data: BodyType<MessageFeedbackInput>}> = (props) => {
+          const {vidyaId,messageId,data} = props ?? {};
+
+          return  setChatMessageFeedback(vidyaId,messageId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetChatMessageFeedbackMutationResult = NonNullable<Awaited<ReturnType<typeof setChatMessageFeedback>>>
+    export type SetChatMessageFeedbackMutationBody = BodyType<MessageFeedbackInput>
+    export type SetChatMessageFeedbackMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Like / dislike (or clear) a tutor assistant reply
+ */
+export const useSetChatMessageFeedback = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setChatMessageFeedback>>, TError,{vidyaId: string;messageId: number;data: BodyType<MessageFeedbackInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof setChatMessageFeedback>>,
+        TError,
+        {vidyaId: string;messageId: number;data: BodyType<MessageFeedbackInput>},
+        TContext
+      > => {
+      return useMutation(getSetChatMessageFeedbackMutationOptions(options));
+    }
 
 export const getGenerateAssessmentUrl = () => {
 

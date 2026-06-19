@@ -444,6 +444,8 @@ const en: Dict = {
   "chat.footerHint":
     "Enter → send · Shift+Enter → new line · Every question earns XP! 🌟",
   "chat.drawing": "Drawing a picture for you… 🎨",
+  "chat.feedback.helpful": "Helpful",
+  "chat.feedback.notHelpful": "Not helpful",
   "chat.welcome":
     "Hey {name}! 👋 I'm your VidyaGanit Maths Tutor! 🚀\n\nI won't hand you answers directly — but I WILL help you discover them yourself. That makes them stick in your brain forever! 🧠✨\n\n{info}Ask me any maths challenge — fractions, multiplication, geometry, percentages, equations — anything!\n\nEvery question earns you XP and badges too! 🌟 What shall we tackle first?",
   "chat.welcomeSyllabus": "I know your {info} syllabus really well. ",
@@ -862,6 +864,8 @@ const ta: Dict = {
   "chat.footerHint":
     "Enter → அனுப்பு · Shift+Enter → புதிய வரி · ஒவ்வொரு கேள்விக்கும் XP! 🌟",
   "chat.drawing": "உங்களுக்காக ஒரு படம் வரைகிறேன்… 🎨",
+  "chat.feedback.helpful": "உதவியாக இருந்தது",
+  "chat.feedback.notHelpful": "உதவியாக இல்லை",
   "chat.welcome":
     "வணக்கம் {name}! 👋 நான் உங்கள் VidyaGanit கணித ஆசிரியர்! 🚀\n\nநான் நேரடியாக பதில்களைத் தர மாட்டேன் — ஆனால் நீங்களே அவற்றைக் கண்டுபிடிக்க உதவுவேன். அது அவற்றை உங்கள் மூளையில் என்றென்றும் நிலைக்க வைக்கும்! 🧠✨\n\n{info}என்னிடம் எந்த கணித சவாலையும் கேளுங்கள் — பின்னங்கள், பெருக்கல், வடிவியல், சதவீதம், சமன்பாடுகள் — எதுவும்!\n\nஒவ்வொரு கேள்வியும் உங்களுக்கு XP யும் பேட்ஜ்களும் தரும்! 🌟 முதலில் எதைக் கையாள்வோம்?",
   "chat.welcomeSyllabus": "உங்கள் {info} பாடத்திட்டத்தை நான் நன்கு அறிவேன். ",
@@ -1280,6 +1284,8 @@ const hi: Dict = {
   "chat.footerHint":
     "Enter → भेजें · Shift+Enter → नई पंक्ति · हर प्रश्न से XP मिलता है! 🌟",
   "chat.drawing": "आपके लिए चित्र बना रहा हूँ… 🎨",
+  "chat.feedback.helpful": "मददगार",
+  "chat.feedback.notHelpful": "मददगार नहीं",
   "chat.welcome":
     "नमस्ते {name}! 👋 मैं आपका VidyaGanit गणित ट्यूटर हूँ! 🚀\n\nमैं सीधे उत्तर नहीं दूँगा — पर मैं आपको खुद उत्तर खोजने में मदद ज़रूर करूँगा। इससे वे हमेशा के लिए आपके दिमाग़ में बस जाते हैं! 🧠✨\n\n{info}मुझसे कोई भी गणित चुनौती पूछें — भिन्न, गुणा, ज्यामिति, प्रतिशत, समीकरण — कुछ भी!\n\nहर प्रश्न से आपको XP और बैज भी मिलते हैं! 🌟 सबसे पहले किस पर काम करें?",
   "chat.welcomeSyllabus": "मैं आपका {info} पाठ्यक्रम अच्छी तरह जानता हूँ। ",
@@ -1698,6 +1704,8 @@ const te: Dict = {
   "chat.footerHint":
     "Enter → పంపు · Shift+Enter → కొత్త లైన్ · ప్రతి ప్రశ్నకు XP! 🌟",
   "chat.drawing": "మీ కోసం ఒక చిత్రాన్ని గీస్తున్నాను… 🎨",
+  "chat.feedback.helpful": "ఉపయోగకరంగా ఉంది",
+  "chat.feedback.notHelpful": "ఉపయోగపడలేదు",
   "chat.welcome":
     "నమస్తే {name}! 👋 నేను మీ VidyaGanit గణిత ట్యూటర్‌ని! 🚀\n\nనేను నేరుగా సమాధానాలు ఇవ్వను — కానీ మీరే వాటిని కనుగొనడంలో సహాయం చేస్తాను. అది వాటిని మీ మెదడులో ఎప్పటికీ నిలిచిపోయేలా చేస్తుంది! 🧠✨\n\n{info}నన్ను ఏ గణిత సవాలునైనా అడగండి — భిన్నాలు, గుణకారం, జ్యామితి, శాతం, సమీకరణాలు — ఏదైనా!\n\nప్రతి ప్రశ్న మీకు XP మరియు బ్యాడ్జ్‌లను కూడా ఇస్తుంది! 🌟 ముందుగా దేనిపై పని చేద్దాం?",
   "chat.welcomeSyllabus": "మీ {info} సిలబస్‌ను నేను బాగా తెలుసు. ",

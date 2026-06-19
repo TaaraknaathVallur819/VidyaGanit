@@ -14,12 +14,15 @@ import {
   Loader2,
   MessageSquare,
   ClipboardCheck,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
 
 import {
   useListChatSessions,
   getListChatSessionsQueryKey,
   getChatSession,
+  setChatMessageFeedback,
 } from "@workspace/api-client-react";
 import { BADGE_CATALOG } from "@/lib/badges";
 import { gameForTopicOrDefault } from "@/lib/syllabus";
@@ -50,6 +53,8 @@ type Message = {
   imageUrl?: string;
   imageAlt?: string;
   attachment?: Attachment;
+  dbId?: number;
+  feedback?: "up" | "down" | null;
 };
 
 function readFileAsDataUrl(file: File): Promise<string> {
@@ -300,6 +305,8 @@ export default function SocraticChat({
             id: `saved-${data.sessionId}-${i}`,
             role: m.role === "assistant" ? "tutor" : "user",
             content: m.content,
+            dbId: m.id,
+            feedback: m.feedback ?? null,
           })),
         );
         setHistory(
@@ -331,6 +338,27 @@ export default function SocraticChat({
       year: "numeric",
     });
   };
+
+  const handleFeedback = useCallback(
+    async (target: Message, value: "up" | "down") => {
+      if (target.dbId == null) return;
+      const prevFeedback = target.feedback ?? null;
+      const next = prevFeedback === value ? null : value;
+      setMessages((prev) =>
+        prev.map((m) => (m.id === target.id ? { ...m, feedback: next } : m)),
+      );
+      try {
+        await setChatMessageFeedback(vidyaId, target.dbId, { feedback: next });
+      } catch {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === target.id ? { ...m, feedback: prevFeedback } : m,
+          ),
+        );
+      }
+    },
+    [vidyaId],
+  );
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -516,6 +544,7 @@ export default function SocraticChat({
               game?: boolean;
               test?: boolean;
               topic?: string;
+              messageId?: number | null;
             };
 
             if (data.game) {
@@ -567,7 +596,16 @@ export default function SocraticChat({
             if (data.done) {
               setMessages((prev) =>
                 prev.map((m) =>
-                  m.id === tutorMsgId ? { ...m, isStreaming: false } : m,
+                  m.id === tutorMsgId
+                    ? {
+                        ...m,
+                        isStreaming: false,
+                        dbId:
+                          typeof data.messageId === "number"
+                            ? data.messageId
+                            : m.dbId,
+                      }
+                    : m,
                 ),
               );
               setHistory((prev) => [
@@ -766,14 +804,48 @@ export default function SocraticChat({
                   attachment={msg.attachment}
                 />
               ) : (
-                <TutorBubble
-                  content={msg.content}
-                  isStreaming={msg.isStreaming}
-                  isDrawing={msg.isDrawing}
-                  imageUrl={msg.imageUrl}
-                  imageAlt={msg.imageAlt}
-                  drawingLabel={t("chat.drawing")}
-                />
+                <div>
+                  <TutorBubble
+                    content={msg.content}
+                    isStreaming={msg.isStreaming}
+                    isDrawing={msg.isDrawing}
+                    imageUrl={msg.imageUrl}
+                    imageAlt={msg.imageAlt}
+                    drawingLabel={t("chat.drawing")}
+                  />
+                  {!msg.isStreaming && !msg.isDrawing && msg.dbId != null && (
+                    <div className="flex items-center gap-1 mt-1.5 ml-[42px]">
+                      <button
+                        type="button"
+                        aria-label={t("chat.feedback.helpful")}
+                        aria-pressed={msg.feedback === "up"}
+                        title={t("chat.feedback.helpful")}
+                        onClick={() => handleFeedback(msg, "up")}
+                        className={`p-1.5 rounded-lg transition-colors ${
+                          msg.feedback === "up"
+                            ? "bg-emerald-100 text-emerald-600"
+                            : "text-muted-foreground hover:bg-indigo-50 hover:text-foreground"
+                        }`}
+                      >
+                        <ThumbsUp className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={t("chat.feedback.notHelpful")}
+                        aria-pressed={msg.feedback === "down"}
+                        title={t("chat.feedback.notHelpful")}
+                        onClick={() => handleFeedback(msg, "down")}
+                        className={`p-1.5 rounded-lg transition-colors ${
+                          msg.feedback === "down"
+                            ? "bg-rose-100 text-rose-600"
+                            : "text-muted-foreground hover:bg-indigo-50 hover:text-foreground"
+                        }`}
+                      >
+                        <ThumbsDown className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
             </motion.div>
           ))}

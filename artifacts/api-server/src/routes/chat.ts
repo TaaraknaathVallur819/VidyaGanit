@@ -8,6 +8,9 @@ import {
   ListChatSessionsResponse,
   GetChatSessionParams,
   GetChatSessionResponse,
+  SetChatMessageFeedbackParams,
+  SetChatMessageFeedbackBody,
+  SetChatMessageFeedbackResponse,
 } from "@workspace/api-zod";
 import {
   detectTopic,
@@ -387,14 +390,19 @@ router.post(
       .replace(GAME_MARKER_RE, "")
       .replace(TEST_MARKER_RE, "")
       .trim() || (fallbackText ?? "");
+  let assistantMessageId: number | null = null;
   if (assistantText) {
     try {
-      await db.insert(chatMessagesTable).values({
-        sessionId,
-        studentVidyaId: vidyaId,
-        role: "assistant",
-        content: assistantText,
-      });
+      const [inserted] = await db
+        .insert(chatMessagesTable)
+        .values({
+          sessionId,
+          studentVidyaId: vidyaId,
+          role: "assistant",
+          content: assistantText,
+        })
+        .returning({ id: chatMessagesTable.id });
+      assistantMessageId = inserted?.id ?? null;
     } catch (err) {
       req.log.error({ err }, "failed to persist tutor chat message");
     }
@@ -416,7 +424,7 @@ router.post(
     .set({ xp: newXp, badges: allBadges })
     .where(eq(usersTable.vidyaId, vidyaId));
 
-  send({ done: true, xpAwarded: xpGained, newBadges });
+  send({ done: true, xpAwarded: xpGained, newBadges, messageId: assistantMessageId });
   res.end();
 });
 
@@ -508,10 +516,60 @@ router.get(
       GetChatSessionResponse.parse({
         sessionId: params.data.sessionId,
         messages: rows.map((r) => ({
+          id: r.id,
           role: r.role === "assistant" ? "assistant" : "user",
           content: r.content,
           createdAt: r.createdAt.toISOString(),
+          feedback: r.feedback === "up" || r.feedback === "down" ? r.feedback : null,
         })),
+      }),
+    );
+  },
+);
+
+// ── Like / dislike (or clear) one of the student's own tutor replies ─
+router.post(
+  "/chat/:vidyaId/messages/:messageId/feedback",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = SetChatMessageFeedbackParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+    const body = SetChatMessageFeedbackBody.safeParse(req.body);
+    if (!body.success) {
+      res.status(400).json({ error: body.error.message });
+      return;
+    }
+
+    // Only the assistant turns the student owns can be rated. The ownership
+    // filter (studentVidyaId) means a user can never rate someone else's reply.
+    const [updated] = await db
+      .update(chatMessagesTable)
+      .set({ feedback: body.data.feedback })
+      .where(
+        and(
+          eq(chatMessagesTable.id, params.data.messageId),
+          eq(chatMessagesTable.studentVidyaId, params.data.vidyaId),
+          eq(chatMessagesTable.role, "assistant"),
+        ),
+      )
+      .returning({ id: chatMessagesTable.id, feedback: chatMessagesTable.feedback });
+
+    if (!updated) {
+      res.status(404).json({ error: "Message not found" });
+      return;
+    }
+
+    res.json(
+      SetChatMessageFeedbackResponse.parse({
+        id: updated.id,
+        feedback:
+          updated.feedback === "up" || updated.feedback === "down"
+            ? updated.feedback
+            : null,
       }),
     );
   },

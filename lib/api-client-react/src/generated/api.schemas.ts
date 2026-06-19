@@ -455,10 +455,24 @@ export const ConsultantMessageRole = {
   assistant: 'assistant',
 } as const;
 
+/**
+ * @nullable
+ */
+export type ConsultantMessageFeedback = typeof ConsultantMessageFeedback[keyof typeof ConsultantMessageFeedback] | null;
+
+
+export const ConsultantMessageFeedback = {
+  up: 'up',
+  down: 'down',
+} as const;
+
 export interface ConsultantMessage {
+  id: number;
   role: ConsultantMessageRole;
   content: string;
   createdAt: string;
+  /** @nullable */
+  feedback?: ConsultantMessageFeedback;
   /** @nullable */
   attachmentName?: string | null;
   /** @nullable */
@@ -502,10 +516,57 @@ export const ChatSessionMessageRole = {
   assistant: 'assistant',
 } as const;
 
+/**
+ * @nullable
+ */
+export type ChatSessionMessageFeedback = typeof ChatSessionMessageFeedback[keyof typeof ChatSessionMessageFeedback] | null;
+
+
+export const ChatSessionMessageFeedback = {
+  up: 'up',
+  down: 'down',
+} as const;
+
 export interface ChatSessionMessage {
+  id: number;
   role: ChatSessionMessageRole;
   content: string;
   createdAt: string;
+  /** @nullable */
+  feedback?: ChatSessionMessageFeedback;
+}
+
+/**
+ * @nullable
+ */
+export type MessageFeedbackInputFeedback = typeof MessageFeedbackInputFeedback[keyof typeof MessageFeedbackInputFeedback] | null;
+
+
+export const MessageFeedbackInputFeedback = {
+  up: 'up',
+  down: 'down',
+} as const;
+
+export interface MessageFeedbackInput {
+  /** @nullable */
+  feedback: MessageFeedbackInputFeedback;
+}
+
+/**
+ * @nullable
+ */
+export type MessageFeedbackResponseFeedback = typeof MessageFeedbackResponseFeedback[keyof typeof MessageFeedbackResponseFeedback] | null;
+
+
+export const MessageFeedbackResponseFeedback = {
+  up: 'up',
+  down: 'down',
+} as const;
+
+export interface MessageFeedbackResponse {
+  id: number;
+  /** @nullable */
+  feedback: MessageFeedbackResponseFeedback;
 }
 
 export interface ChatSessionResponse {

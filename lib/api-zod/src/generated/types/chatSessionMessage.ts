@@ -5,10 +5,14 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { ChatSessionMessageFeedback } from './chatSessionMessageFeedback';
 import type { ChatSessionMessageRole } from './chatSessionMessageRole';
 
 export interface ChatSessionMessage {
+  id: number;
   role: ChatSessionMessageRole;
   content: string;
   createdAt: Date;
+  /** @nullable */
+  feedback?: ChatSessionMessageFeedback;
 }

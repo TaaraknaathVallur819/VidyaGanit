@@ -14,11 +14,14 @@ import {
   History,
   Plus,
   MessageSquare,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
 import {
   useListConsultantSessions,
   getListConsultantSessionsQueryKey,
   getConsultantSession,
+  setConsultantMessageFeedback,
 } from "@workspace/api-client-react";
 import { useLanguage } from "@/lib/i18n";
 import { useLiveSpeech } from "@/hooks/useLiveSpeech";
@@ -46,6 +49,8 @@ type Message = {
   attachment?: Attachment;
   attachmentName?: string | null;
   attachmentType?: string | null;
+  dbId?: number;
+  feedback?: "up" | "down" | null;
 };
 
 type HistoryEntry = { role: "user" | "assistant"; content: string };
@@ -140,6 +145,8 @@ export default function ParentConsultantChat({
             content: m.content,
             attachmentName: m.attachmentName,
             attachmentType: m.attachmentType,
+            dbId: m.id,
+            feedback: m.feedback ?? null,
           })),
         );
         setHistory(data.messages.map((m) => ({ role: m.role, content: m.content })));
@@ -154,6 +161,29 @@ export default function ParentConsultantChat({
       }
     },
     [vidyaId, activeSessionId, loadingSessionId, t],
+  );
+
+  const handleFeedback = useCallback(
+    async (target: Message, value: "up" | "down") => {
+      if (target.dbId == null) return;
+      const prevFeedback = target.feedback ?? null;
+      const next = prevFeedback === value ? null : value;
+      setMessages((prev) =>
+        prev.map((m) => (m.id === target.id ? { ...m, feedback: next } : m)),
+      );
+      try {
+        await setConsultantMessageFeedback(vidyaId, target.dbId, {
+          feedback: next,
+        });
+      } catch {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === target.id ? { ...m, feedback: prevFeedback } : m,
+          ),
+        );
+      }
+    },
+    [vidyaId],
   );
 
   // On first load, restore the most recent conversation (if any).
@@ -331,6 +361,7 @@ export default function ParentConsultantChat({
               image?: string;
               imageAlt?: string;
               imageError?: boolean;
+              messageId?: number | null;
             };
             if (typeof data.chunk === "string") {
               fullContent += data.chunk;
@@ -364,7 +395,18 @@ export default function ParentConsultantChat({
               // the bubble done, then refresh the sessions list.
               const stillActive = sessionIdRef.current === mySessionId;
               setMessages((prev) =>
-                prev.map((m) => (m.id === aiMsgId ? { ...m, isStreaming: false } : m)),
+                prev.map((m) =>
+                  m.id === aiMsgId
+                    ? {
+                        ...m,
+                        isStreaming: false,
+                        dbId:
+                          typeof data.messageId === "number"
+                            ? data.messageId
+                            : m.dbId,
+                      }
+                    : m,
+                ),
               );
               if (stillActive) {
                 if (data.sessionId) {
@@ -632,8 +674,40 @@ export default function ParentConsultantChat({
                       </div>
                     )}
                     {!msg.isStreaming && !msg.isDrawing && msg.content && (
-                      <div className="mt-1.5 -mb-1 -ml-1">
+                      <div className="mt-1.5 -mb-1 -ml-1 flex items-center gap-1">
                         <SpeakButton text={msg.content} tone="dark" />
+                        {msg.dbId != null && (
+                          <>
+                            <button
+                              type="button"
+                              aria-label={t("chat.feedback.helpful")}
+                              aria-pressed={msg.feedback === "up"}
+                              title={t("chat.feedback.helpful")}
+                              onClick={() => handleFeedback(msg, "up")}
+                              className={`p-1.5 rounded-lg transition-colors ${
+                                msg.feedback === "up"
+                                  ? "bg-emerald-100 text-emerald-600"
+                                  : "text-muted-foreground hover:bg-emerald-50 hover:text-foreground"
+                              }`}
+                            >
+                              <ThumbsUp className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              aria-label={t("chat.feedback.notHelpful")}
+                              aria-pressed={msg.feedback === "down"}
+                              title={t("chat.feedback.notHelpful")}
+                              onClick={() => handleFeedback(msg, "down")}
+                              className={`p-1.5 rounded-lg transition-colors ${
+                                msg.feedback === "down"
+                                  ? "bg-rose-100 text-rose-600"
+                                  : "text-muted-foreground hover:bg-rose-50 hover:text-foreground"
+                              }`}
+                            >
+                              <ThumbsDown className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     )}
                   </div>

@@ -570,6 +570,42 @@ paths:
               schema:
                 $ref: "#/components/schemas/ConsultantHistoryResponse"
 
+  /parent/{vidyaId}/consultant/messages/{messageId}/feedback:
+    post:
+      operationId: setConsultantMessageFeedback
+      tags: [parent]
+      summary: Like / dislike (or clear) a strategy-AI assistant reply
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: messageId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageFeedbackInput"
+      responses:
+        "200":
+          description: Updated feedback state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageFeedbackResponse"
+        "404":
+          description: Message not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /parent/{vidyaId}/consultant/message:
     post:
       operationId: sendConsultantMessage
@@ -672,6 +708,42 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ChatSessionResponse"
+
+  /chat/{vidyaId}/messages/{messageId}/feedback:
+    post:
+      operationId: setChatMessageFeedback
+      tags: [chat]
+      summary: Like / dislike (or clear) a tutor assistant reply
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: messageId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageFeedbackInput"
+      responses:
+        "200":
+          description: Updated feedback state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageFeedbackResponse"
+        "404":
+          description: Message not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /assessment/generate:
     post:
@@ -1256,8 +1328,10 @@ components:
 
     ConsultantMessage:
       type: object
-      required: [role, content, createdAt]
+      required: [id, role, content, createdAt]
       properties:
+        id:
+          type: integer
         role:
           type: string
           enum: [user, assistant]
@@ -1266,6 +1340,9 @@ components:
         createdAt:
           type: string
           format: date-time
+        feedback:
+          type: ["string", "null"]
+          enum: [up, down, null]
         attachmentName:
           type: ["string", "null"]
         attachmentType:
@@ -1336,8 +1413,10 @@ components:
 
     ChatSessionMessage:
       type: object
-      required: [role, content, createdAt]
+      required: [id, role, content, createdAt]
       properties:
+        id:
+          type: integer
         role:
           type: string
           enum: [user, assistant]
@@ -1346,6 +1425,27 @@ components:
         createdAt:
           type: string
           format: date-time
+        feedback:
+          type: ["string", "null"]
+          enum: [up, down, null]
+
+    MessageFeedbackInput:
+      type: object
+      required: [feedback]
+      properties:
+        feedback:
+          type: ["string", "null"]
+          enum: [up, down, null]
+
+    MessageFeedbackResponse:
+      type: object
+      required: [id, feedback]
+      properties:
+        id:
+          type: integer
+        feedback:
+          type: ["string", "null"]
+          enum: [up, down, null]
 
     ChatSessionResponse:
       type: object
