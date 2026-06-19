@@ -55,6 +55,7 @@ import {
   History as HistoryIcon,
   Sparkles,
   Layers,
+  Search,
 } from "lucide-react";
 
 const UNASSIGNED_BATCH = "__unassigned__";
@@ -100,6 +101,15 @@ export default function TutorDashboard() {
       : batchFilter === UNASSIGNED_BATCH
         ? students.filter((s) => !s.batch)
         : students.filter((s) => s.batch === batchFilter);
+
+  const [studentSearch, setStudentSearch] = useState("");
+  const searchedStudents = filteredStudents.filter((s) => {
+    const q = studentSearch.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      s.name.toLowerCase().includes(q) || s.vidyaId.toLowerCase().includes(q)
+    );
+  });
 
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
 
@@ -539,7 +549,23 @@ export default function TutorDashboard() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {filteredStudents.map((s) => (
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                        <input
+                          type="text"
+                          value={studentSearch}
+                          onChange={(e) => setStudentSearch(e.target.value)}
+                          placeholder={t("profile.searchStudents")}
+                          aria-label={t("profile.searchStudents")}
+                          className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-colors"
+                        />
+                      </div>
+                      {searchedStudents.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-6">
+                          {t("profile.noSearchResults")}
+                        </p>
+                      ) : (
+                        searchedStudents.map((s) => (
                         <div
                           key={s.vidyaId}
                           className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-primary/20 transition-colors"
@@ -572,7 +598,8 @@ export default function TutorDashboard() {
                             <X className="w-4 h-4" />
                           </button>
                         </div>
-                      ))}
+                        ))
+                      )}
                     </div>
                   )}
                 </CardContent>

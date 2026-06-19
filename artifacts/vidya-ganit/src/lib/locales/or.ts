@@ -117,6 +117,8 @@ const dict: Record<string, string> = {
   "profile.linkPlaceholder": "ଛାତ୍ରର VidyaGanit ID ଲେଖନ୍ତୁ (ଯଥା VG-STU-12345)",
   "profile.link": "ସଂଯୋଗ କରନ୍ତୁ",
   "profile.noStudentsTitle": "ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ଛାତ୍ର ସଂଯୁକ୍ତ ନାହାନ୍ତି",
+  "profile.searchStudents": "ନାମ କିମ୍ବା ଆଇଡି ଦ୍ୱାରା ଖୋଜନ୍ତୁ",
+  "profile.noSearchResults": "ଆପଣଙ୍କ ଖୋଜ ସହ ମେଳ ଖାଉଥିବା କୌଣସି ଛାତ୍ର ନାହାନ୍ତି",
   "profile.noStudentsHint": "ସେମାନଙ୍କ ଆକାଉଣ୍ଟ ସଂଯୋଗ କରିବାକୁ ଉପରେ ଆପଣଙ୍କ ସନ୍ତାନର VidyaGanit ID ଲେଖନ୍ତୁ।",
   "profile.class": "ଶ୍ରେଣୀ",
   "profile.removeStudent": "ଛାତ୍ର ହଟାନ୍ତୁ",

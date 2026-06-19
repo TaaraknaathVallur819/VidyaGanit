@@ -117,6 +117,8 @@ const dict: Record<string, string> = {
   "profile.linkPlaceholder": "फरायसायनि VidyaGanit ID होबो (बिदिनो VG-STU-12345)",
   "profile.link": "नांजाब",
   "profile.noStudentsTitle": "दासिमबो जेबो फरायसा नांजाबआखै",
+  "profile.searchStudents": "मुं एबा आईडि-जों नागिरना होर",
+  "profile.noSearchResults": "नोंथांनि नागिरनायजों मानजानाय फरायसा गैया",
   "profile.noStudentsHint": "नोंथांनि गथनि एकाउन्ट नांजाबनो गाहायाव बिनि VidyaGanit ID होबो।",
   "profile.class": "क्लास",
   "profile.removeStudent": "फरायसा बोखारना",

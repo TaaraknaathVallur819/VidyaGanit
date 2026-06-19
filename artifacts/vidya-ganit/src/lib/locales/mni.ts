@@ -117,6 +117,8 @@ const dict: Record<string, string> = {
   "profile.linkPlaceholder": "মহৈরোইগী VidyaGanit ID হাপচিল্লউ (খুদম VG-STU-12345)",
   "profile.link": "শম্নৌ",
   "profile.noStudentsTitle": "হৌজিক ফাওবদা শম্নবা মহৈরোই লৈতে",
+  "profile.searchStudents": "মমিং নত্রগা আইডিনা থিয়ু",
+  "profile.noSearchResults": "নহাক্কী থিবগা চান্নবা মহৈরোই লৈতে",
   "profile.noStudentsHint": "নঙগী অঙাঙগী VidyaGanit ID মথক্তা হাপচিল্লগা অকাউন্ত শম্নৌ।",
   "profile.class": "ক্লাস",
   "profile.removeStudent": "মহৈরোই লৌথোকউ",

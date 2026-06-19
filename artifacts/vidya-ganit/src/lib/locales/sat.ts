@@ -117,6 +117,8 @@ const dict: Record<string, string> = {
   "profile.linkPlaceholder": "ᱪᱮᱫᱚᱜᱤᱡᱟᱜ VidyaGanit ID ᱵᱚᱞᱚ (ᱡᱮᱞᱮᱠᱟ VG-STU-12345)",
   "profile.link": "ᱡᱩᱲᱟᱣ",
   "profile.noStudentsTitle": "ᱱᱤᱛᱚᱜ ᱫᱷᱟᱹᱵᱤᱡ ᱡᱟᱦᱟᱸ ᱪᱮᱫᱚᱜᱤᱡ ᱵᱟᱝ ᱡᱩᱲᱟᱣᱮᱱᱟ",
+  "profile.searchStudents": "ᱧᱩᱛᱩᱢ ᱵᱟᱝ ᱟᱭᱰᱤ ᱛᱮ ᱯᱟᱸᱡᱟ ᱢᱮ",
+  "profile.noSearchResults": "ᱟᱢᱟᱜ ᱯᱟᱸᱡᱟ ᱥᱟᱶ ᱢᱮᱞᱟᱣ ᱪᱮᱫᱚᱜᱤᱡ ᱵᱟᱝ ᱢᱮᱱᱟᱜ",
   "profile.noStudentsHint": "ᱟᱢᱟᱜ ᱜᱤᱫᱽᱨᱟᱹᱜ ᱮᱠᱟᱩᱱᱴ ᱡᱩᱲᱟᱣ ᱞᱟᱹᱜᱤᱫ ᱪᱮᱛᱟᱱ ᱨᱮ ᱩᱱᱤᱭᱟᱜ VidyaGanit ID ᱵᱚᱞᱚ ᱢᱮ।",
   "profile.class": "ᱠᱞᱟᱥ",
   "profile.removeStudent": "ᱪᱮᱫᱚᱜᱤᱡ ᱚᱪᱚᱜ",

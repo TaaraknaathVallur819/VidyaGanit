@@ -117,6 +117,8 @@ const dict: Record<string, string> = {
   "profile.linkPlaceholder": "طالب علمُک VidyaGanit ID درج کریو (مثلن VG-STU-12345)",
   "profile.link": "جوڑیو",
   "profile.noStudentsTitle": "وُنی کانہہ طالب علم چھُ نہٕ جوڑنہٕ آمت",
+  "profile.searchStudents": "ناوۍ یا آی ڈی سۆتؠ ژھانڈیو",
+  "profile.noSearchResults": "تُہُنٛدِس ژھانڈنس سٟتؠ مِلان کانٛہہ طالِب علم چھُ نہٕ",
   "profile.noStudentsHint": "پننہِ شُرِنہِ ہُنٛد کھاتہٕ جوڑنہٕ خٲطرٕ ہیور تَمِ سُنٛد VidyaGanit ID درج کریو۔",
   "profile.class": "جماعت",
   "profile.removeStudent": "طالب علم ہٹایو",

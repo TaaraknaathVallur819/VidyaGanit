@@ -52,6 +52,7 @@ import {
   TrendingUp,
   History as HistoryIcon,
   Sparkles,
+  Search,
 } from "lucide-react";
 
 function getPasswordStrength(pwd: string) {
@@ -86,6 +87,15 @@ export default function ParentDashboard() {
     query: { enabled: !!vidyaId, queryKey: getGetLinkedStudentsQueryKey(vidyaId) },
   });
   const students = linkedData?.students ?? [];
+
+  const [studentSearch, setStudentSearch] = useState("");
+  const visibleStudents = students.filter((s) => {
+    const q = studentSearch.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      s.name.toLowerCase().includes(q) || s.vidyaId.toLowerCase().includes(q)
+    );
+  });
 
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
 
@@ -453,7 +463,23 @@ export default function ParentDashboard() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {students.map((s) => (
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                        <input
+                          type="text"
+                          value={studentSearch}
+                          onChange={(e) => setStudentSearch(e.target.value)}
+                          placeholder={t("profile.searchStudents")}
+                          aria-label={t("profile.searchStudents")}
+                          className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-colors"
+                        />
+                      </div>
+                      {visibleStudents.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-6">
+                          {t("profile.noSearchResults")}
+                        </p>
+                      ) : (
+                        visibleStudents.map((s) => (
                         <div
                           key={s.vidyaId}
                           className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-primary/20 transition-colors"
@@ -486,7 +512,8 @@ export default function ParentDashboard() {
                             <X className="w-4 h-4" />
                           </button>
                         </div>
-                      ))}
+                        ))
+                      )}
                     </div>
                   )}
                 </CardContent>
