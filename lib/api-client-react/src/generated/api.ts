@@ -33,6 +33,7 @@ import type {
   ConsultantMessageInput,
   ConsultantSessionsResponse,
   CurriculumResponse,
+  DailyGoalInput,
   ErrorResponse,
   ForgotPasswordInput,
   GameScoreInput,
@@ -50,6 +51,7 @@ import type {
   ProfileUpdate,
   RecommendationResponse,
   ResetPasswordInput,
+  StreakStatus,
   StudentAnalytics,
   StudentHistoryResponse,
   SubmitAssessmentInput,
@@ -664,6 +666,155 @@ export function useGetOwnAnalytics<TData = Awaited<ReturnType<typeof getOwnAnaly
 
 
 
+
+export const getGetStreakUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/profile/${vidyaId}/streak`
+}
+
+/**
+ * @summary A student's own practice-streak status and daily goal progress
+ */
+export const getStreak = async (vidyaId: string, options?: RequestInit): Promise<StreakStatus> => {
+
+  return customFetch<StreakStatus>(getGetStreakUrl(vidyaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStreakQueryKey = (vidyaId: string,) => {
+    return [
+    `/api/profile/${vidyaId}/streak`
+    ] as const;
+    }
+
+
+export const getGetStreakQueryOptions = <TData = Awaited<ReturnType<typeof getStreak>>, TError = ErrorType<ErrorResponse>>(vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStreak>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStreakQueryKey(vidyaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStreak>>> = ({ signal }) => getStreak(vidyaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStreak>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStreakQueryResult = NonNullable<Awaited<ReturnType<typeof getStreak>>>
+export type GetStreakQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary A student's own practice-streak status and daily goal progress
+ */
+
+export function useGetStreak<TData = Awaited<ReturnType<typeof getStreak>>, TError = ErrorType<ErrorResponse>>(
+ vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStreak>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStreakQueryOptions(vidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getSetDailyGoalUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/profile/${vidyaId}/streak`
+}
+
+/**
+ * @summary Update a student's own daily practice goal
+ */
+export const setDailyGoal = async (vidyaId: string,
+    dailyGoalInput: DailyGoalInput, options?: RequestInit): Promise<StreakStatus> => {
+
+  return customFetch<StreakStatus>(getSetDailyGoalUrl(vidyaId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      dailyGoalInput,)
+  }
+);}
+
+
+
+
+export const getSetDailyGoalMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setDailyGoal>>, TError,{vidyaId: string;data: BodyType<DailyGoalInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setDailyGoal>>, TError,{vidyaId: string;data: BodyType<DailyGoalInput>}, TContext> => {
+
+const mutationKey = ['setDailyGoal'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setDailyGoal>>, {vidyaId: string;data: BodyType<DailyGoalInput>}> = (props) => {
+          const {vidyaId,data} = props ?? {};
+
+          return  setDailyGoal(vidyaId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetDailyGoalMutationResult = NonNullable<Awaited<ReturnType<typeof setDailyGoal>>>
+    export type SetDailyGoalMutationBody = BodyType<DailyGoalInput>
+    export type SetDailyGoalMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Update a student's own daily practice goal
+ */
+export const useSetDailyGoal = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setDailyGoal>>, TError,{vidyaId: string;data: BodyType<DailyGoalInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof setDailyGoal>>,
+        TError,
+        {vidyaId: string;data: BodyType<DailyGoalInput>},
+        TContext
+      > => {
+      return useMutation(getSetDailyGoalMutationOptions(options));
+    }
 
 export const getLinkStudentUrl = (vidyaId: string,) => {
 

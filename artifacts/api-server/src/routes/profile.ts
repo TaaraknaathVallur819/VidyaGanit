@@ -24,8 +24,14 @@ import {
   UnlinkStudentResponse,
   GetOwnAnalyticsParams,
   GetOwnAnalyticsResponse,
+  GetStreakParams,
+  GetStreakResponse,
+  SetDailyGoalParams,
+  SetDailyGoalBody,
+  SetDailyGoalResponse,
 } from "@workspace/api-zod";
 import { computeStudentAnalytics } from "../lib/analytics";
+import { countTodayQuestions, liveStreak } from "../lib/streak";
 
 const router: IRouter = Router();
 
@@ -104,6 +110,87 @@ router.get(
         studentClass: user.studentClass ?? null,
         board: user.board ?? null,
         ...analytics,
+      }),
+    );
+  },
+);
+
+// A student's own practice streak + today's progress toward their daily goal.
+// requireSelf keeps this to the authenticated student's own data.
+router.get(
+  "/profile/:vidyaId/streak",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = GetStreakParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+
+    const [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.vidyaId, params.data.vidyaId));
+
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    const todayCount = await countTodayQuestions(user.vidyaId);
+
+    res.json(
+      GetStreakResponse.parse({
+        streakCurrent: liveStreak(user.streakCurrent ?? 0, user.lastActiveDate ?? null),
+        streakLongest: user.streakLongest ?? 0,
+        dailyGoal: user.dailyGoal ?? 3,
+        todayCount,
+        lastActiveDate: user.lastActiveDate ?? null,
+      }),
+    );
+  },
+);
+
+router.patch(
+  "/profile/:vidyaId/streak",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = SetDailyGoalParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+
+    const body = SetDailyGoalBody.safeParse(req.body);
+    if (!body.success) {
+      res.status(400).json({ error: body.error.message });
+      return;
+    }
+
+    const dailyGoal = Math.min(50, Math.max(1, Math.round(body.data.dailyGoal)));
+
+    const [user] = await db
+      .update(usersTable)
+      .set({ dailyGoal })
+      .where(eq(usersTable.vidyaId, params.data.vidyaId))
+      .returning();
+
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    const todayCount = await countTodayQuestions(user.vidyaId);
+
+    res.json(
+      SetDailyGoalResponse.parse({
+        streakCurrent: liveStreak(user.streakCurrent ?? 0, user.lastActiveDate ?? null),
+        streakLongest: user.streakLongest ?? 0,
+        dailyGoal: user.dailyGoal ?? 3,
+        todayCount,
+        lastActiveDate: user.lastActiveDate ?? null,
       }),
     );
   },

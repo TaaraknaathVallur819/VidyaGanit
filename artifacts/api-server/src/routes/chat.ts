@@ -23,6 +23,7 @@ import { normalizeLanguage } from "../lib/counselor";
 import { computeStudentAnalytics } from "../lib/analytics";
 import { buildPastConversationDigest } from "../lib/chatMemory";
 import { computeXpAndBadges } from "../lib/xp";
+import { computeStreakOnActivity } from "../lib/streak";
 import { streamChat, normalizeChatModel, type ChatImage } from "../lib/aiChat";
 import { generateImageDataUrl, normalizeImageModel } from "../lib/aiImage";
 import { requireAuth, requireSelf } from "../middlewares/auth";
@@ -419,9 +420,21 @@ router.post(
   const newXp = (user.xp ?? 0) + xpGained;
   const allBadges = [...new Set([...(user.badges ?? []), ...newBadges])];
 
+  const streak = computeStreakOnActivity({
+    streakCurrent: user.streakCurrent ?? 0,
+    streakLongest: user.streakLongest ?? 0,
+    lastActiveDate: user.lastActiveDate ?? null,
+  });
+
   await db
     .update(usersTable)
-    .set({ xp: newXp, badges: allBadges })
+    .set({
+      xp: newXp,
+      badges: allBadges,
+      streakCurrent: streak.streakCurrent,
+      streakLongest: streak.streakLongest,
+      lastActiveDate: streak.lastActiveDate,
+    })
     .where(eq(usersTable.vidyaId, vidyaId));
 
   send({ done: true, xpAwarded: xpGained, newBadges, messageId: assistantMessageId });

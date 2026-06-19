@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer, real } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, real, date } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
@@ -31,6 +31,13 @@ export const usersTable = pgTable("users", {
   voiceName: text("voice_name"),
   xp: integer("xp").notNull().default(0),
   badges: text("badges").array().notNull().default(sql`ARRAY[]::text[]`),
+  // Daily practice streak: consecutive calendar days with at least one tutoring
+  // interaction. `lastActiveDate` is the last calendar day the student practised
+  // (YYYY-MM-DD); `dailyGoal` is the student's target questions-per-day.
+  streakCurrent: integer("streak_current").notNull().default(0),
+  streakLongest: integer("streak_longest").notNull().default(0),
+  lastActiveDate: date("last_active_date", { mode: "string" }),
+  dailyGoal: integer("daily_goal").notNull().default(3),
   resetTokenHash: text("reset_token_hash"),
   resetTokenExpiresAt: timestamp("reset_token_expires_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

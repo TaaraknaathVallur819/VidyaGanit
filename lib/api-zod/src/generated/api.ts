@@ -251,6 +251,46 @@ export const GetOwnAnalyticsResponse = zod.object({
 
 
 /**
+ * @summary A student's own practice-streak status and daily goal progress
+ */
+export const GetStreakParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetStreakResponse = zod.object({
+  "streakCurrent": zod.number(),
+  "streakLongest": zod.number(),
+  "dailyGoal": zod.number(),
+  "todayCount": zod.number(),
+  "lastActiveDate": zod.string().nullable()
+})
+
+
+/**
+ * @summary Update a student's own daily practice goal
+ */
+export const SetDailyGoalParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const setDailyGoalBodyDailyGoalMax = 50;
+
+
+
+export const SetDailyGoalBody = zod.object({
+  "dailyGoal": zod.number().min(1).max(setDailyGoalBodyDailyGoalMax)
+})
+
+export const SetDailyGoalResponse = zod.object({
+  "streakCurrent": zod.number(),
+  "streakLongest": zod.number(),
+  "dailyGoal": zod.number(),
+  "todayCount": zod.number(),
+  "lastActiveDate": zod.string().nullable()
+})
+
+
+/**
  * @summary Link a student to a parent account
  */
 export const LinkStudentParams = zod.object({

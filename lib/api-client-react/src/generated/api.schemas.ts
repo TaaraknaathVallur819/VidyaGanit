@@ -420,6 +420,23 @@ export interface StudentAnalytics {
   topics: TopicMastery[];
 }
 
+export interface StreakStatus {
+  streakCurrent: number;
+  streakLongest: number;
+  dailyGoal: number;
+  todayCount: number;
+  /** @nullable */
+  lastActiveDate: string | null;
+}
+
+export interface DailyGoalInput {
+  /**
+     * @minimum 1
+     * @maximum 50
+     */
+  dailyGoal: number;
+}
+
 export type HistoryMessageRole = typeof HistoryMessageRole[keyof typeof HistoryMessageRole];
 
 
