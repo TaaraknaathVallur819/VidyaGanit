@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -153,6 +154,7 @@ export default function ParentDashboard() {
   const [editName, setEditName] = useState("");
   const [editGender, setEditGender] = useState<"male" | "female">("male");
   const [editContact, setEditContact] = useState("");
+  const [editAboutMe, setEditAboutMe] = useState("");
   const [editError, setEditError] = useState("");
   const updateMutation = useUpdateProfile();
 
@@ -160,6 +162,7 @@ export default function ParentDashboard() {
     setEditName(displayed?.name ?? "");
     setEditGender((displayed?.gender as "male" | "female") ?? "male");
     setEditContact(displayed?.contact ?? "");
+    setEditAboutMe(displayed?.aboutMe ?? "");
     setEditError("");
     setEditOpen(true);
   };
@@ -174,6 +177,7 @@ export default function ParentDashboard() {
           name: editName.trim(),
           gender: editGender,
           contact: editContact.trim() || null,
+          aboutMe: editAboutMe.trim() || null,
         },
       },
       {
@@ -591,6 +595,20 @@ export default function ParentDashboard() {
                 placeholder="Email or phone number"
                 className="h-11"
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-about-me">{t("profile.aboutMe")}</Label>
+              <Textarea
+                id="edit-about-me"
+                data-testid="input-edit-about-me"
+                value={editAboutMe}
+                onChange={(e) => setEditAboutMe(e.target.value)}
+                maxLength={1000}
+                rows={3}
+                placeholder={t("profile.aboutMeHint")}
+                className="resize-none"
+              />
+              <p className="text-xs text-muted-foreground">{t("profile.aboutMeHint")}</p>
             </div>
             {editError && (
               <p className="text-sm text-red-500 font-medium">{editError}</p>

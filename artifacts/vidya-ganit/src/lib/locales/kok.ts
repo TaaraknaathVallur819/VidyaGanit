@@ -408,6 +408,9 @@ const dict: Record<string, string> = {
   "logout.confirmYes": "Yes, log out",
   "logout.confirmNo": "No, stay",
   "student.tab.progress": "My Progress",
+  "profile.aboutMe": "About me",
+  "profile.aboutMeHint":
+    "Share anything you'd like the AI to know — your interests, goals, or how you like to learn. The AI uses this to personalise its help.",
 };
 
 export default dict;

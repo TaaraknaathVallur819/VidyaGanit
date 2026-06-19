@@ -28,6 +28,11 @@ export interface UserProfile {
   batches?: string[] | null;
   /** @nullable */
   academyName?: string | null;
+  /**
+     * @maxLength 1000
+     * @nullable
+     */
+  aboutMe?: string | null;
   /** @nullable */
   language?: UserProfileLanguage;
   /**

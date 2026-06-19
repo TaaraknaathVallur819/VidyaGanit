@@ -498,6 +498,9 @@ const en: Dict = {
   "coach.placeholder": "Ask for teaching ideas…",
   "coach.welcome":
     "Hello {name}! I'm your teaching Coach. Ask me for ideas to explain tricky topics, plan a lesson, or support a student's maths journey. Pick a student above and I'll tailor my suggestions to their progress.",
+  "profile.aboutMe": "About me",
+  "profile.aboutMeHint":
+    "Share anything you'd like the AI to know — your interests, goals, or how you like to learn. The AI uses this to personalise its help.",
 };
 
 const ta: Dict = {
@@ -913,6 +916,9 @@ const ta: Dict = {
   "coach.placeholder": "கற்பித்தல் யோசனைகளைக் கேளுங்கள்…",
   "coach.welcome":
     "வணக்கம் {name}! நான் உங்கள் கற்பித்தல் பயிற்சியாளர். கடினமான தலைப்புகளை விளக்கவும், பாடத்தைத் திட்டமிடவும், அல்லது மாணவரின் கணிதப் பயணத்தை ஆதரிக்கவும் என்னிடம் யோசனைகளைக் கேளுங்கள். மேலே ஒரு மாணவரைத் தேர்ந்தெடுங்கள், அவர்களின் முன்னேற்றத்திற்கு ஏற்ப நான் ஆலோசனைகளை வழங்குவேன்.",
+  "profile.aboutMe": "என்னைப் பற்றி",
+  "profile.aboutMeHint":
+    "AI அறிய வேண்டியதை எதையும் பகிரவும் — உங்கள் ஆர்வங்கள், இலக்குகள், அல்லது நீங்கள் எப்படிக் கற்க விரும்புகிறீர்கள். உங்களுக்கு ஏற்ப உதவியை வழங்க AI இதைப் பயன்படுத்தும்.",
 };
 
 const hi: Dict = {
@@ -1328,6 +1334,9 @@ const hi: Dict = {
   "coach.placeholder": "पढ़ाने के तरीके पूछें…",
   "coach.welcome":
     "नमस्ते {name}! मैं आपका टीचिंग कोच हूँ। कठिन विषयों को समझाने, पाठ की योजना बनाने, या किसी छात्र की गणित यात्रा में मदद के लिए मुझसे सुझाव पूछें। ऊपर एक छात्र चुनें और मैं उनकी प्रगति के अनुसार सलाह दूँगा।",
+  "profile.aboutMe": "मेरे बारे में",
+  "profile.aboutMeHint":
+    "आप AI को जो भी बताना चाहें साझा करें — आपकी रुचियाँ, लक्ष्य, या आप कैसे सीखना पसंद करते हैं। AI इसका उपयोग अपनी मदद को आपके अनुसार बनाने के लिए करता है।",
 };
 
 const te: Dict = {
@@ -1743,6 +1752,9 @@ const te: Dict = {
   "coach.placeholder": "బోధన ఆలోచనల కోసం అడగండి…",
   "coach.welcome":
     "నమస్తే {name}! నేను మీ టీచింగ్ కోచ్‌ని. కష్టమైన అంశాలను వివరించడానికి, పాఠాన్ని ప్లాన్ చేయడానికి, లేదా విద్యార్థి గణిత ప్రయాణానికి సహాయం చేయడానికి నన్ను ఆలోచనలు అడగండి. పైన ఒక విద్యార్థిని ఎంచుకోండి, వారి పురోగతికి తగ్గట్టు నేను సూచనలు ఇస్తాను.",
+  "profile.aboutMe": "నా గురించి",
+  "profile.aboutMeHint":
+    "AI తెలుసుకోవాల్సిన దేన్నైనా పంచుకోండి — మీ ఆసక్తులు, లక్ష్యాలు, లేదా మీరు ఎలా నేర్చుకోవాలనుకుంటున్నారో. మీకు తగ్గట్టు సహాయాన్ని అందించడానికి AI దీన్ని ఉపయోగిస్తుంది.",
 };
 
 export const DICTS: Record<Language, Dict> = {

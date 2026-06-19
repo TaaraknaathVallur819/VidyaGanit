@@ -961,6 +961,9 @@ components:
             type: string
         academyName:
           type: ["string", "null"]
+        aboutMe:
+          type: ["string", "null"]
+          maxLength: 1000
         language:
           type: ["string", "null"]
           enum: [en, hi, bn, mr, te, ta, gu, ur, kn, ml, pa, or, as, brx, doi, ks, kok, mai, mni, ne, sa, sat, sd, null]
@@ -995,6 +998,9 @@ components:
           enum: [male, female]
         contact:
           type: ["string", "null"]
+        aboutMe:
+          type: ["string", "null"]
+          maxLength: 1000
         language:
           type: string
           enum: [en, hi, bn, mr, te, ta, gu, ur, kn, ml, pa, or, as, brx, doi, ks, kok, mai, mni, ne, sa, sat, sd]

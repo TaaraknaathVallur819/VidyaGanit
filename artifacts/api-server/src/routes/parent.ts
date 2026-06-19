@@ -719,6 +719,7 @@ router.post(
         system: buildCounselorSystemPrompt({
           parentName: parent.name,
           language,
+          aboutMe: parent.aboutMe ?? null,
           role: parent.role === "tutor" ? "tutor" : "parent",
           student: studentSummary,
         }),

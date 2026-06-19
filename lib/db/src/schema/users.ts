@@ -19,6 +19,9 @@ export const usersTable = pgTable("users", {
   // mirrors the first entry of this list; `batches` is the authoritative list.
   batches: text("batches").array(),
   academyName: text("academy_name"),
+  // Free-text "About me" personal context the user shares so the AI (tutor for
+  // students, Strategy/Coach AI for parents/tutors) can personalise its replies.
+  aboutMe: text("about_me"),
   language: text("language"),
   // Read-aloud voice preferences for the AI tutor/counselor speech synthesis.
   // rate = speaking pace, pitch = tone, voiceName = the chosen system voice

@@ -14,8 +14,10 @@ import {
   buildTutorSystemPrompt,
   type ChatEntry,
   type Topic,
+  type StudentTopicProgress,
 } from "../lib/tutor";
 import { normalizeLanguage } from "../lib/counselor";
+import { computeStudentAnalytics } from "../lib/analytics";
 import { computeXpAndBadges } from "../lib/xp";
 import { streamChat, normalizeChatModel, type ChatImage } from "../lib/aiChat";
 import { generateImageDataUrl, normalizeImageModel } from "../lib/aiImage";
@@ -166,10 +168,21 @@ router.post(
     req.log.error({ err }, "failed to persist student chat message");
   }
 
+  // Ground the tutor in what the student has actually practised so far.
+  let progress: { totalSessions: number; topics: StudentTopicProgress[] } | null = null;
+  try {
+    const analytics = await computeStudentAnalytics(vidyaId);
+    progress = { totalSessions: analytics.totalSessions, topics: analytics.topics };
+  } catch (err) {
+    req.log.error({ err }, "failed to compute student analytics for tutor prompt");
+  }
+
   const context = {
     name: user.name,
     studentClass: user.studentClass ?? null,
     board: user.board ?? null,
+    aboutMe: user.aboutMe ?? null,
+    progress,
   };
 
   const chatHistory: ChatEntry[] = (history ?? []).map((h) => ({

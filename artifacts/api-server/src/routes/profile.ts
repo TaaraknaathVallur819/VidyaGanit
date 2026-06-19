@@ -42,6 +42,7 @@ function toProfile(user: typeof usersTable.$inferSelect) {
     batch: user.batch ?? null,
     batches: user.batches ?? null,
     academyName: user.academyName ?? null,
+    aboutMe: user.aboutMe ?? null,
     language: user.language ?? null,
     xp: user.xp ?? 0,
     badges: user.badges ?? [],
@@ -125,6 +126,10 @@ router.patch("/profile/:vidyaId", requireAuth, requireSelf, async (req, res): Pr
   if (body.data.name !== undefined) updates.name = body.data.name;
   if (body.data.gender !== undefined) updates.gender = body.data.gender;
   if (body.data.contact !== undefined) updates.contact = body.data.contact ?? null;
+  // Cap "About me" so a huge blob can never be persisted or injected into the prompt.
+  if (body.data.aboutMe !== undefined) {
+    updates.aboutMe = body.data.aboutMe ? body.data.aboutMe.slice(0, 1000) : null;
+  }
   if (body.data.language !== undefined) updates.language = body.data.language;
   // Read-aloud voice settings: clamp to the same ranges the browser SpeechSynthesis
   // API accepts so a bad client value can never be persisted.

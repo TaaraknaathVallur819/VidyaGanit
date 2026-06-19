@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -116,12 +117,14 @@ export default function StudentDashboard() {
   };
   const [editName, setEditName] = useState("");
   const [editGender, setEditGender] = useState<"male" | "female">("male");
+  const [editAboutMe, setEditAboutMe] = useState("");
   const [editError, setEditError] = useState("");
   const updateMutation = useUpdateProfile();
 
   const openEdit = () => {
     setEditName(displayed?.name ?? "");
     setEditGender((displayed?.gender as "male" | "female") ?? "male");
+    setEditAboutMe(displayed?.aboutMe ?? "");
     setEditError("");
     setEditOpen(true);
   };
@@ -130,7 +133,10 @@ export default function StudentDashboard() {
     e.preventDefault();
     setEditError("");
     updateMutation.mutate(
-      { vidyaId, data: { name: editName.trim(), gender: editGender } },
+      {
+        vidyaId,
+        data: { name: editName.trim(), gender: editGender, aboutMe: editAboutMe.trim() || null },
+      },
       {
         onSuccess: (updated) => {
           setUser(updated);
@@ -491,6 +497,20 @@ export default function StudentDashboard() {
                   </button>
                 ))}
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-about-me">{t("profile.aboutMe")}</Label>
+              <Textarea
+                id="edit-about-me"
+                data-testid="input-edit-about-me"
+                value={editAboutMe}
+                onChange={(e) => setEditAboutMe(e.target.value)}
+                maxLength={1000}
+                rows={3}
+                placeholder={t("profile.aboutMeHint")}
+                className="resize-none"
+              />
+              <p className="text-xs text-muted-foreground">{t("profile.aboutMeHint")}</p>
             </div>
             {editError && (
               <p className="text-sm text-red-500 font-medium">{editError}</p>

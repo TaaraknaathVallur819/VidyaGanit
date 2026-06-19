@@ -157,6 +157,11 @@ export interface UserProfile {
   batches?: string[] | null;
   /** @nullable */
   academyName?: string | null;
+  /**
+     * @maxLength 1000
+     * @nullable
+     */
+  aboutMe?: string | null;
   /** @nullable */
   language?: UserProfileLanguage;
   /**
@@ -218,6 +223,11 @@ export interface ProfileUpdate {
   gender?: ProfileUpdateGender;
   /** @nullable */
   contact?: string | null;
+  /**
+     * @maxLength 1000
+     * @nullable
+     */
+  aboutMe?: string | null;
   language?: ProfileUpdateLanguage;
   /**
      * @minimum 0.5

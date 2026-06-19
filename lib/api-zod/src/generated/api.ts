@@ -48,6 +48,8 @@ export const LoginUserBody = zod.object({
   "password": zod.string()
 })
 
+export const loginUserResponseAboutMeMax = 1000;
+
 export const loginUserResponseVoiceRateDefault = 1;
 export const loginUserResponseVoiceRateMin = 0.5;
 export const loginUserResponseVoiceRateMax = 2;
@@ -70,6 +72,7 @@ export const LoginUserResponse = zod.object({
   "batch": zod.string().nullish(),
   "batches": zod.array(zod.string()).nullish(),
   "academyName": zod.string().nullish(),
+  "aboutMe": zod.string().max(loginUserResponseAboutMeMax).nullish(),
   "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
   "voiceRate": zod.number().min(loginUserResponseVoiceRateMin).max(loginUserResponseVoiceRateMax).default(loginUserResponseVoiceRateDefault),
   "voicePitch": zod.number().min(loginUserResponseVoicePitchMin).max(loginUserResponseVoicePitchMax).default(loginUserResponseVoicePitchDefault),
@@ -85,6 +88,8 @@ export const LoginUserResponse = zod.object({
 export const GetProfileParams = zod.object({
   "vidyaId": zod.coerce.string()
 })
+
+export const getProfileResponseAboutMeMax = 1000;
 
 export const getProfileResponseVoiceRateDefault = 1;
 export const getProfileResponseVoiceRateMin = 0.5;
@@ -108,6 +113,7 @@ export const GetProfileResponse = zod.object({
   "batch": zod.string().nullish(),
   "batches": zod.array(zod.string()).nullish(),
   "academyName": zod.string().nullish(),
+  "aboutMe": zod.string().max(getProfileResponseAboutMeMax).nullish(),
   "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
   "voiceRate": zod.number().min(getProfileResponseVoiceRateMin).max(getProfileResponseVoiceRateMax).default(getProfileResponseVoiceRateDefault),
   "voicePitch": zod.number().min(getProfileResponseVoicePitchMin).max(getProfileResponseVoicePitchMax).default(getProfileResponseVoicePitchDefault),
@@ -125,6 +131,8 @@ export const UpdateProfileParams = zod.object({
 })
 
 
+export const updateProfileBodyAboutMeMax = 1000;
+
 export const updateProfileBodyVoiceRateMin = 0.5;
 export const updateProfileBodyVoiceRateMax = 2;
 
@@ -137,11 +145,14 @@ export const UpdateProfileBody = zod.object({
   "name": zod.string().min(1).optional(),
   "gender": zod.enum(['male', 'female']).optional(),
   "contact": zod.string().nullish(),
+  "aboutMe": zod.string().max(updateProfileBodyAboutMeMax).nullish(),
   "language": zod.enum(['en', 'hi', 'bn', 'mr', 'te', 'ta', 'gu', 'ur', 'kn', 'ml', 'pa', 'or', 'as', 'brx', 'doi', 'ks', 'kok', 'mai', 'mni', 'ne', 'sa', 'sat', 'sd']).optional(),
   "voiceRate": zod.number().min(updateProfileBodyVoiceRateMin).max(updateProfileBodyVoiceRateMax).optional(),
   "voicePitch": zod.number().min(updateProfileBodyVoicePitchMin).max(updateProfileBodyVoicePitchMax).optional(),
   "voiceName": zod.string().nullish()
 })
+
+export const updateProfileResponseAboutMeMax = 1000;
 
 export const updateProfileResponseVoiceRateDefault = 1;
 export const updateProfileResponseVoiceRateMin = 0.5;
@@ -165,6 +176,7 @@ export const UpdateProfileResponse = zod.object({
   "batch": zod.string().nullish(),
   "batches": zod.array(zod.string()).nullish(),
   "academyName": zod.string().nullish(),
+  "aboutMe": zod.string().max(updateProfileResponseAboutMeMax).nullish(),
   "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
   "voiceRate": zod.number().min(updateProfileResponseVoiceRateMin).max(updateProfileResponseVoiceRateMax).default(updateProfileResponseVoiceRateDefault),
   "voicePitch": zod.number().min(updateProfileResponseVoicePitchMin).max(updateProfileResponseVoicePitchMax).default(updateProfileResponseVoicePitchDefault),
