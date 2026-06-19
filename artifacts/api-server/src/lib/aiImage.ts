@@ -41,7 +41,11 @@ export async function generateImageDataUrl(
   prompt: string,
 ): Promise<string> {
   if (model === "openai") {
-    const buffer = await generateImageBuffer(prompt, "1024x1024");
+    // Use "low" quality for the tutor's inline diagrams: they are deliberately
+    // simple flat-vector illustrations with short labels, so the lowest quality
+    // tier renders an acceptable image while generating noticeably faster (and
+    // cheaper) than the default high/auto tier.
+    const buffer = await generateImageBuffer(prompt, "1024x1024", "low");
     return `data:image/png;base64,${buffer.toString("base64")}`;
   }
 
