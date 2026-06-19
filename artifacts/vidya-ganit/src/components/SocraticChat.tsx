@@ -823,8 +823,8 @@ export default function SocraticChat({
                         onClick={() => handleFeedback(msg, "up")}
                         className={`p-1.5 rounded-lg transition-colors ${
                           msg.feedback === "up"
-                            ? "bg-emerald-100 text-emerald-600"
-                            : "text-muted-foreground hover:bg-indigo-50 hover:text-foreground"
+                            ? "bg-green-100 text-green-600"
+                            : "text-green-500/70 hover:bg-green-50 hover:text-green-600"
                         }`}
                       >
                         <ThumbsUp className="w-3.5 h-3.5" />
@@ -837,8 +837,8 @@ export default function SocraticChat({
                         onClick={() => handleFeedback(msg, "down")}
                         className={`p-1.5 rounded-lg transition-colors ${
                           msg.feedback === "down"
-                            ? "bg-rose-100 text-rose-600"
-                            : "text-muted-foreground hover:bg-indigo-50 hover:text-foreground"
+                            ? "bg-red-100 text-red-600"
+                            : "text-red-500/70 hover:bg-red-50 hover:text-red-600"
                         }`}
                       >
                         <ThumbsDown className="w-3.5 h-3.5" />
