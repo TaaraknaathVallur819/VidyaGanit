@@ -37,6 +37,7 @@ import SocraticChat from "@/components/SocraticChat";
 import MiniGames from "@/components/MiniGames";
 import AssessmentTest from "@/components/AssessmentTest";
 import AssessmentReport from "@/components/AssessmentReport";
+import StudentProgress from "@/components/StudentProgress";
 import VoiceSettings from "@/components/VoiceSettings";
 import FloatingShapes from "@/components/FloatingShapes";
 import { BADGE_CATALOG } from "@/lib/badges";
@@ -198,6 +199,12 @@ export default function StudentDashboard() {
                 className="px-0 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none bg-transparent font-semibold"
               >
                 {t("student.tab.profile")}
+              </TabsTrigger>
+              <TabsTrigger
+                value="progress"
+                className="px-0 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none bg-transparent font-semibold"
+              >
+                {t("student.tab.progress")}
               </TabsTrigger>
               <TabsTrigger
                 value="workspace"
@@ -411,6 +418,13 @@ export default function StudentDashboard() {
             >
               <VoiceSettings />
             </motion.div>
+          </div>
+        </TabsContent>
+
+        {/* ── My Progress Tab ── */}
+        <TabsContent value="progress" className="mt-0 p-6 relative overflow-y-auto">
+          <div className="max-w-3xl mx-auto relative">
+            <StudentProgress vidyaId={vidyaId} />
           </div>
         </TabsContent>
 

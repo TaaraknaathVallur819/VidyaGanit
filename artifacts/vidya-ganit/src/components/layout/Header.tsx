@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,6 +8,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useAuth } from "@/lib/auth";
 import { useLanguage, LANGUAGES, type Language } from "@/lib/i18n";
 import { useUpdateProfile } from "@workspace/api-client-react";
@@ -17,6 +28,7 @@ export default function Header() {
   const { t, lang, setLang } = useLanguage();
   const [, setLocation] = useLocation();
   const updateProfile = useUpdateProfile();
+  const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
 
   const handleLanguageChange = (next: Language) => {
     setLang(next);
@@ -31,11 +43,16 @@ export default function Header() {
 
   const handleSwitchRole = () => {
     if (user) {
-      logout();
-      setLocation("/");
+      setConfirmLogoutOpen(true);
     } else {
       setLocation("/auth");
     }
+  };
+
+  const confirmLogout = () => {
+    setConfirmLogoutOpen(false);
+    logout();
+    setLocation("/");
   };
 
   return (
@@ -87,6 +104,27 @@ export default function Header() {
           )}
         </Button>
       </div>
+
+      <AlertDialog open={confirmLogoutOpen} onOpenChange={setConfirmLogoutOpen}>
+        <AlertDialogContent className="rounded-2xl" data-testid="dialog-confirm-logout">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("logout.confirmTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("logout.confirmBody")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-logout" className="rounded-full">
+              {t("logout.confirmNo")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmLogout}
+              data-testid="button-confirm-logout"
+              className="rounded-full"
+            >
+              {t("logout.confirmYes")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </header>
   );
 }

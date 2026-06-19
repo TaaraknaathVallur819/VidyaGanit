@@ -89,6 +89,31 @@ describe("GET /profile/:vidyaId", () => {
   });
 });
 
+describe("GET /profile/:vidyaId/analytics (own progress)", () => {
+  const url = (vidyaId: string) => `/api/profile/${vidyaId}/analytics`;
+
+  it("returns the authenticated student's own analytics", async () => {
+    const res = await request(app).get(url(STUDENT_A)).set("Cookie", cookieFor(STUDENT_A));
+
+    expect(res.status).toBe(200);
+    expect(res.body.studentVidyaId).toBe(STUDENT_A);
+    expect(Array.isArray(res.body.topics)).toBe(true);
+    expect(typeof res.body.totalSessions).toBe("number");
+    expect(typeof res.body.totalMessages).toBe("number");
+  });
+
+  it("rejects unauthenticated requests with 401", async () => {
+    const res = await request(app).get(url(STUDENT_A));
+    expect(res.status).toBe(401);
+  });
+
+  it("rejects cross-account access with 403 (requireSelf)", async () => {
+    // Logged in as A, asking for B's analytics.
+    const res = await request(app).get(url(STUDENT_B)).set("Cookie", cookieFor(STUDENT_A));
+    expect(res.status).toBe(403);
+  });
+});
+
 describe("PATCH /profile/:vidyaId", () => {
   const url = (vidyaId: string) => `/api/profile/${vidyaId}`;
 

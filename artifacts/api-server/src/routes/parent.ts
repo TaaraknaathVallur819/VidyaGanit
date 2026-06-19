@@ -31,6 +31,7 @@ import {
   TranscribeConsultantAudioResponse,
 } from "@workspace/api-zod";
 import { detectTopic } from "../lib/tutor";
+import { ANALYTICS_TOPICS, computeStudentAnalytics } from "../lib/analytics";
 import { recommendNextLessons } from "../lib/curriculum";
 import {
   buildCounselorSystemPrompt,
@@ -56,13 +57,6 @@ const MAX_AUDIO_DATAURL_LEN = 11_500_000;
 // The counselor may request an illustration with a trailing [[DRAW: ...]] marker.
 const DRAW_MARKER_RE = /\[\[DRAW:\s*([\s\S]*?)\]\]/;
 const DRAW_MARKER_START = "[[DRAW:";
-
-// The three curriculum focus areas surfaced on the Progress Analytics tab.
-const ANALYTICS_TOPICS: { key: "fraction" | "decimal" | "divide"; label: string }[] = [
-  { key: "fraction", label: "Fractions" },
-  { key: "decimal", label: "Decimals" },
-  { key: "divide", label: "Long Division" },
-];
 
 function decodeTextAttachment(mimeType: string, dataUrl: string): string | null {
   const readableMime =
@@ -122,48 +116,7 @@ router.get(
       return;
     }
 
-    const rows = await db
-      .select({
-        sessionId: chatMessagesTable.sessionId,
-        content: chatMessagesTable.content,
-      })
-      .from(chatMessagesTable)
-      .where(
-        and(
-          eq(chatMessagesTable.studentVidyaId, student.vidyaId),
-          eq(chatMessagesTable.role, "user"),
-        ),
-      );
-
-    const allSessions = new Set<string>();
-    const perTopic = new Map<string, { count: number; sessions: Set<string> }>();
-    for (const t of ANALYTICS_TOPICS) {
-      perTopic.set(t.key, { count: 0, sessions: new Set() });
-    }
-
-    for (const row of rows) {
-      allSessions.add(row.sessionId);
-      const topic = detectTopic(row.content);
-      const bucket = perTopic.get(topic);
-      if (bucket) {
-        bucket.count += 1;
-        bucket.sessions.add(row.sessionId);
-      }
-    }
-
-    const topics = ANALYTICS_TOPICS.map((t) => {
-      const bucket = perTopic.get(t.key)!;
-      // Honest, activity-based estimate: each practised question contributes
-      // toward an 8-question "confident" baseline, capped at 100%.
-      const mastery = Math.min(100, Math.round(bucket.count * 12.5));
-      return {
-        key: t.key,
-        label: t.label,
-        questionsPracticed: bucket.count,
-        sessions: bucket.sessions.size,
-        mastery,
-      };
-    });
+    const analytics = await computeStudentAnalytics(student.vidyaId);
 
     res.json(
       GetStudentAnalyticsResponse.parse({
@@ -171,9 +124,7 @@ router.get(
         name: student.name,
         studentClass: student.studentClass ?? null,
         board: student.board ?? null,
-        totalSessions: allSessions.size,
-        totalMessages: rows.length,
-        topics,
+        ...analytics,
       }),
     );
   },

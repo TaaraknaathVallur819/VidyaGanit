@@ -22,7 +22,10 @@ import {
   BulkLinkStudentsResponse,
   UnlinkStudentParams,
   UnlinkStudentResponse,
+  GetOwnAnalyticsParams,
+  GetOwnAnalyticsResponse,
 } from "@workspace/api-zod";
+import { computeStudentAnalytics } from "../lib/analytics";
 
 const router: IRouter = Router();
 
@@ -67,6 +70,43 @@ router.get("/profile/:vidyaId", requireAuth, requireSelf, async (req, res): Prom
 
   res.json(GetProfileResponse.parse(toProfile(user)));
 });
+
+// A student's own per-topic practice analytics. requireSelf ensures a user can
+// only read their own progress, never another account's.
+router.get(
+  "/profile/:vidyaId/analytics",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = GetOwnAnalyticsParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+
+    const [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.vidyaId, params.data.vidyaId));
+
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    const analytics = await computeStudentAnalytics(user.vidyaId);
+
+    res.json(
+      GetOwnAnalyticsResponse.parse({
+        studentVidyaId: user.vidyaId,
+        name: user.name,
+        studentClass: user.studentClass ?? null,
+        board: user.board ?? null,
+        ...analytics,
+      }),
+    );
+  },
+);
 
 router.patch("/profile/:vidyaId", requireAuth, requireSelf, async (req, res): Promise<void> => {
   const params = UpdateProfileParams.safeParse(req.params);

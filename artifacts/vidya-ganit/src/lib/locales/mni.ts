@@ -403,6 +403,11 @@ const dict: Record<string, string> = {
   "curriculum.lessonsLabel": "Lessons",
   "curriculum.loading": "Loading curriculum…",
 
+  "logout.confirmTitle": "Log out?",
+  "logout.confirmBody": "Are you sure you want to log out?",
+  "logout.confirmYes": "Yes, log out",
+  "logout.confirmNo": "No, stay",
+  "student.tab.progress": "My Progress",
 };
 
 export default dict;

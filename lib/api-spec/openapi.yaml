@@ -203,6 +203,37 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /profile/{vidyaId}/analytics:
+    get:
+      operationId: getOwnAnalytics
+      tags: [auth]
+      summary: A student's own per-topic practice analytics
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Student analytics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentAnalytics"
+        "403":
+          description: Cannot access another account's analytics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Student not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /profile/{vidyaId}/link-student:
     post:
       operationId: linkStudent

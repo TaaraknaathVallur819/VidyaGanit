@@ -215,6 +215,30 @@ export const GetLinkedStudentsResponse = zod.object({
 
 
 /**
+ * @summary A student's own per-topic practice analytics
+ */
+export const GetOwnAnalyticsParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetOwnAnalyticsResponse = zod.object({
+  "studentVidyaId": zod.string(),
+  "name": zod.string(),
+  "studentClass": zod.string().nullable(),
+  "board": zod.string().nullable(),
+  "totalSessions": zod.number(),
+  "totalMessages": zod.number(),
+  "topics": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string(),
+  "questionsPracticed": zod.number(),
+  "sessions": zod.number(),
+  "mastery": zod.number().describe('Activity-based mastery estimate (0-100), derived from practice volume.')
+}))
+})
+
+
+/**
  * @summary Link a student to a parent account
  */
 export const LinkStudentParams = zod.object({

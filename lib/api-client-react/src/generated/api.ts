@@ -586,6 +586,83 @@ export function useGetLinkedStudents<TData = Awaited<ReturnType<typeof getLinked
 
 
 
+export const getGetOwnAnalyticsUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/profile/${vidyaId}/analytics`
+}
+
+/**
+ * @summary A student's own per-topic practice analytics
+ */
+export const getOwnAnalytics = async (vidyaId: string, options?: RequestInit): Promise<StudentAnalytics> => {
+
+  return customFetch<StudentAnalytics>(getGetOwnAnalyticsUrl(vidyaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetOwnAnalyticsQueryKey = (vidyaId: string,) => {
+    return [
+    `/api/profile/${vidyaId}/analytics`
+    ] as const;
+    }
+
+
+export const getGetOwnAnalyticsQueryOptions = <TData = Awaited<ReturnType<typeof getOwnAnalytics>>, TError = ErrorType<ErrorResponse>>(vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOwnAnalytics>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetOwnAnalyticsQueryKey(vidyaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getOwnAnalytics>>> = ({ signal }) => getOwnAnalytics(vidyaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getOwnAnalytics>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetOwnAnalyticsQueryResult = NonNullable<Awaited<ReturnType<typeof getOwnAnalytics>>>
+export type GetOwnAnalyticsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary A student's own per-topic practice analytics
+ */
+
+export function useGetOwnAnalytics<TData = Awaited<ReturnType<typeof getOwnAnalytics>>, TError = ErrorType<ErrorResponse>>(
+ vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOwnAnalytics>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetOwnAnalyticsQueryOptions(vidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
 export const getLinkStudentUrl = (vidyaId: string,) => {
 
 
