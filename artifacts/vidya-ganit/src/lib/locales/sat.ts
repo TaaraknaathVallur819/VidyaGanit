@@ -1,4 +1,12 @@
 const dict: Record<string, string> = {
+  "student.streak.title": "ᱢᱟᱦᱟ ᱢᱟᱦᱟ ᱛᱟᱲᱟᱢ",
+  "student.streak.subtitle": "ᱱᱳᱶᱟ ᱫᱚᱦᱚᱭ ᱞᱟᱹᱜᱤᱫ ᱢᱟᱦᱟ ᱢᱟᱦᱟ ᱷᱮᱯᱲᱟᱣ ᱢᱮ!",
+  "student.streak.current": "ᱱᱤᱛᱚᱜᱟᱜ",
+  "student.streak.best": "ᱨᱟᱲᱟ",
+  "student.streak.days": "ᱢᱟᱦᱟ",
+  "student.streak.todayProgress": "ᱛᱮᱦᱮᱸᱭ: {count} / {goal}",
+  "student.streak.dailyGoal": "ᱢᱟᱦᱟ ᱢᱟᱦᱟ ᱞᱟᱠᱷᱭᱚ",
+  "student.streak.goalReached": "ᱞᱟᱠᱷᱭᱚ ᱦᱟᱛᱟᱣ ᱮᱱᱟ! 🎉",
   "auth.batchAdd": "Add another batch",
   "auth.batchRemove": "Remove batch",
   "tutor.allBatches": "All batches",

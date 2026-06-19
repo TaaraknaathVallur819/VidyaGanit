@@ -21,6 +21,9 @@ import {
   useChangePassword,
   useListOwnAssessments,
   getListOwnAssessmentsQueryKey,
+  useGetStreak,
+  getGetStreakQueryKey,
+  useSetDailyGoal,
 } from "@workspace/api-client-react";
 import {
   User,
@@ -33,6 +36,8 @@ import {
   CheckCircle2,
   Gamepad2,
   ClipboardCheck,
+  Flame,
+  Target,
 } from "lucide-react";
 import SocraticChat from "@/components/SocraticChat";
 import MiniGames from "@/components/MiniGames";
@@ -114,6 +119,20 @@ export default function StudentDashboard() {
   const startTest = (topic: string) => {
     setTestTopic(topic);
     setTestOpen(true);
+  };
+
+  // Daily streak + goal
+  const { data: streak, refetch: refetchStreak } = useGetStreak(vidyaId, {
+    query: { enabled: !!vidyaId, queryKey: getGetStreakQueryKey(vidyaId) },
+  });
+  const setGoalMutation = useSetDailyGoal();
+  const changeGoal = (next: number) => {
+    const clamped = Math.min(50, Math.max(1, next));
+    if (!vidyaId || clamped === (streak?.dailyGoal ?? 3)) return;
+    setGoalMutation.mutate(
+      { vidyaId, data: { dailyGoal: clamped } },
+      { onSuccess: () => refetchStreak() },
+    );
   };
   const [editName, setEditName] = useState("");
   const [editGender, setEditGender] = useState<"male" | "female">("male");
@@ -272,6 +291,125 @@ export default function StudentDashboard() {
                     <InfoChip label={t("student.class")} value={displayed.studentClass ? `${t("common.class")} ${displayed.studentClass}` : "—"} icon={<GraduationCap className="w-3.5 h-3.5" />} />
                     <InfoChip label={t("student.board")} value={displayed.board ?? "—"} icon={<BookOpen className="w-3.5 h-3.5" />} />
                   </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Daily Streak Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: 0.08 }}
+            >
+              <Card className="border-0 shadow-md rounded-2xl overflow-hidden">
+                <CardContent className="p-6 space-y-5">
+                  <div className="flex items-center gap-2">
+                    <Flame className="w-5 h-5 text-orange-500" />
+                    <div>
+                      <h3 className="font-bold text-lg text-foreground leading-tight">
+                        {t("student.streak.title")}
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        {t("student.streak.subtitle")}
+                      </p>
+                    </div>
+                    <Badge
+                      variant="secondary"
+                      className="ml-auto text-base font-bold px-3 py-1 gap-1 bg-orange-100 text-orange-700"
+                    >
+                      <Flame className="w-4 h-4" />
+                      {streak?.streakCurrent ?? 0}
+                    </Badge>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-2xl bg-orange-50 border border-orange-100 p-4 text-center">
+                      <p className="text-3xl font-extrabold text-orange-600 leading-none">
+                        {streak?.streakCurrent ?? 0}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1.5">
+                        {t("student.streak.current")} · {t("student.streak.days")}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl bg-amber-50 border border-amber-100 p-4 text-center">
+                      <p className="text-3xl font-extrabold text-amber-600 leading-none">
+                        {streak?.streakLongest ?? 0}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1.5">
+                        {t("student.streak.best")} · {t("student.streak.days")}
+                      </p>
+                    </div>
+                  </div>
+
+                  {(() => {
+                    const todayCount = streak?.todayCount ?? 0;
+                    const goal = streak?.dailyGoal ?? 3;
+                    const pct = Math.min(100, goal > 0 ? (todayCount / goal) * 100 : 0);
+                    const reached = todayCount >= goal;
+                    return (
+                      <div>
+                        <div className="flex items-center justify-between text-xs font-medium mb-1.5">
+                          <span className="text-muted-foreground">
+                            {t("student.streak.todayProgress")
+                              .replace("{count}", String(todayCount))
+                              .replace("{goal}", String(goal))}
+                          </span>
+                          {reached && (
+                            <span className="text-emerald-600 font-semibold">
+                              {t("student.streak.goalReached")}
+                            </span>
+                          )}
+                        </div>
+                        <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
+                          <motion.div
+                            className={`h-full rounded-full ${reached ? "bg-gradient-to-r from-emerald-400 to-emerald-500" : "bg-gradient-to-r from-orange-400 to-orange-500"}`}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${pct}%` }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-2 mt-4">
+                          <Target className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm font-medium text-foreground">
+                            {t("student.streak.dailyGoal")}
+                          </span>
+                          <div className="ml-auto flex items-center gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              className="h-7 w-7 rounded-full"
+                              aria-label="-"
+                              data-testid="button-goal-decrease"
+                              disabled={setGoalMutation.isPending || goal <= 1}
+                              onClick={() => changeGoal(goal - 1)}
+                            >
+                              −
+                            </Button>
+                            <span
+                              className="w-6 text-center font-bold tabular-nums"
+                              data-testid="text-daily-goal"
+                            >
+                              {goal}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              className="h-7 w-7 rounded-full"
+                              aria-label="+"
+                              data-testid="button-goal-increase"
+                              disabled={setGoalMutation.isPending || goal >= 50}
+                              onClick={() => changeGoal(goal + 1)}
+                            >
+                              +
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </CardContent>
               </Card>
             </motion.div>

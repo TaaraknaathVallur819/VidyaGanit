@@ -8,3 +8,4 @@
 - [i18n language set](i18n-language-set.md) — 23-code UI language set must stay synced across i18n.tsx, counselor.ts, and 5 openapi.yaml enums (then regen codegen)
 - [i18n parity guard](i18n-parity.md) — all DICTS languages must key-match English; enforced by vitest in web artifact; `test` validation runs all packages
 - [Assessment tests & voice settings](assessment-and-voice.md) — topic tests have NO negative marking; VoiceSettings must sit in "My Profile" for all 3 roles
+- [Daily streaks](daily-streaks.md) — streaks use IST calendar days; advance-on-activity persists, read-side reports 0 if stale without mutating

@@ -1,4 +1,12 @@
 const dict: Record<string, string> = {
+  "student.streak.title": "दैनिक मालिका",
+  "student.streak.subtitle": "ती टिकवण्यासाठी दररोज सराव करा!",
+  "student.streak.current": "सध्याची",
+  "student.streak.best": "सर्वोत्तम",
+  "student.streak.days": "दिवस",
+  "student.streak.todayProgress": "आज: {count} / {goal}",
+  "student.streak.dailyGoal": "दैनिक ध्येय",
+  "student.streak.goalReached": "ध्येय गाठले! 🎉",
   "auth.batchAdd": "Add another batch",
   "auth.batchRemove": "Remove batch",
   "tutor.allBatches": "All batches",

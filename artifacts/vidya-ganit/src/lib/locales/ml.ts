@@ -1,4 +1,12 @@
 const dict: Record<string, string> = {
+  "student.streak.title": "ദൈനംദിന പരമ്പര",
+  "student.streak.subtitle": "ഇത് നിലനിർത്താൻ എല്ലാ ദിവസവും പരിശീലിക്കൂ!",
+  "student.streak.current": "നിലവിലുള്ളത്",
+  "student.streak.best": "മികച്ചത്",
+  "student.streak.days": "ദിവസങ്ങൾ",
+  "student.streak.todayProgress": "ഇന്ന്: {count} / {goal}",
+  "student.streak.dailyGoal": "ദൈനംദിന ലക്ഷ്യം",
+  "student.streak.goalReached": "ലക്ഷ്യം നേടി! 🎉",
   "auth.batchAdd": "Add another batch",
   "auth.batchRemove": "Remove batch",
   "tutor.allBatches": "All batches",
