@@ -11,6 +11,9 @@ export const parentStudentLinksTable = pgTable(
     studentVidyaId: text("student_vidya_id")
       .notNull()
       .references(() => usersTable.vidyaId, { onDelete: "cascade" }),
+    // Which of the tutor's batches this student belongs to. Null for parent links
+    // and for tutor links left unassigned.
+    batch: text("batch"),
     linkedAt: timestamp("linked_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [unique("parent_student_unique").on(t.parentVidyaId, t.studentVidyaId)],

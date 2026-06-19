@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import bcrypt from "bcryptjs";
 import { and, eq } from "drizzle-orm";
 import { db, usersTable, parentStudentLinksTable } from "@workspace/db";
-import { requireAuth, requireSelf } from "../middlewares/auth";
+import { requireAuth, requireSelf, requireParentOrTutor } from "../middlewares/auth";
 import {
   GetProfileParams,
   GetProfileResponse,
@@ -17,6 +17,9 @@ import {
   LinkStudentParams,
   LinkStudentBody,
   LinkStudentResponse,
+  BulkLinkStudentsParams,
+  BulkLinkStudentsBody,
+  BulkLinkStudentsResponse,
   UnlinkStudentParams,
   UnlinkStudentResponse,
 } from "@workspace/api-zod";
@@ -34,6 +37,7 @@ function toProfile(user: typeof usersTable.$inferSelect) {
     parentType: user.parentType ?? null,
     contact: user.contact ?? null,
     batch: user.batch ?? null,
+    batches: user.batches ?? null,
     academyName: user.academyName ?? null,
     language: user.language ?? null,
     xp: user.xp ?? 0,
@@ -175,6 +179,7 @@ router.get(
       gender: usersTable.gender,
       studentClass: usersTable.studentClass,
       board: usersTable.board,
+      batch: parentStudentLinksTable.batch,
     })
     .from(parentStudentLinksTable)
     .innerJoin(usersTable, eq(usersTable.vidyaId, parentStudentLinksTable.studentVidyaId))
@@ -188,6 +193,7 @@ router.get(
         gender: s.gender,
         studentClass: s.studentClass ?? null,
         board: s.board ?? null,
+        batch: s.batch ?? null,
       })),
     }),
   );
@@ -197,6 +203,7 @@ router.post(
   "/profile/:vidyaId/link-student",
   requireAuth,
   requireSelf,
+  requireParentOrTutor,
   async (req, res): Promise<void> => {
     const params = LinkStudentParams.safeParse(req.params);
   if (!params.success) {
@@ -210,7 +217,7 @@ router.post(
     return;
   }
 
-  const { studentVidyaId } = body.data;
+  const { studentVidyaId, batch } = body.data;
 
   if (studentVidyaId === params.data.vidyaId) {
     res.status(400).json({ error: "You cannot link your own account." });
@@ -231,6 +238,7 @@ router.post(
     await db.insert(parentStudentLinksTable).values({
       parentVidyaId: params.data.vidyaId,
       studentVidyaId,
+      batch: batch?.trim() || null,
     });
   } catch {
     res.status(400).json({ error: "This student is already linked to your account." });
@@ -249,10 +257,91 @@ router.post(
   );
 });
 
+// Bulk-link many students in one request. Each ID is resolved independently and
+// gets its own status so the client can show a per-ID summary; a bad ID never
+// aborts the whole batch. Capped to keep a single request bounded.
+const MAX_BULK_LINK = 100;
+
+router.post(
+  "/profile/:vidyaId/link-students",
+  requireAuth,
+  requireSelf,
+  requireParentOrTutor,
+  async (req, res): Promise<void> => {
+    const params = BulkLinkStudentsParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+
+    const body = BulkLinkStudentsBody.safeParse(req.body);
+    if (!body.success) {
+      res.status(400).json({ error: body.error.message });
+      return;
+    }
+
+    const parentVidyaId = params.data.vidyaId;
+    const batch = body.data.batch?.trim() || null;
+
+    // Normalise: uppercase, trim, drop blanks, de-dupe — preserving first-seen order.
+    const ids = body.data.studentVidyaIds
+      .map((id) => id.trim().toUpperCase())
+      .filter((id) => id.length > 0)
+      .filter((id, i, arr) => arr.indexOf(id) === i)
+      .slice(0, MAX_BULK_LINK);
+
+    const results: { vidyaId: string; status: string; name: string | null }[] = [];
+
+    for (const studentVidyaId of ids) {
+      if (studentVidyaId === parentVidyaId) {
+        results.push({ vidyaId: studentVidyaId, status: "self", name: null });
+        continue;
+      }
+
+      const [user] = await db
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.vidyaId, studentVidyaId));
+
+      if (!user) {
+        results.push({ vidyaId: studentVidyaId, status: "not_found", name: null });
+        continue;
+      }
+      if (user.role !== "student") {
+        results.push({ vidyaId: studentVidyaId, status: "not_a_student", name: user.name });
+        continue;
+      }
+
+      const inserted = await db
+        .insert(parentStudentLinksTable)
+        .values({ parentVidyaId, studentVidyaId, batch })
+        .onConflictDoNothing({
+          target: [
+            parentStudentLinksTable.parentVidyaId,
+            parentStudentLinksTable.studentVidyaId,
+          ],
+        })
+        .returning();
+
+      results.push({
+        vidyaId: studentVidyaId,
+        status: inserted.length > 0 ? "linked" : "already_linked",
+        name: user.name,
+      });
+    }
+
+    const linkedCount = results.filter((r) => r.status === "linked").length;
+    req.log.info({ parentVidyaId, requested: ids.length, linked: linkedCount }, "Bulk student link");
+
+    res.json(BulkLinkStudentsResponse.parse({ results }));
+  },
+);
+
 router.delete(
   "/profile/:vidyaId/link-student/:studentVidyaId",
   requireAuth,
   requireSelf,
+  requireParentOrTutor,
   async (req, res): Promise<void> => {
     const params = UnlinkStudentParams.safeParse(req.params);
     if (!params.success) {

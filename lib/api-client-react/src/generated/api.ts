@@ -22,6 +22,8 @@ import type {
 import type {
   AssessmentResult,
   AssessmentResultsResponse,
+  BulkLinkResultsResponse,
+  BulkLinkStudentsInput,
   ChangePasswordInput,
   ChatMessageInput,
   ChatSessionResponse,
@@ -654,6 +656,78 @@ export const useLinkStudent = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getLinkStudentMutationOptions(options));
+    }
+
+export const getBulkLinkStudentsUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/profile/${vidyaId}/link-students`
+}
+
+/**
+ * @summary Link multiple students to a parent or tutor account at once
+ */
+export const bulkLinkStudents = async (vidyaId: string,
+    bulkLinkStudentsInput: BulkLinkStudentsInput, options?: RequestInit): Promise<BulkLinkResultsResponse> => {
+
+  return customFetch<BulkLinkResultsResponse>(getBulkLinkStudentsUrl(vidyaId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      bulkLinkStudentsInput,)
+  }
+);}
+
+
+
+
+export const getBulkLinkStudentsMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bulkLinkStudents>>, TError,{vidyaId: string;data: BodyType<BulkLinkStudentsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof bulkLinkStudents>>, TError,{vidyaId: string;data: BodyType<BulkLinkStudentsInput>}, TContext> => {
+
+const mutationKey = ['bulkLinkStudents'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof bulkLinkStudents>>, {vidyaId: string;data: BodyType<BulkLinkStudentsInput>}> = (props) => {
+          const {vidyaId,data} = props ?? {};
+
+          return  bulkLinkStudents(vidyaId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type BulkLinkStudentsMutationResult = NonNullable<Awaited<ReturnType<typeof bulkLinkStudents>>>
+    export type BulkLinkStudentsMutationBody = BodyType<BulkLinkStudentsInput>
+    export type BulkLinkStudentsMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Link multiple students to a parent or tutor account at once
+ */
+export const useBulkLinkStudents = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bulkLinkStudents>>, TError,{vidyaId: string;data: BodyType<BulkLinkStudentsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof bulkLinkStudents>>,
+        TError,
+        {vidyaId: string;data: BodyType<BulkLinkStudentsInput>},
+        TContext
+      > => {
+      return useMutation(getBulkLinkStudentsMutationOptions(options));
     }
 
 export const getUnlinkStudentUrl = (vidyaId: string,

@@ -66,3 +66,32 @@ export async function requireTutor(
   }
   next();
 }
+
+/**
+ * Must run after `requireAuth`. Rejects authenticated users whose account role
+ * is not `parent` or `tutor`. Linking students to an account is a parent/tutor
+ * capability, so a student must never be able to attach other students to their
+ * own account even if they call the API directly.
+ */
+export async function requireParentOrTutor(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  const vidyaId = req.vidyaId;
+  if (!vidyaId) {
+    res.status(401).json({ error: "Please log in to continue." });
+    return;
+  }
+  const rows = await db
+    .select({ role: usersTable.role })
+    .from(usersTable)
+    .where(eq(usersTable.vidyaId, vidyaId))
+    .limit(1);
+  const role = rows[0]?.role;
+  if (role !== "parent" && role !== "tutor") {
+    res.status(403).json({ error: "Only parents and tutors can link students." });
+    return;
+  }
+  next();
+}

@@ -21,6 +21,7 @@ import {
 import { useAuth } from "@/lib/auth";
 import { useLanguage, LANGUAGES } from "@/lib/i18n";
 import ProgressAnalytics from "@/components/parent/ProgressAnalytics";
+import BulkAddStudents from "@/components/BulkAddStudents";
 import VoiceSettings from "@/components/VoiceSettings";
 import SavedHistory from "@/components/parent/SavedHistory";
 import ParentConsultantChat from "@/components/parent/ParentConsultantChat";
@@ -380,14 +381,17 @@ export default function ParentDashboard() {
             >
               <Card className="border-0 shadow-md rounded-2xl overflow-hidden">
                 <CardContent className="p-6">
-                  <div className="flex items-center gap-2 mb-5">
+                  <div className="flex items-center gap-2 mb-5 flex-wrap">
                     <UserPlus className="w-5 h-5 text-primary" />
                     <h3 className="font-bold text-lg text-foreground">{t("profile.connectedStudents")}</h3>
                     {students.length > 0 && (
-                      <span className="ml-auto text-xs font-semibold bg-primary/10 text-primary px-2.5 py-1 rounded-full">
+                      <span className="text-xs font-semibold bg-primary/10 text-primary px-2.5 py-1 rounded-full">
                         {students.length} {t("profile.linked")}
                       </span>
                     )}
+                    <div className="ml-auto">
+                      <BulkAddStudents vidyaId={vidyaId} onLinked={refetchLinked} />
+                    </div>
                   </div>
 
                   {/* Link input */}

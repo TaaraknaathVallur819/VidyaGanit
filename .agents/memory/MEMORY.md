@@ -1,4 +1,5 @@
 - [AI tutor chat](ai-tutor-chat.md) — SSE chat contract, gpt-5.4/gpt-image-1, [[DRAW]] marker stripping, vidyaId-trust caveat
+- [Student-linking authz](student-linking-authz.md) — link/unlink routes need requireParentOrTutor (not just requireSelf); batches/bulk-add/report-export shape; types come from @workspace/api-client-react
 - [Brain Games tailoring](brain-games-tailoring.md) — board tailoring is sequencing+pacing only (not fake topic pools); complexity-driven timerFor; symbolic prompts
 - [Indian education boards](india-boards.md) — `@workspace/india-boards` is the single catalog shared by the picker + AI prompt; keep stored board values backward-compatible
 - [Recommendation mastery weighting](recommendation-mastery-weighting.md) — next-lesson engine weights graded test 0.7 over chat practice 0.3; equal-average regressed perfect-test topics

@@ -35,6 +35,7 @@ export const RegisterUserBody = zod.object({
   "parentType": zod.union([zod.literal('father'),zod.literal('mother'),zod.literal(null)]).nullish(),
   "contact": zod.string().nullish(),
   "batch": zod.string().nullish(),
+  "batches": zod.array(zod.string()).nullish(),
   "academyName": zod.string().nullish()
 })
 
@@ -67,6 +68,7 @@ export const LoginUserResponse = zod.object({
   "parentType": zod.string().nullish(),
   "contact": zod.string().nullish(),
   "batch": zod.string().nullish(),
+  "batches": zod.array(zod.string()).nullish(),
   "academyName": zod.string().nullish(),
   "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
   "voiceRate": zod.number().min(loginUserResponseVoiceRateMin).max(loginUserResponseVoiceRateMax).default(loginUserResponseVoiceRateDefault),
@@ -104,6 +106,7 @@ export const GetProfileResponse = zod.object({
   "parentType": zod.string().nullish(),
   "contact": zod.string().nullish(),
   "batch": zod.string().nullish(),
+  "batches": zod.array(zod.string()).nullish(),
   "academyName": zod.string().nullish(),
   "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
   "voiceRate": zod.number().min(getProfileResponseVoiceRateMin).max(getProfileResponseVoiceRateMax).default(getProfileResponseVoiceRateDefault),
@@ -160,6 +163,7 @@ export const UpdateProfileResponse = zod.object({
   "parentType": zod.string().nullish(),
   "contact": zod.string().nullish(),
   "batch": zod.string().nullish(),
+  "batches": zod.array(zod.string()).nullish(),
   "academyName": zod.string().nullish(),
   "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
   "voiceRate": zod.number().min(updateProfileResponseVoiceRateMin).max(updateProfileResponseVoiceRateMax).default(updateProfileResponseVoiceRateDefault),
@@ -204,7 +208,8 @@ export const GetLinkedStudentsResponse = zod.object({
   "name": zod.string(),
   "gender": zod.enum(['male', 'female']),
   "studentClass": zod.string().nullish(),
-  "board": zod.string().nullish()
+  "board": zod.string().nullish(),
+  "batch": zod.string().nullish()
 }))
 })
 
@@ -217,7 +222,8 @@ export const LinkStudentParams = zod.object({
 })
 
 export const LinkStudentBody = zod.object({
-  "studentVidyaId": zod.string()
+  "studentVidyaId": zod.string(),
+  "batch": zod.string().nullish()
 })
 
 export const LinkStudentResponse = zod.object({
@@ -225,7 +231,29 @@ export const LinkStudentResponse = zod.object({
   "name": zod.string(),
   "gender": zod.enum(['male', 'female']),
   "studentClass": zod.string().nullish(),
-  "board": zod.string().nullish()
+  "board": zod.string().nullish(),
+  "batch": zod.string().nullish()
+})
+
+
+/**
+ * @summary Link multiple students to a parent or tutor account at once
+ */
+export const BulkLinkStudentsParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const BulkLinkStudentsBody = zod.object({
+  "studentVidyaIds": zod.array(zod.string()),
+  "batch": zod.string().nullish()
+})
+
+export const BulkLinkStudentsResponse = zod.object({
+  "results": zod.array(zod.object({
+  "vidyaId": zod.string(),
+  "status": zod.enum(['linked', 'already_linked', 'not_found', 'not_a_student', 'self']),
+  "name": zod.string().nullish()
+}))
 })
 
 

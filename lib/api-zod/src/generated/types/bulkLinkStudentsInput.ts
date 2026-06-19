@@ -6,8 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface LinkStudentInput {
-  studentVidyaId: string;
+export interface BulkLinkStudentsInput {
+  studentVidyaIds: string[];
   /** @nullable */
   batch?: string | null;
 }

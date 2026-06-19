@@ -57,6 +57,7 @@ function profileResponse(user: typeof usersTable.$inferSelect) {
     parentType: user.parentType ?? null,
     contact: user.contact ?? null,
     batch: user.batch ?? null,
+    batches: user.batches ?? null,
     academyName: user.academyName ?? null,
     language: user.language ?? null,
     xp: user.xp ?? 0,
@@ -71,8 +72,17 @@ router.post("/auth/register", async (req, res): Promise<void> => {
     return;
   }
 
-  const { name, password, role, gender, studentClass, board, parentType, contact, batch, academyName } =
+  const { name, password, role, gender, studentClass, board, parentType, contact, batch, batches, academyName } =
     parsed.data;
+
+  // Tutors can teach several batches. Normalise the list (trim, drop blanks,
+  // de-dupe) and keep the legacy single `batch` column in sync with the first.
+  const cleanBatches = (batches ?? [])
+    .map((b) => b.trim())
+    .filter((b) => b.length > 0)
+    .filter((b, i, arr) => arr.indexOf(b) === i);
+  const batchesValue = cleanBatches.length > 0 ? cleanBatches : null;
+  const legacyBatch = cleanBatches[0] ?? batch ?? null;
 
   const [existing] = await db
     .select()
@@ -99,7 +109,8 @@ router.post("/auth/register", async (req, res): Promise<void> => {
       board: board ?? null,
       parentType: parentType ?? null,
       contact: contact ?? null,
-      batch: batch ?? null,
+      batch: legacyBatch,
+      batches: batchesValue,
       academyName: academyName ?? null,
     })
     .returning();

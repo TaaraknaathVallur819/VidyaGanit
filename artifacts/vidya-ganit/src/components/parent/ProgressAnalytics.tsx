@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { Loader2, TrendingUp, Sparkles, MessageCircle, BookOpen, ClipboardCheck } from "lucide-react";
+import { Loader2, TrendingUp, Sparkles, MessageCircle, BookOpen, ClipboardCheck, FileText, FileSpreadsheet } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   useGetStudentAnalytics,
   getGetStudentAnalyticsQueryKey,
@@ -10,6 +11,7 @@ import {
 import { useLanguage } from "@/lib/i18n";
 import AssessmentReport from "@/components/AssessmentReport";
 import RecommendedLesson from "@/components/parent/RecommendedLesson";
+import { exportReportPdf, exportReportCsv } from "@/lib/exportReport";
 
 const TOPIC_COLORS: Record<string, string> = {
   fraction: "from-rose-500 to-pink-500",
@@ -58,14 +60,43 @@ export default function ProgressAnalytics({
 
   const hasActivity = data.totalMessages > 0;
 
+  const handleExportPdf = () =>
+    exportReportPdf({ t, analytics: data, assessments: assessments?.results ?? [] });
+  const handleExportCsv = () =>
+    exportReportCsv({ t, analytics: data, assessments: assessments?.results ?? [] });
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-primary" />
-          {t("progress.title")}
-        </h2>
-        <p className="text-sm text-muted-foreground mt-1">{t("progress.subtitle")}</p>
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-primary" />
+            {t("progress.title")}
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">{t("progress.subtitle")}</p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportPdf}
+            data-testid="button-export-pdf"
+            className="gap-1.5 rounded-full"
+          >
+            <FileText className="w-4 h-4" />
+            {t("report.pdf")}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCsv}
+            data-testid="button-export-csv"
+            className="gap-1.5 rounded-full"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            {t("report.csv")}
+          </Button>
+        </div>
       </div>
 
       <RecommendedLesson vidyaId={vidyaId} studentVidyaId={studentVidyaId} />

@@ -21,6 +21,7 @@ import {
 import { useAuth } from "@/lib/auth";
 import { useLanguage, LANGUAGES } from "@/lib/i18n";
 import ProgressAnalytics from "@/components/parent/ProgressAnalytics";
+import BulkAddStudents from "@/components/BulkAddStudents";
 import VoiceSettings from "@/components/VoiceSettings";
 import SavedHistory from "@/components/parent/SavedHistory";
 import ParentConsultantChat from "@/components/parent/ParentConsultantChat";
@@ -52,7 +53,10 @@ import {
   TrendingUp,
   History as HistoryIcon,
   Sparkles,
+  Layers,
 } from "lucide-react";
+
+const UNASSIGNED_BATCH = "__unassigned__";
 
 function getPasswordStrength(pwd: string) {
   if (!pwd) return { label: "", color: "", barColor: "", level: 0 };
@@ -87,20 +91,30 @@ export default function TutorDashboard() {
   });
   const students = linkedData?.students ?? [];
 
+  const [batchFilter, setBatchFilter] = useState<string>("all");
+
+  const filteredStudents =
+    batchFilter === "all"
+      ? students
+      : batchFilter === UNASSIGNED_BATCH
+        ? students.filter((s) => !s.batch)
+        : students.filter((s) => s.batch === batchFilter);
+
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
 
-  // Default the picker to the first linked student, and keep it valid as the
-  // list changes (e.g. after unlinking).
+  // Default the picker to the first student in the active batch view, and keep
+  // it valid as the list/filter changes (e.g. after unlinking or switching batch).
   useEffect(() => {
-    if (students.length === 0) {
+    if (filteredStudents.length === 0) {
       if (selectedStudentId !== null) setSelectedStudentId(null);
       return;
     }
-    const stillValid = students.some((s) => s.vidyaId === selectedStudentId);
-    if (!stillValid) setSelectedStudentId(students[0].vidyaId);
-  }, [students, selectedStudentId]);
+    const stillValid = filteredStudents.some((s) => s.vidyaId === selectedStudentId);
+    if (!stillValid) setSelectedStudentId(filteredStudents[0].vidyaId);
+  }, [filteredStudents, selectedStudentId]);
 
-  const selectedStudent = students.find((s) => s.vidyaId === selectedStudentId) ?? null;
+  const selectedStudent =
+    filteredStudents.find((s) => s.vidyaId === selectedStudentId) ?? null;
 
   const [linkInput, setLinkInput] = useState("");
   const [linkError, setLinkError] = useState("");
@@ -233,6 +247,47 @@ export default function TutorDashboard() {
 
   if (!displayed) return null;
 
+  // Batches the tutor teaches (new multi-batch field, falling back to the legacy
+  // single batch), plus any batch already assigned on a linked student.
+  const tutorBatches =
+    displayed.batches && displayed.batches.length > 0
+      ? displayed.batches
+      : displayed.batch
+        ? [displayed.batch]
+        : [];
+  const batchValues = Array.from(
+    new Set([
+      ...tutorBatches,
+      ...students.map((s) => s.batch).filter((b): b is string => !!b),
+    ]),
+  );
+  const hasUnassigned = students.some((s) => !s.batch);
+  const showBatchFilter = batchValues.length > 0 || hasUnassigned;
+
+  const batchFilterSelect = showBatchFilter ? (
+    <Select value={batchFilter} onValueChange={setBatchFilter}>
+      <SelectTrigger
+        className="w-auto gap-2 h-9 rounded-xl shrink-0"
+        data-testid="select-batch-filter"
+        aria-label={t("tutor.filterByBatch")}
+      >
+        <Layers className="w-4 h-4 text-primary" />
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="all">{t("tutor.allBatches")}</SelectItem>
+        {batchValues.map((b) => (
+          <SelectItem key={b} value={b}>
+            {b}
+          </SelectItem>
+        ))}
+        {hasUnassigned && (
+          <SelectItem value={UNASSIGNED_BATCH}>{t("tutor.unassigned")}</SelectItem>
+        )}
+      </SelectContent>
+    </Select>
+  ) : null;
+
   const tabTriggerClass =
     "px-0 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none bg-transparent font-semibold gap-1.5";
 
@@ -295,7 +350,8 @@ export default function TutorDashboard() {
         {/* Shared student picker for progress/history tabs */}
         {needsStudent && students.length > 0 && (
           <div className="bg-white border-b px-6 py-3">
-            <div className="max-w-3xl mx-auto flex items-center gap-3">
+            <div className="max-w-3xl mx-auto flex items-center gap-3 flex-wrap">
+              {batchFilterSelect}
               <span className="text-sm font-medium text-muted-foreground shrink-0">
                 {t("picker.label")}
               </span>
@@ -307,7 +363,7 @@ export default function TutorDashboard() {
                   <SelectValue placeholder={t("picker.placeholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {students.map((s) => (
+                  {filteredStudents.map((s) => (
                     <SelectItem key={s.vidyaId} value={s.vidyaId}>
                       {s.name}
                       {s.studentClass ? ` · ${t("profile.class")} ${s.studentClass}` : ""}
@@ -396,15 +452,26 @@ export default function TutorDashboard() {
             >
               <Card className="border-0 shadow-md rounded-2xl overflow-hidden">
                 <CardContent className="p-6">
-                  <div className="flex items-center gap-2 mb-5">
+                  <div className="flex items-center gap-2 mb-5 flex-wrap">
                     <UserPlus className="w-5 h-5 text-primary" />
                     <h3 className="font-bold text-lg text-foreground">{t("profile.connectedStudents")}</h3>
                     {students.length > 0 && (
-                      <span className="ml-auto text-xs font-semibold bg-primary/10 text-primary px-2.5 py-1 rounded-full">
+                      <span className="text-xs font-semibold bg-primary/10 text-primary px-2.5 py-1 rounded-full">
                         {students.length} {t("profile.linked")}
                       </span>
                     )}
+                    <div className="ml-auto">
+                      <BulkAddStudents
+                        vidyaId={vidyaId}
+                        batches={tutorBatches}
+                        onLinked={refetchLinked}
+                      />
+                    </div>
                   </div>
+
+                  {showBatchFilter && (
+                    <div className="mb-4">{batchFilterSelect}</div>
+                  )}
 
                   {/* Link input */}
                   <form onSubmit={handleLinkStudent} className="flex gap-2 mb-5">
@@ -459,9 +526,16 @@ export default function TutorDashboard() {
                         {t("profile.noStudentsHint")}
                       </p>
                     </div>
+                  ) : filteredStudents.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8 text-center space-y-3 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                      <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                        <Layers className="w-6 h-6 text-gray-400" />
+                      </div>
+                      <p className="text-sm font-semibold text-muted-foreground">{t("tutor.noBatchStudents")}</p>
+                    </div>
                   ) : (
                     <div className="space-y-3">
-                      {students.map((s) => (
+                      {filteredStudents.map((s) => (
                         <div
                           key={s.vidyaId}
                           className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-primary/20 transition-colors"

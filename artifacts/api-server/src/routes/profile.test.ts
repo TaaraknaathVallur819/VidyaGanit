@@ -3,7 +3,7 @@ import request from "supertest";
 
 import app from "../app";
 import { signSession, SESSION_COOKIE } from "../lib/session";
-import { db, usersTable } from "@workspace/db";
+import { db, usersTable, parentStudentLinksTable } from "@workspace/db";
 import { inArray } from "drizzle-orm";
 
 // Unique-per-run id prefix so test rows never collide with real data and are
@@ -11,8 +11,10 @@ import { inArray } from "drizzle-orm";
 const RUN = `TST-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
 const STUDENT_A = `${RUN}-STU-A`;
 const STUDENT_B = `${RUN}-STU-B`;
+const PARENT_A = `${RUN}-PARENT-A`;
+const TUTOR_A = `${RUN}-TUTOR-A`;
 
-const ALL_VIDYA_IDS = [STUDENT_A, STUDENT_B];
+const ALL_VIDYA_IDS = [STUDENT_A, STUDENT_B, PARENT_A, TUTOR_A];
 
 /** Builds a signed-session Cookie header value for the given user. */
 function cookieFor(vidyaId: string): string {
@@ -39,10 +41,27 @@ beforeAll(async () => {
       studentClass: "6",
       board: "ICSE",
     },
+    {
+      vidyaId: PARENT_A,
+      name: "Parent A",
+      passwordHash: "x",
+      role: "parent",
+      gender: "female",
+    },
+    {
+      vidyaId: TUTOR_A,
+      name: "Tutor A",
+      passwordHash: "x",
+      role: "tutor",
+      gender: "male",
+    },
   ]);
 });
 
 afterAll(async () => {
+  await db
+    .delete(parentStudentLinksTable)
+    .where(inArray(parentStudentLinksTable.parentVidyaId, ALL_VIDYA_IDS));
   await db.delete(usersTable).where(inArray(usersTable.vidyaId, ALL_VIDYA_IDS));
 });
 
@@ -91,5 +110,65 @@ describe("PATCH /profile/:vidyaId", () => {
       .set("Cookie", cookieFor(STUDENT_A))
       .send({ language: "ta" });
     expect(res.status).toBe(403);
+  });
+});
+
+describe("student linking is restricted to parents/tutors (requireParentOrTutor)", () => {
+  const singleUrl = (vidyaId: string) => `/api/profile/${vidyaId}/link-student`;
+  const bulkUrl = (vidyaId: string) => `/api/profile/${vidyaId}/link-students`;
+
+  it("forbids a student from single-linking another student (403)", async () => {
+    const res = await request(app)
+      .post(singleUrl(STUDENT_A))
+      .set("Cookie", cookieFor(STUDENT_A))
+      .send({ studentVidyaId: STUDENT_B });
+    expect(res.status).toBe(403);
+  });
+
+  it("forbids a student from bulk-linking students (403)", async () => {
+    const res = await request(app)
+      .post(bulkUrl(STUDENT_A))
+      .set("Cookie", cookieFor(STUDENT_A))
+      .send({ studentVidyaIds: [STUDENT_B] });
+    expect(res.status).toBe(403);
+  });
+
+  it("lets a parent bulk-link a student with per-ID statuses", async () => {
+    const res = await request(app)
+      .post(bulkUrl(PARENT_A))
+      .set("Cookie", cookieFor(PARENT_A))
+      .send({ studentVidyaIds: [STUDENT_A, STUDENT_A, "VG-DOES-NOT-EXIST"] });
+    expect(res.status).toBe(200);
+    const byId = Object.fromEntries(
+      res.body.results.map((r: { vidyaId: string; status: string }) => [r.vidyaId, r.status]),
+    );
+    expect(byId[STUDENT_A]).toBe("linked");
+    expect(byId["VG-DOES-NOT-EXIST"]).toBe("not_found");
+  });
+
+  it("lets a tutor single-link a student with an optional batch", async () => {
+    const res = await request(app)
+      .post(singleUrl(TUTOR_A))
+      .set("Cookie", cookieFor(TUTOR_A))
+      .send({ studentVidyaId: STUDENT_B, batch: "Morning Batch" });
+    expect(res.status).toBe(200);
+    expect(res.body.vidyaId).toBe(STUDENT_B);
+  });
+
+  it("forbids a student from unlinking, but lets a parent unlink (requireParentOrTutor)", async () => {
+    const unlinkUrl = (vidyaId: string, studentVidyaId: string) =>
+      `/api/profile/${vidyaId}/link-student/${studentVidyaId}`;
+
+    // Student cannot reach the unlink route at all.
+    const studentRes = await request(app)
+      .delete(unlinkUrl(STUDENT_A, STUDENT_B))
+      .set("Cookie", cookieFor(STUDENT_A));
+    expect(studentRes.status).toBe(403);
+
+    // Parent (who linked STUDENT_A earlier) can unlink them.
+    const parentRes = await request(app)
+      .delete(unlinkUrl(PARENT_A, STUDENT_A))
+      .set("Cookie", cookieFor(PARENT_A));
+    expect(parentRes.status).toBe(200);
   });
 });

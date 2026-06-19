@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { UserCircle, Users, GraduationCap } from "lucide-react";
+import { UserCircle, Users, GraduationCap, Plus, X } from "lucide-react";
 import { useRegisterUser, useLoginUser } from "@workspace/api-client-react";
 import { useAuth } from "@/lib/auth";
 import { useLanguage } from "@/lib/i18n";
@@ -74,7 +74,7 @@ export default function Auth() {
   // Register state
   const [regName, setRegName] = useState("");
   const [regContact, setRegContact] = useState("");
-  const [regBatch, setRegBatch] = useState("");
+  const [regBatches, setRegBatches] = useState<string[]>([""]);
   const [regAcademyName, setRegAcademyName] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [nameError, setNameError] = useState("");
@@ -124,7 +124,8 @@ export default function Auth() {
       ? studentClass !== null && resolvedBoard.length > 0
       : role === "parent"
         ? parentType !== null
-        : regBatch.trim().length > 0 && regContact.trim().length > 0);
+        : regBatches.some((b) => b.trim().length > 0) &&
+          regContact.trim().length > 0);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -154,6 +155,10 @@ export default function Auth() {
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isRegisterValid) return;
+    const cleanedBatches = regBatches
+      .map((b) => b.trim())
+      .filter((b) => b.length > 0)
+      .filter((b, i, arr) => arr.indexOf(b) === i);
     registerMutation.mutate(
       {
         data: {
@@ -168,7 +173,8 @@ export default function Auth() {
             role === "parent" || role === "tutor"
               ? regContact.trim() || null
               : null,
-          batch: role === "tutor" ? regBatch.trim() || null : null,
+          batch: role === "tutor" ? cleanedBatches[0] ?? null : null,
+          batches: role === "tutor" ? cleanedBatches : null,
           academyName: role === "tutor" ? regAcademyName.trim() || null : null,
         },
       },
@@ -441,19 +447,52 @@ export default function Auth() {
                   </div>
                 </div>
 
-                {/* Tutor batch */}
+                {/* Tutor batches (one or more) */}
                 {role === "tutor" && (
                   <div className="space-y-2">
-                    <Label htmlFor="reg-batch" className="text-foreground font-medium">{t("auth.batch")}</Label>
-                    <Input
-                      id="reg-batch"
-                      data-testid="input-register-batch"
-                      value={regBatch}
-                      onChange={(e) => setRegBatch(e.target.value)}
-                      placeholder={t("auth.batchPlaceholder")}
-                      className="h-12 text-lg px-4 bg-gray-50 border-gray-200"
-                      required
-                    />
+                    <Label className="text-foreground font-medium">{t("auth.batch")}</Label>
+                    <div className="space-y-2">
+                      {regBatches.map((b, i) => (
+                        <div key={i} className="flex gap-2">
+                          <Input
+                            data-testid={`input-register-batch-${i}`}
+                            value={b}
+                            onChange={(e) =>
+                              setRegBatches((prev) =>
+                                prev.map((v, idx) => (idx === i ? e.target.value : v)),
+                              )
+                            }
+                            placeholder={t("auth.batchPlaceholder")}
+                            className="h-12 text-lg px-4 bg-gray-50 border-gray-200 flex-1"
+                            required={i === 0}
+                          />
+                          {regBatches.length > 1 && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              data-testid={`button-remove-batch-${i}`}
+                              onClick={() =>
+                                setRegBatches((prev) => prev.filter((_, idx) => idx !== i))
+                              }
+                              className="h-12 px-3 shrink-0"
+                              aria-label={t("auth.batchRemove")}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      data-testid="button-add-batch"
+                      onClick={() => setRegBatches((prev) => [...prev, ""])}
+                      className="text-primary hover:text-primary h-9 px-2 gap-1.5"
+                    >
+                      <Plus className="w-4 h-4" />
+                      {t("auth.batchAdd")}
+                    </Button>
                   </div>
                 )}
 

@@ -240,6 +240,37 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /profile/{vidyaId}/link-students:
+    post:
+      operationId: bulkLinkStudents
+      tags: [auth]
+      summary: Link multiple students to a parent or tutor account at once
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkLinkStudentsInput"
+      responses:
+        "200":
+          description: Per-ID linking results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkLinkResultsResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /profile/{vidyaId}/link-student/{studentVidyaId}:
     delete:
       operationId: unlinkStudent
@@ -834,6 +865,10 @@ components:
           type: ["string", "null"]
         batch:
           type: ["string", "null"]
+        batches:
+          type: ["array", "null"]
+          items:
+            type: string
         academyName:
           type: ["string", "null"]
 
@@ -889,6 +924,10 @@ components:
           type: ["string", "null"]
         batch:
           type: ["string", "null"]
+        batches:
+          type: ["array", "null"]
+          items:
+            type: string
         academyName:
           type: ["string", "null"]
         language:
@@ -1021,6 +1060,8 @@ components:
       properties:
         studentVidyaId:
           type: string
+        batch:
+          type: ["string", "null"]
 
     LinkedStudentProfile:
       type: object
@@ -1037,6 +1078,8 @@ components:
           type: ["string", "null"]
         board:
           type: ["string", "null"]
+        batch:
+          type: ["string", "null"]
 
     LinkedStudentsResponse:
       type: object
@@ -1046,6 +1089,38 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LinkedStudentProfile"
+
+    BulkLinkStudentsInput:
+      type: object
+      required: [studentVidyaIds]
+      properties:
+        studentVidyaIds:
+          type: array
+          items:
+            type: string
+        batch:
+          type: ["string", "null"]
+
+    BulkLinkResult:
+      type: object
+      required: [vidyaId, status]
+      properties:
+        vidyaId:
+          type: string
+        status:
+          type: string
+          enum: [linked, already_linked, not_found, not_a_student, self]
+        name:
+          type: ["string", "null"]
+
+    BulkLinkResultsResponse:
+      type: object
+      required: [results]
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/BulkLinkResult"
 
     ErrorResponse:
       type: object

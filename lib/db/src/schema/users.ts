@@ -15,6 +15,9 @@ export const usersTable = pgTable("users", {
   parentType: text("parent_type"),
   contact: text("contact"),
   batch: text("batch"),
+  // Tutors can teach several batches. `batch` (above) is kept for back-compat and
+  // mirrors the first entry of this list; `batches` is the authoritative list.
+  batches: text("batches").array(),
   academyName: text("academy_name"),
   language: text("language"),
   // Read-aloud voice preferences for the AI tutor/counselor speech synthesis.

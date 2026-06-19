@@ -68,6 +68,8 @@ export interface UserRegistrationInput {
   /** @nullable */
   batch?: string | null;
   /** @nullable */
+  batches?: string[] | null;
+  /** @nullable */
   academyName?: string | null;
 }
 
@@ -151,6 +153,8 @@ export interface UserProfile {
   contact?: string | null;
   /** @nullable */
   batch?: string | null;
+  /** @nullable */
+  batches?: string[] | null;
   /** @nullable */
   academyName?: string | null;
   /** @nullable */
@@ -325,6 +329,8 @@ export interface ChatMessageInput {
 
 export interface LinkStudentInput {
   studentVidyaId: string;
+  /** @nullable */
+  batch?: string | null;
 }
 
 export type LinkedStudentProfileGender = typeof LinkedStudentProfileGender[keyof typeof LinkedStudentProfileGender];
@@ -343,10 +349,40 @@ export interface LinkedStudentProfile {
   studentClass?: string | null;
   /** @nullable */
   board?: string | null;
+  /** @nullable */
+  batch?: string | null;
 }
 
 export interface LinkedStudentsResponse {
   students: LinkedStudentProfile[];
+}
+
+export interface BulkLinkStudentsInput {
+  studentVidyaIds: string[];
+  /** @nullable */
+  batch?: string | null;
+}
+
+export type BulkLinkResultStatus = typeof BulkLinkResultStatus[keyof typeof BulkLinkResultStatus];
+
+
+export const BulkLinkResultStatus = {
+  linked: 'linked',
+  already_linked: 'already_linked',
+  not_found: 'not_found',
+  not_a_student: 'not_a_student',
+  self: 'self',
+} as const;
+
+export interface BulkLinkResult {
+  vidyaId: string;
+  status: BulkLinkResultStatus;
+  /** @nullable */
+  name?: string | null;
+}
+
+export interface BulkLinkResultsResponse {
+  results: BulkLinkResult[];
 }
 
 export interface ErrorResponse {

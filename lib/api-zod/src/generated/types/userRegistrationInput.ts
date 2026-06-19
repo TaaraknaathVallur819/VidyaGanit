@@ -28,5 +28,7 @@ export interface UserRegistrationInput {
   /** @nullable */
   batch?: string | null;
   /** @nullable */
+  batches?: string[] | null;
+  /** @nullable */
   academyName?: string | null;
 }

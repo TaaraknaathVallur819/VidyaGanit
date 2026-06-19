@@ -15,4 +15,6 @@ export interface LinkedStudentProfile {
   studentClass?: string | null;
   /** @nullable */
   board?: string | null;
+  /** @nullable */
+  batch?: string | null;
 }

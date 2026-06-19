@@ -5,9 +5,8 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { BulkLinkResult } from './bulkLinkResult';
 
-export interface LinkStudentInput {
-  studentVidyaId: string;
-  /** @nullable */
-  batch?: string | null;
+export interface BulkLinkResultsResponse {
+  results: BulkLinkResult[];
 }
