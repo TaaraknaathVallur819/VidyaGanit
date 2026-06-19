@@ -54,7 +54,11 @@ function isLikelyNewQuestion(message: string): boolean {
 }
 
 const MAX_MESSAGE_LEN = 1500;
-const MAX_HISTORY_ENTRIES = 20;
+// Keep the FULL conversation available to the tutor (not just recent turns) so
+// it remembers everything the student has worked through in a session. This is a
+// generous upper bound for any realistic conversation while still guarding the
+// model's context window / cost against a pathologically long history.
+const MAX_HISTORY_ENTRIES = 200;
 const MAX_HISTORY_ENTRY_LEN = 2000;
 // ~8 MB binary → ~10.7M base64 chars; cap the whole data URL a little above that.
 const MAX_ATTACHMENT_DATAURL_LEN = 11_500_000;

@@ -47,7 +47,11 @@ import { rateLimit } from "../middlewares/rateLimit";
 const router: IRouter = Router();
 
 const MAX_MESSAGE_LEN = 4000;
-const MAX_HISTORY_ENTRIES = 20;
+// Keep the FULL conversation available to the AI (not just recent turns) so the
+// parent/tutor consultant remembers everything discussed in a session. Generous
+// upper bound for any realistic conversation while still guarding the model's
+// context window / cost against a pathologically long history.
+const MAX_HISTORY_ENTRIES = 200;
 const MAX_HISTORY_ENTRY_LEN = 4000;
 const MAX_ATTACHMENT_DATAURL_LEN = 11_500_000;
 const MAX_ATTACHMENT_TEXT_LEN = 8000;
