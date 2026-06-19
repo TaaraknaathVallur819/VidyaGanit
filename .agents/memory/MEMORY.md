@@ -1,4 +1,5 @@
 - [AI tutor chat](ai-tutor-chat.md) — SSE chat contract, gpt-5.4/gpt-image-1, [[DRAW]] marker stripping, vidyaId-trust caveat
+- [Brain Games tailoring](brain-games-tailoring.md) — board tailoring is sequencing+pacing only (not fake topic pools); complexity-driven timerFor; symbolic prompts
 - [Indian education boards](india-boards.md) — `@workspace/india-boards` is the single catalog shared by the picker + AI prompt; keep stored board values backward-compatible
 - [Recommendation mastery weighting](recommendation-mastery-weighting.md) — next-lesson engine weights graded test 0.7 over chat practice 0.3; equal-average regressed perfect-test topics
 - [Password reset flow](password-reset-flow.md) — reset link goes to STORED contact only; uniform response; no-contact accounts get no link (anti-takeover/enumeration)

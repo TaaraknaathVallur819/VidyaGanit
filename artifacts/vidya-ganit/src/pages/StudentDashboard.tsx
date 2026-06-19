@@ -570,6 +570,7 @@ export default function StudentDashboard() {
         onClose={() => setGamesOpen(false)}
         vidyaId={vidyaId}
         studentClass={displayed?.studentClass ?? null}
+        board={displayed?.board ?? null}
         onXpAwarded={() => { refetch(); }}
       />
     </div>

@@ -14,15 +14,27 @@ export type GameId =
   | "place"
   | "rounding"
   | "factors"
+  | "multiples"
+  | "primes"
+  | "money"
   | "fractions"
   | "decimals"
   | "percent"
+  | "average"
+  | "hcflcm"
+  | "ratio"
   | "geometry"
+  | "mensuration"
   | "integers"
   | "algebra"
+  | "interest"
   | "exponents";
 
 export type GameKind = "mcq" | "truefalse";
+
+// Topic complexity, 1 (simple drill) … 5 (multi-step concept). Drives how long a
+// round's timer runs: harder topics get more thinking time (see syllabus.ts).
+export type Complexity = 1 | 2 | 3 | 4 | 5;
 
 export type GameQuestion = {
   prompt: string;
@@ -38,6 +50,7 @@ export type GameDef = {
   kind: GameKind;
   minClass: number;
   maxClass: number;
+  complexity: Complexity;
   make: (cls: number) => GameQuestion;
 };
 
@@ -374,22 +387,165 @@ function makeExponents(c: number): GameQuestion {
   return numericQuestion(`${b}^${e} = ?`, answer, Math.max(5, Math.floor(answer * 0.3)));
 }
 
+function isPrime(n: number): boolean {
+  if (n < 2) return false;
+  for (let i = 2; i * i <= n; i++) if (n % i === 0) return false;
+  return true;
+}
+
+// Skip-counting: complete the run of multiples (n, 2n, 3n, ?). The next term is
+// uniquely 4n, so any distinct distractor is a valid wrong answer.
+function makeMultiples(c: number): GameQuestion {
+  const n = randInt(2, c <= 4 ? 6 : c === 5 ? 9 : 12);
+  const answer = n * 4;
+  return mcFrom(`${n}, ${n * 2}, ${n * 3}, ?`, answer, [
+    answer - 1,
+    answer + 1,
+    n * 3 + 1,
+    answer + n,
+    Math.max(1, answer - n),
+  ]);
+}
+
+// Prime or composite — shown as a bare number with a ✓ / ✗ choice (the desc
+// asks "is it prime?"). Balanced ~50/50 between primes and composites.
+function makePrimes(c: number): GameQuestion {
+  const max = c <= 5 ? 30 : c === 6 ? 50 : 80;
+  let n: number;
+  if (Math.random() < 0.5) {
+    const primes: number[] = [];
+    for (let i = 2; i <= max; i++) if (isPrime(i)) primes.push(i);
+    n = primes[randInt(0, primes.length - 1)];
+  } else {
+    do {
+      n = randInt(4, max);
+    } while (isPrime(n));
+  }
+  return { prompt: `${n}`, options: ["true", "false"], answer: isPrime(n) ? 0 : 1 };
+}
+
+// Money in rupees: either a sum (₹a + ₹b) or change from a round note (₹note − ₹cost).
+function makeMoney(c: number): GameQuestion {
+  const max = c <= 4 ? 90 : 500;
+  if (Math.random() < 0.5) {
+    const a = randInt(5, max);
+    const b = randInt(5, max);
+    return numericQuestion(`₹${a} + ₹${b} = ?`, a + b, Math.max(5, Math.floor((a + b) * 0.2)));
+  }
+  const notes = c <= 4 ? [50, 100] : [100, 200, 500];
+  const paid = notes[randInt(0, notes.length - 1)];
+  const cost = randInt(5, paid - 5);
+  return numericQuestion(`₹${paid} − ₹${cost} = ?`, paid - cost, Math.max(5, Math.floor((paid - cost) * 0.2)));
+}
+
+// Mean of k numbers (x̄). The numbers are built to make the mean a whole number.
+function makeAverage(c: number): GameQuestion {
+  const k = c <= 6 ? 2 : 3;
+  const mean = randInt(c <= 6 ? 6 : 10, c <= 6 ? 30 : 50);
+  let nums: number[] = [];
+  for (let guard = 0; guard < 50; guard++) {
+    const trial: number[] = [];
+    let sum = 0;
+    for (let i = 0; i < k - 1; i++) {
+      const v = randInt(Math.max(1, mean - 5), mean + 5);
+      trial.push(v);
+      sum += v;
+    }
+    const last = mean * k - sum;
+    if (last >= 1) {
+      trial.push(last);
+      nums = trial;
+      break;
+    }
+  }
+  if (nums.length < k) nums = Array(k).fill(mean);
+  return numericQuestion(`${nums.join(", ")} → x̄ ?`, mean, Math.max(3, Math.floor(mean * 0.3)));
+}
+
+// HCF or LCM of two numbers (Indian textbooks use the HCF/LCM abbreviations).
+function makeHcfLcm(c: number): GameQuestion {
+  const max = c <= 6 ? 12 : 20;
+  const a = randInt(2, max);
+  const b = randInt(2, max);
+  const g = gcd(a, b);
+  if (Math.random() < 0.5) {
+    return mcFrom(`HCF(${a}, ${b}) = ?`, g, [a, b, g + 1, Math.max(1, g - 1), g * 2]);
+  }
+  const lcm = (a * b) / g;
+  return mcFrom(`LCM(${a}, ${b}) = ?`, lcm, [a * b, lcm + a, Math.max(1, lcm - a), a + b]);
+}
+
+// Equivalent ratio: a : b = (a·k) : ? — find the matching term.
+function makeRatio(c: number): GameQuestion {
+  const a = randInt(1, 6);
+  const b = randInt(1, 6);
+  const k = randInt(2, c <= 6 ? 5 : 8);
+  const answer = b * k;
+  return numericQuestion(`${a} : ${b} = ${a * k} : ?`, answer, Math.max(3, Math.floor(answer * 0.3)));
+}
+
+// Mensuration: area of a triangle (½·b·h) or a circle (πr², π = 22/7, r a
+// multiple of 7 so the answer is a whole number).
+function makeMensuration(c: number): GameQuestion {
+  void c;
+  if (Math.random() < 0.5) {
+    const b = randInt(2, 12) * 2;
+    const h = randInt(2, 14);
+    const area = (b * h) / 2;
+    return numericQuestion(`△ ½ × ${b} × ${h} = ?`, area, Math.max(4, Math.floor(area * 0.2)));
+  }
+  const r = [7, 14, 21][randInt(0, 2)];
+  const area = (22 * r * r) / 7;
+  return numericQuestion(`◯ 22/7 × ${r}² = ?`, area, Math.max(10, Math.floor(area * 0.2)));
+}
+
+// Simple interest (P·R·T/100) or profit/loss (SP − CP, which may be a loss).
+function makeInterest(c: number): GameQuestion {
+  void c;
+  if (Math.random() < 0.5) {
+    const p = randInt(1, 20) * 100;
+    const r = [2, 4, 5, 8, 10][randInt(0, 4)];
+    const t = randInt(1, 3);
+    const si = (p * r * t) / 100;
+    return numericQuestion(`SI ₹${p}, ${r}%, ${t}y = ?`, si, Math.max(5, Math.floor(si * 0.2)));
+  }
+  const cp = randInt(2, 20) * 10;
+  const delta = randInt(1, 10) * 5;
+  const profit = Math.random() < 0.5;
+  const sp = profit ? cp + delta : cp - Math.min(delta, cp - 5);
+  const answer = sp - cp;
+  return numericQuestion(
+    `CP ₹${cp} → SP ₹${sp} = ?`,
+    answer,
+    Math.max(4, Math.floor(Math.abs(answer) * 0.4 + 3)),
+    true,
+  );
+}
+
 // ── Catalog ───────────────────────────────────────────────────────────────
 
 export const GAME_CATALOG: GameDef[] = [
-  { id: "speed", emoji: "⚡", nameKey: "games.speed.name", descKey: "games.speed.desc", kind: "mcq", minClass: 4, maxClass: 7, make: makeSpeed },
-  { id: "truefalse", emoji: "🤔", nameKey: "games.truefalse.name", descKey: "games.truefalse.desc", kind: "truefalse", minClass: 4, maxClass: 7, make: makeTrueFalse },
-  { id: "missing", emoji: "🔢", nameKey: "games.missing.name", descKey: "games.missing.desc", kind: "mcq", minClass: 4, maxClass: 6, make: makeMissing },
-  { id: "place", emoji: "🏷️", nameKey: "games.place.name", descKey: "games.place.desc", kind: "mcq", minClass: 4, maxClass: 5, make: makePlace },
-  { id: "rounding", emoji: "📍", nameKey: "games.rounding.name", descKey: "games.rounding.desc", kind: "mcq", minClass: 4, maxClass: 6, make: makeRounding },
-  { id: "factors", emoji: "🧩", nameKey: "games.factors.name", descKey: "games.factors.desc", kind: "mcq", minClass: 4, maxClass: 6, make: makeFactors },
-  { id: "fractions", emoji: "🍕", nameKey: "games.fractions.name", descKey: "games.fractions.desc", kind: "mcq", minClass: 4, maxClass: 7, make: makeFractions },
-  { id: "decimals", emoji: "🔟", nameKey: "games.decimals.name", descKey: "games.decimals.desc", kind: "mcq", minClass: 5, maxClass: 7, make: makeDecimals },
-  { id: "percent", emoji: "💯", nameKey: "games.percent.name", descKey: "games.percent.desc", kind: "mcq", minClass: 5, maxClass: 7, make: makePercent },
-  { id: "geometry", emoji: "📐", nameKey: "games.geometry.name", descKey: "games.geometry.desc", kind: "mcq", minClass: 5, maxClass: 7, make: makeGeometry },
-  { id: "integers", emoji: "❄️", nameKey: "games.integers.name", descKey: "games.integers.desc", kind: "mcq", minClass: 6, maxClass: 7, make: makeIntegers },
-  { id: "algebra", emoji: "🔮", nameKey: "games.algebra.name", descKey: "games.algebra.desc", kind: "mcq", minClass: 6, maxClass: 7, make: makeAlgebra },
-  { id: "exponents", emoji: "🚀", nameKey: "games.exponents.name", descKey: "games.exponents.desc", kind: "mcq", minClass: 7, maxClass: 7, make: makeExponents },
+  { id: "speed", emoji: "⚡", nameKey: "games.speed.name", descKey: "games.speed.desc", kind: "mcq", minClass: 4, maxClass: 7, complexity: 2, make: makeSpeed },
+  { id: "truefalse", emoji: "🤔", nameKey: "games.truefalse.name", descKey: "games.truefalse.desc", kind: "truefalse", minClass: 4, maxClass: 7, complexity: 2, make: makeTrueFalse },
+  { id: "missing", emoji: "🔢", nameKey: "games.missing.name", descKey: "games.missing.desc", kind: "mcq", minClass: 4, maxClass: 6, complexity: 2, make: makeMissing },
+  { id: "place", emoji: "🏷️", nameKey: "games.place.name", descKey: "games.place.desc", kind: "mcq", minClass: 4, maxClass: 5, complexity: 1, make: makePlace },
+  { id: "rounding", emoji: "📍", nameKey: "games.rounding.name", descKey: "games.rounding.desc", kind: "mcq", minClass: 4, maxClass: 6, complexity: 1, make: makeRounding },
+  { id: "factors", emoji: "🧩", nameKey: "games.factors.name", descKey: "games.factors.desc", kind: "mcq", minClass: 4, maxClass: 6, complexity: 3, make: makeFactors },
+  { id: "multiples", emoji: "🎯", nameKey: "games.multiples.name", descKey: "games.multiples.desc", kind: "mcq", minClass: 4, maxClass: 6, complexity: 2, make: makeMultiples },
+  { id: "primes", emoji: "🔱", nameKey: "games.primes.name", descKey: "games.primes.desc", kind: "truefalse", minClass: 5, maxClass: 7, complexity: 2, make: makePrimes },
+  { id: "money", emoji: "💰", nameKey: "games.money.name", descKey: "games.money.desc", kind: "mcq", minClass: 4, maxClass: 5, complexity: 2, make: makeMoney },
+  { id: "fractions", emoji: "🍕", nameKey: "games.fractions.name", descKey: "games.fractions.desc", kind: "mcq", minClass: 4, maxClass: 7, complexity: 3, make: makeFractions },
+  { id: "decimals", emoji: "🔟", nameKey: "games.decimals.name", descKey: "games.decimals.desc", kind: "mcq", minClass: 5, maxClass: 7, complexity: 3, make: makeDecimals },
+  { id: "percent", emoji: "💯", nameKey: "games.percent.name", descKey: "games.percent.desc", kind: "mcq", minClass: 5, maxClass: 7, complexity: 3, make: makePercent },
+  { id: "average", emoji: "📊", nameKey: "games.average.name", descKey: "games.average.desc", kind: "mcq", minClass: 6, maxClass: 7, complexity: 3, make: makeAverage },
+  { id: "hcflcm", emoji: "🔗", nameKey: "games.hcflcm.name", descKey: "games.hcflcm.desc", kind: "mcq", minClass: 6, maxClass: 7, complexity: 4, make: makeHcfLcm },
+  { id: "ratio", emoji: "⚖️", nameKey: "games.ratio.name", descKey: "games.ratio.desc", kind: "mcq", minClass: 6, maxClass: 7, complexity: 4, make: makeRatio },
+  { id: "geometry", emoji: "📐", nameKey: "games.geometry.name", descKey: "games.geometry.desc", kind: "mcq", minClass: 5, maxClass: 7, complexity: 3, make: makeGeometry },
+  { id: "mensuration", emoji: "🔺", nameKey: "games.mensuration.name", descKey: "games.mensuration.desc", kind: "mcq", minClass: 7, maxClass: 7, complexity: 5, make: makeMensuration },
+  { id: "integers", emoji: "❄️", nameKey: "games.integers.name", descKey: "games.integers.desc", kind: "mcq", minClass: 6, maxClass: 7, complexity: 4, make: makeIntegers },
+  { id: "algebra", emoji: "🔮", nameKey: "games.algebra.name", descKey: "games.algebra.desc", kind: "mcq", minClass: 6, maxClass: 7, complexity: 4, make: makeAlgebra },
+  { id: "interest", emoji: "🏦", nameKey: "games.interest.name", descKey: "games.interest.desc", kind: "mcq", minClass: 7, maxClass: 7, complexity: 5, make: makeInterest },
+  { id: "exponents", emoji: "🚀", nameKey: "games.exponents.name", descKey: "games.exponents.desc", kind: "mcq", minClass: 7, maxClass: 7, complexity: 4, make: makeExponents },
 ];
 
 const BY_ID = new Map<GameId, GameDef>(GAME_CATALOG.map((g) => [g.id, g]));

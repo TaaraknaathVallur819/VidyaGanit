@@ -1083,6 +1083,8 @@ export default function SocraticChat({
         open={gamesOpen}
         onClose={() => setGamesOpen(false)}
         vidyaId={vidyaId}
+        studentClass={studentClass}
+        board={board}
         onXpAwarded={onXpAwarded}
       />
 

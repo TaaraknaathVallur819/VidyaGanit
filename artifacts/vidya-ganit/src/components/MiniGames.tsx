@@ -7,29 +7,30 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Zap, Timer, Trophy, Gamepad2, Check, X } from "lucide-react";
+import { Zap, Timer, Trophy, Gamepad2, Check, X, GraduationCap } from "lucide-react";
 import { useSubmitGameScore } from "@workspace/api-client-react";
 import { useLanguage } from "@/lib/i18n";
 import {
-  gamesForClass,
   makeQuestion,
+  type GameDef,
   type GameId,
   type GameQuestion,
 } from "@/lib/games";
-
-const ROUND_SECONDS = 30;
+import { boardShortLabel, gamesForClassBoard, timerFor } from "@/lib/syllabus";
 
 export default function MiniGames({
   open,
   onClose,
   vidyaId,
   studentClass,
+  board,
   onXpAwarded,
 }: {
   open: boolean;
   onClose: () => void;
   vidyaId: string;
   studentClass?: number | string | null;
+  board?: string | null;
   onXpAwarded?: () => void;
 }) {
   const { t } = useLanguage();
@@ -41,13 +42,21 @@ export default function MiniGames({
     return Number.isNaN(n) ? null : n;
   }, [studentClass]);
 
-  const availableGames = useMemo(() => gamesForClass(cls), [cls]);
+  const availableGames = useMemo(
+    () => gamesForClassBoard(cls, board ?? null),
+    [cls, board],
+  );
+  const defById = useMemo(() => {
+    const m = new Map<GameId, GameDef>();
+    for (const g of availableGames) m.set(g.id, g);
+    return m;
+  }, [availableGames]);
 
   const [phase, setPhase] = useState<"menu" | "playing" | "result">("menu");
   const [game, setGame] = useState<GameId>("speed");
   const [question, setQuestion] = useState<GameQuestion | null>(null);
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(ROUND_SECONDS);
+  const [timeLeft, setTimeLeft] = useState(30);
   const [picked, setPicked] = useState<number | null>(null);
   const [xpAwarded, setXpAwarded] = useState<number | null>(null);
 
@@ -60,6 +69,8 @@ export default function MiniGames({
   const gameRef = useRef<GameId>("speed");
   const clsRef = useRef<number | null>(cls);
   clsRef.current = cls;
+  const boardRef = useRef<string | null>(board ?? null);
+  boardRef.current = board ?? null;
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
@@ -96,7 +107,8 @@ export default function MiniGames({
       setScore(0);
       scoreRef.current = 0;
       setPicked(null);
-      setTimeLeft(ROUND_SECONDS);
+      const def = defById.get(id);
+      setTimeLeft(def ? timerFor(def, clsRef.current, boardRef.current) : 30);
       setQuestion(makeQuestion(id, clsRef.current));
       setPhase("playing");
       timerRef.current = setInterval(() => {
@@ -109,7 +121,7 @@ export default function MiniGames({
         });
       }, 1000);
     },
-    [clearTimer, finishGame],
+    [clearTimer, finishGame, defById],
   );
 
   const handleAnswer = (index: number) => {
@@ -160,6 +172,17 @@ export default function MiniGames({
         {phase === "menu" && (
           <div className="space-y-3 mt-1">
             <p className="text-sm text-muted-foreground">{t("games.subtitle")}</p>
+            {cls != null && (
+              <div
+                data-testid="text-games-tailored"
+                className="flex items-center gap-1.5 text-xs font-semibold text-primary bg-indigo-50 border border-indigo-100 rounded-full px-3 py-1.5 w-fit"
+              >
+                <GraduationCap className="w-3.5 h-3.5 shrink-0" />
+                {t("games.tailored")
+                  .replace("{class}", String(cls))
+                  .replace("{board}", boardShortLabel(board ?? null))}
+              </div>
+            )}
             <div className="space-y-2.5 max-h-[55vh] overflow-y-auto pr-1">
               {availableGames.map((g) => (
                 <button
@@ -170,13 +193,17 @@ export default function MiniGames({
                   className="w-full flex items-center gap-3 rounded-2xl border-2 border-indigo-100 bg-white px-4 py-3 text-left hover:border-primary hover:bg-indigo-50 transition-all"
                 >
                   <span className="text-2xl shrink-0">{g.emoji}</span>
-                  <span className="min-w-0">
+                  <span className="min-w-0 flex-1">
                     <span className="block font-bold text-sm text-foreground">
                       {t(g.nameKey)}
                     </span>
                     <span className="block text-xs text-muted-foreground">
                       {t(g.descKey)}
                     </span>
+                  </span>
+                  <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground shrink-0">
+                    <Timer className="w-3.5 h-3.5" />
+                    {timerFor(g, cls, board ?? null)}s
                   </span>
                 </button>
               ))}
