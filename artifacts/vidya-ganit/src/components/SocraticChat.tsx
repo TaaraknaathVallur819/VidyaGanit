@@ -25,6 +25,7 @@ import { BADGE_CATALOG } from "@/lib/badges";
 import { gameForTopicOrDefault } from "@/lib/syllabus";
 import { type GameId } from "@/lib/games";
 import { useLanguage } from "@/lib/i18n";
+import { useLiveSpeech } from "@/hooks/useLiveSpeech";
 import MiniGames from "@/components/MiniGames";
 import AssessmentTest from "@/components/AssessmentTest";
 import AiModelSelect, { type ChatModelKey } from "@/components/AiModelSelect";
@@ -249,7 +250,6 @@ export default function SocraticChat({
   const [badgeToasts, setBadgeToasts] = useState<BadgeToast[]>([]);
   const [attachment, setAttachment] = useState<Attachment | null>(null);
   const [attachError, setAttachError] = useState<string | null>(null);
-  const [isListening, setIsListening] = useState(false);
   const [chatModel, setChatModel] = useState<ChatModelKey>("gpt-5-mini");
   const [imageModel, setImageModel] = useState<ImageModel>("openai");
   const [gameOffered, setGameOffered] = useState(false);
@@ -268,7 +268,6 @@ export default function SocraticChat({
   const sessionIdRef = useRef<string>(crypto.randomUUID());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const inputBeforeVoiceRef = useRef<string>("");
 
   // List the student's own past tutoring conversations.
@@ -360,65 +359,30 @@ export default function SocraticChat({
     );
   };
 
-  const stopListening = () => {
-    recognitionRef.current?.stop();
-  };
+  const { isListening, start: startListening, stop: stopListening } = useLiveSpeech({
+    lang,
+    onResult: (transcript) => {
+      setInput(inputBeforeVoiceRef.current + transcript);
+      requestAnimationFrame(adjustTextarea);
+    },
+    onError: (kind) => {
+      if (kind === "permission") setAttachError(t("chat.err.micPermission"));
+      else if (kind === "no-speech") setAttachError(t("chat.err.noSpeech"));
+      else if (kind === "unsupported")
+        setAttachError(t("chat.err.voiceUnsupported"));
+      else setAttachError(t("chat.err.micStart"));
+    },
+  });
 
   const toggleListening = () => {
     if (isListening) {
       stopListening();
       return;
     }
-    const SpeechRecognitionCtor =
-      window.SpeechRecognition ?? window.webkitSpeechRecognition;
-    if (!SpeechRecognitionCtor) {
-      setAttachError(t("chat.err.voiceUnsupported"));
-      return;
-    }
     setAttachError(null);
-    const recognition = new SpeechRecognitionCtor();
-    recognition.lang = "en-IN";
-    recognition.interimResults = true;
-    recognition.continuous = false;
     inputBeforeVoiceRef.current = input ? input.trim() + " " : "";
-
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
-      let transcript = "";
-      for (let i = 0; i < event.results.length; i++) {
-        transcript += event.results[i][0].transcript;
-      }
-      setInput(inputBeforeVoiceRef.current + transcript);
-      requestAnimationFrame(adjustTextarea);
-    };
-    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      setIsListening(false);
-      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
-        setAttachError(t("chat.err.micPermission"));
-      } else if (event.error === "no-speech") {
-        setAttachError(t("chat.err.noSpeech"));
-      }
-    };
-    recognition.onend = () => {
-      setIsListening(false);
-      recognitionRef.current = null;
-    };
-
-    recognitionRef.current = recognition;
-    try {
-      recognition.start();
-      setIsListening(true);
-    } catch {
-      recognitionRef.current = null;
-      setIsListening(false);
-      setAttachError(t("chat.err.micStart"));
-    }
+    startListening();
   };
-
-  useEffect(() => {
-    return () => {
-      recognitionRef.current?.abort();
-    };
-  }, []);
 
   const handleFilePicked = async (
     e: React.ChangeEvent<HTMLInputElement>,

@@ -21,6 +21,7 @@ import {
   getConsultantSession,
 } from "@workspace/api-client-react";
 import { useLanguage } from "@/lib/i18n";
+import { useLiveSpeech } from "@/hooks/useLiveSpeech";
 import AiModelSelect, { type ChatModelKey } from "@/components/AiModelSelect";
 import ImageModelSelect, { type ImageModel } from "@/components/ImageModelSelect";
 import SpeakButton from "@/components/SpeakButton";
@@ -60,15 +61,6 @@ function readFileAsDataUrl(file: File | Blob, name = "file"): Promise<string> {
   });
 }
 
-function pickAudioMime(): string {
-  const candidates = ["audio/webm", "audio/mp4", "audio/ogg"];
-  if (typeof MediaRecorder === "undefined") return "";
-  for (const c of candidates) {
-    if (MediaRecorder.isTypeSupported(c)) return c;
-  }
-  return "";
-}
-
 export default function ParentConsultantChat({
   vidyaId,
   parentName,
@@ -97,8 +89,6 @@ export default function ParentConsultantChat({
   const [isStreaming, setIsStreaming] = useState(false);
   const [attachment, setAttachment] = useState<Attachment | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [isTranscribing, setIsTranscribing] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
@@ -112,9 +102,7 @@ export default function ParentConsultantChat({
   const streamAbortRef = useRef<AbortController | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const streamRef = useRef<MediaStream | null>(null);
+  const inputBeforeVoiceRef = useRef<string>("");
 
   // List the parent's past counseling conversations.
   const { data: sessionsData, refetch: refetchSessions } = useListConsultantSessions(
@@ -211,78 +199,34 @@ export default function ParentConsultantChat({
     }
   };
 
-  const stopRecording = useCallback(() => {
-    mediaRecorderRef.current?.stop();
-  }, []);
-
-  const transcribeBlob = useCallback(
-    async (blob: Blob, mimeType: string) => {
-      setIsTranscribing(true);
-      setStatusError(null);
-      try {
-        const dataUrl = await readFileAsDataUrl(blob, "recording");
-        const res = await fetch(`/api/parent/${vidyaId}/consultant/transcribe`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ audio: dataUrl, mimeType, language: lang }),
-        });
-        if (!res.ok) throw new Error("transcription failed");
-        const data = (await res.json()) as { text?: string };
-        if (data.text) {
-          setInput((prev) => (prev ? prev.trim() + " " : "") + data.text);
-          requestAnimationFrame(adjustTextarea);
-        }
-      } catch {
-        setStatusError(t("strategy.error"));
-      } finally {
-        setIsTranscribing(false);
-      }
+  const {
+    isListening: isRecording,
+    start: startListening,
+    stop: stopListening,
+  } = useLiveSpeech({
+    lang,
+    onResult: (transcript) => {
+      setInput(inputBeforeVoiceRef.current + transcript);
+      requestAnimationFrame(adjustTextarea);
     },
-    [vidyaId, lang, adjustTextarea, t],
-  );
+    onError: (kind) => {
+      setStatusError(
+        kind === "permission"
+          ? t("chat.err.micPermission")
+          : t("strategy.micUnsupported"),
+      );
+    },
+  });
 
-  const toggleRecording = useCallback(async () => {
+  const toggleRecording = useCallback(() => {
     if (isRecording) {
-      stopRecording();
+      stopListening();
       return;
     }
-    const mimeType = pickAudioMime();
-    if (!mimeType || typeof navigator === "undefined" || !navigator.mediaDevices) {
-      setStatusError(t("strategy.micUnsupported"));
-      return;
-    }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      const recorder = new MediaRecorder(stream, { mimeType });
-      audioChunksRef.current = [];
-      recorder.ondataavailable = (ev) => {
-        if (ev.data.size > 0) audioChunksRef.current.push(ev.data);
-      };
-      recorder.onstop = () => {
-        setIsRecording(false);
-        streamRef.current?.getTracks().forEach((tr) => tr.stop());
-        streamRef.current = null;
-        const blob = new Blob(audioChunksRef.current, { type: mimeType });
-        mediaRecorderRef.current = null;
-        if (blob.size > 0) void transcribeBlob(blob, mimeType);
-      };
-      mediaRecorderRef.current = recorder;
-      recorder.start();
-      setIsRecording(true);
-      setStatusError(null);
-    } catch {
-      setStatusError(t("strategy.micUnsupported"));
-    }
-  }, [isRecording, stopRecording, transcribeBlob, t]);
-
-  useEffect(() => {
-    return () => {
-      mediaRecorderRef.current?.stop();
-      streamRef.current?.getTracks().forEach((tr) => tr.stop());
-    };
-  }, []);
+    setStatusError(null);
+    inputBeforeVoiceRef.current = input ? input.trim() + " " : "";
+    startListening();
+  }, [isRecording, stopListening, startListening, input]);
 
   const sendMessage = async () => {
     const msg = input.trim();
@@ -740,18 +684,10 @@ export default function ParentConsultantChat({
         {statusError && (
           <p className="text-xs text-red-500 font-medium mb-2">{statusError}</p>
         )}
-        {(isRecording || isTranscribing) && (
+        {isRecording && (
           <p className="text-xs text-emerald-600 font-medium mb-2 flex items-center gap-1.5">
-            {isTranscribing ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" /> {t("strategy.transcribing")}
-              </>
-            ) : (
-              <>
-                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                {t("strategy.recording")}
-              </>
-            )}
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            {t("strategy.recording")}
           </p>
         )}
 
@@ -777,7 +713,7 @@ export default function ParentConsultantChat({
           <button
             type="button"
             onClick={toggleRecording}
-            disabled={isStreaming || isTranscribing}
+            disabled={isStreaming}
             className={`p-2.5 rounded-xl transition-colors disabled:opacity-40 shrink-0 ${
               isRecording
                 ? "bg-red-500 text-white hover:bg-red-600"
