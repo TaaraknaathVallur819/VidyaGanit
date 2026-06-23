@@ -23,6 +23,8 @@ import type {
   AnnouncementsResponse,
   AssessmentResult,
   AssessmentResultsResponse,
+  BookmarkInput,
+  BookmarksResponse,
   BulkLinkResultsResponse,
   BulkLinkStudentsInput,
   ChangePasswordInput,
@@ -57,6 +59,8 @@ import type {
   MessageFeedbackInput,
   MessageFeedbackResponse,
   MessageResponse,
+  MessageThreadResponse,
+  MessageThreadsResponse,
   MistakesResponse,
   NotificationsResponse,
   ProfileUpdate,
@@ -64,6 +68,7 @@ import type {
   ResetPasswordInput,
   ReviewDueResponse,
   ReviewGradeInput,
+  SendMessageInput,
   ShopEquipInput,
   ShopItemInput,
   ShopResponse,
@@ -75,7 +80,11 @@ import type {
   TranscriptionResponse,
   TutorAssignmentsResponse,
   UserProfile,
-  UserRegistrationInput
+  UserRegistrationInput,
+  WeeklyGoalInput,
+  WeeklyGoalResponse,
+  WorksheetInput,
+  WorksheetResponse
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -4141,5 +4150,762 @@ export const useScanAlerts = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getScanAlertsMutationOptions(options));
+    }
+
+export const getGetWeeklygoalUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/goals/${vidyaId}`
+}
+
+/**
+ * @summary The student's weekly XP goal and progress
+ */
+export const getWeeklygoal = async (vidyaId: string, options?: RequestInit): Promise<WeeklyGoalResponse> => {
+
+  return customFetch<WeeklyGoalResponse>(getGetWeeklygoalUrl(vidyaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetWeeklygoalQueryKey = (vidyaId: string,) => {
+    return [
+    `/api/goals/${vidyaId}`
+    ] as const;
+    }
+
+
+export const getGetWeeklygoalQueryOptions = <TData = Awaited<ReturnType<typeof getWeeklygoal>>, TError = ErrorType<unknown>>(vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getWeeklygoal>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetWeeklygoalQueryKey(vidyaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getWeeklygoal>>> = ({ signal }) => getWeeklygoal(vidyaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getWeeklygoal>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetWeeklygoalQueryResult = NonNullable<Awaited<ReturnType<typeof getWeeklygoal>>>
+export type GetWeeklygoalQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary The student's weekly XP goal and progress
+ */
+
+export function useGetWeeklygoal<TData = Awaited<ReturnType<typeof getWeeklygoal>>, TError = ErrorType<unknown>>(
+ vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getWeeklygoal>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetWeeklygoalQueryOptions(vidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getSetWeeklyGoalUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/goals/${vidyaId}`
+}
+
+/**
+ * @summary Set the student's weekly XP target
+ */
+export const setWeeklyGoal = async (vidyaId: string,
+    weeklyGoalInput: WeeklyGoalInput, options?: RequestInit): Promise<WeeklyGoalResponse> => {
+
+  return customFetch<WeeklyGoalResponse>(getSetWeeklyGoalUrl(vidyaId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      weeklyGoalInput,)
+  }
+);}
+
+
+
+
+export const getSetWeeklyGoalMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setWeeklyGoal>>, TError,{vidyaId: string;data: BodyType<WeeklyGoalInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setWeeklyGoal>>, TError,{vidyaId: string;data: BodyType<WeeklyGoalInput>}, TContext> => {
+
+const mutationKey = ['setWeeklyGoal'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setWeeklyGoal>>, {vidyaId: string;data: BodyType<WeeklyGoalInput>}> = (props) => {
+          const {vidyaId,data} = props ?? {};
+
+          return  setWeeklyGoal(vidyaId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetWeeklyGoalMutationResult = NonNullable<Awaited<ReturnType<typeof setWeeklyGoal>>>
+    export type SetWeeklyGoalMutationBody = BodyType<WeeklyGoalInput>
+    export type SetWeeklyGoalMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Set the student's weekly XP target
+ */
+export const useSetWeeklyGoal = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setWeeklyGoal>>, TError,{vidyaId: string;data: BodyType<WeeklyGoalInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof setWeeklyGoal>>,
+        TError,
+        {vidyaId: string;data: BodyType<WeeklyGoalInput>},
+        TContext
+      > => {
+      return useMutation(getSetWeeklyGoalMutationOptions(options));
+    }
+
+export const getGetStudentWeeklyGoalUrl = (vidyaId: string,
+    studentVidyaId: string,) => {
+
+
+
+
+  return `/api/parent/${vidyaId}/students/${studentVidyaId}/goal`
+}
+
+/**
+ * @summary A linked student's weekly XP goal and progress
+ */
+export const getStudentWeeklyGoal = async (vidyaId: string,
+    studentVidyaId: string, options?: RequestInit): Promise<WeeklyGoalResponse> => {
+
+  return customFetch<WeeklyGoalResponse>(getGetStudentWeeklyGoalUrl(vidyaId,studentVidyaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStudentWeeklyGoalQueryKey = (vidyaId: string,
+    studentVidyaId: string,) => {
+    return [
+    `/api/parent/${vidyaId}/students/${studentVidyaId}/goal`
+    ] as const;
+    }
+
+
+export const getGetStudentWeeklyGoalQueryOptions = <TData = Awaited<ReturnType<typeof getStudentWeeklyGoal>>, TError = ErrorType<ErrorResponse>>(vidyaId: string,
+    studentVidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentWeeklyGoal>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStudentWeeklyGoalQueryKey(vidyaId,studentVidyaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStudentWeeklyGoal>>> = ({ signal }) => getStudentWeeklyGoal(vidyaId,studentVidyaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId && studentVidyaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStudentWeeklyGoal>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStudentWeeklyGoalQueryResult = NonNullable<Awaited<ReturnType<typeof getStudentWeeklyGoal>>>
+export type GetStudentWeeklyGoalQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary A linked student's weekly XP goal and progress
+ */
+
+export function useGetStudentWeeklyGoal<TData = Awaited<ReturnType<typeof getStudentWeeklyGoal>>, TError = ErrorType<ErrorResponse>>(
+ vidyaId: string,
+    studentVidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStudentWeeklyGoal>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStudentWeeklyGoalQueryOptions(vidyaId,studentVidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetWorksheetUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/worksheet/${vidyaId}`
+}
+
+/**
+ * @summary Generate a printable practice worksheet (parent/tutor only)
+ */
+export const getWorksheet = async (vidyaId: string,
+    worksheetInput: WorksheetInput, options?: RequestInit): Promise<WorksheetResponse> => {
+
+  return customFetch<WorksheetResponse>(getGetWorksheetUrl(vidyaId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      worksheetInput,)
+  }
+);}
+
+
+
+
+export const getGetWorksheetMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof getWorksheet>>, TError,{vidyaId: string;data: BodyType<WorksheetInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof getWorksheet>>, TError,{vidyaId: string;data: BodyType<WorksheetInput>}, TContext> => {
+
+const mutationKey = ['getWorksheet'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof getWorksheet>>, {vidyaId: string;data: BodyType<WorksheetInput>}> = (props) => {
+          const {vidyaId,data} = props ?? {};
+
+          return  getWorksheet(vidyaId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GetWorksheetMutationResult = NonNullable<Awaited<ReturnType<typeof getWorksheet>>>
+    export type GetWorksheetMutationBody = BodyType<WorksheetInput>
+    export type GetWorksheetMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Generate a printable practice worksheet (parent/tutor only)
+ */
+export const useGetWorksheet = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof getWorksheet>>, TError,{vidyaId: string;data: BodyType<WorksheetInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof getWorksheet>>,
+        TError,
+        {vidyaId: string;data: BodyType<WorksheetInput>},
+        TContext
+      > => {
+      return useMutation(getGetWorksheetMutationOptions(options));
+    }
+
+export const getGetBookmarksUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/bookmarks/${vidyaId}`
+}
+
+/**
+ * @summary The student's saved concepts and questions
+ */
+export const getBookmarks = async (vidyaId: string, options?: RequestInit): Promise<BookmarksResponse> => {
+
+  return customFetch<BookmarksResponse>(getGetBookmarksUrl(vidyaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetBookmarksQueryKey = (vidyaId: string,) => {
+    return [
+    `/api/bookmarks/${vidyaId}`
+    ] as const;
+    }
+
+
+export const getGetBookmarksQueryOptions = <TData = Awaited<ReturnType<typeof getBookmarks>>, TError = ErrorType<unknown>>(vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBookmarks>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetBookmarksQueryKey(vidyaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getBookmarks>>> = ({ signal }) => getBookmarks(vidyaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getBookmarks>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetBookmarksQueryResult = NonNullable<Awaited<ReturnType<typeof getBookmarks>>>
+export type GetBookmarksQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary The student's saved concepts and questions
+ */
+
+export function useGetBookmarks<TData = Awaited<ReturnType<typeof getBookmarks>>, TError = ErrorType<unknown>>(
+ vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBookmarks>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetBookmarksQueryOptions(vidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getAddBookmarkUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/bookmarks/${vidyaId}`
+}
+
+/**
+ * @summary Save a concept or question
+ */
+export const addBookmark = async (vidyaId: string,
+    bookmarkInput: BookmarkInput, options?: RequestInit): Promise<BookmarksResponse> => {
+
+  return customFetch<BookmarksResponse>(getAddBookmarkUrl(vidyaId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      bookmarkInput,)
+  }
+);}
+
+
+
+
+export const getAddBookmarkMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addBookmark>>, TError,{vidyaId: string;data: BodyType<BookmarkInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addBookmark>>, TError,{vidyaId: string;data: BodyType<BookmarkInput>}, TContext> => {
+
+const mutationKey = ['addBookmark'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addBookmark>>, {vidyaId: string;data: BodyType<BookmarkInput>}> = (props) => {
+          const {vidyaId,data} = props ?? {};
+
+          return  addBookmark(vidyaId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddBookmarkMutationResult = NonNullable<Awaited<ReturnType<typeof addBookmark>>>
+    export type AddBookmarkMutationBody = BodyType<BookmarkInput>
+    export type AddBookmarkMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Save a concept or question
+ */
+export const useAddBookmark = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addBookmark>>, TError,{vidyaId: string;data: BodyType<BookmarkInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof addBookmark>>,
+        TError,
+        {vidyaId: string;data: BodyType<BookmarkInput>},
+        TContext
+      > => {
+      return useMutation(getAddBookmarkMutationOptions(options));
+    }
+
+export const getRemoveBookmarkUrl = (vidyaId: string,
+    kind: string,
+    refId: string,) => {
+
+
+
+
+  return `/api/bookmarks/${vidyaId}/${kind}/${refId}`
+}
+
+/**
+ * @summary Remove a saved item
+ */
+export const removeBookmark = async (vidyaId: string,
+    kind: string,
+    refId: string, options?: RequestInit): Promise<BookmarksResponse> => {
+
+  return customFetch<BookmarksResponse>(getRemoveBookmarkUrl(vidyaId,kind,refId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getRemoveBookmarkMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeBookmark>>, TError,{vidyaId: string;kind: string;refId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof removeBookmark>>, TError,{vidyaId: string;kind: string;refId: string}, TContext> => {
+
+const mutationKey = ['removeBookmark'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeBookmark>>, {vidyaId: string;kind: string;refId: string}> = (props) => {
+          const {vidyaId,kind,refId} = props ?? {};
+
+          return  removeBookmark(vidyaId,kind,refId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemoveBookmarkMutationResult = NonNullable<Awaited<ReturnType<typeof removeBookmark>>>
+
+    export type RemoveBookmarkMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Remove a saved item
+ */
+export const useRemoveBookmark = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeBookmark>>, TError,{vidyaId: string;kind: string;refId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof removeBookmark>>,
+        TError,
+        {vidyaId: string;kind: string;refId: string},
+        TContext
+      > => {
+      return useMutation(getRemoveBookmarkMutationOptions(options));
+    }
+
+export const getGetMessageThreadsUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/messages/${vidyaId}/threads`
+}
+
+/**
+ * @summary Tutor⇄parent message threads for the user
+ */
+export const getMessageThreads = async (vidyaId: string, options?: RequestInit): Promise<MessageThreadsResponse> => {
+
+  return customFetch<MessageThreadsResponse>(getGetMessageThreadsUrl(vidyaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMessageThreadsQueryKey = (vidyaId: string,) => {
+    return [
+    `/api/messages/${vidyaId}/threads`
+    ] as const;
+    }
+
+
+export const getGetMessageThreadsQueryOptions = <TData = Awaited<ReturnType<typeof getMessageThreads>>, TError = ErrorType<unknown>>(vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMessageThreads>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMessageThreadsQueryKey(vidyaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMessageThreads>>> = ({ signal }) => getMessageThreads(vidyaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMessageThreads>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMessageThreadsQueryResult = NonNullable<Awaited<ReturnType<typeof getMessageThreads>>>
+export type GetMessageThreadsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Tutor⇄parent message threads for the user
+ */
+
+export function useGetMessageThreads<TData = Awaited<ReturnType<typeof getMessageThreads>>, TError = ErrorType<unknown>>(
+ vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMessageThreads>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMessageThreadsQueryOptions(vidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetMessageThreadUrl = (vidyaId: string,
+    otherVidyaId: string,) => {
+
+
+
+
+  return `/api/messages/${vidyaId}/thread/${otherVidyaId}`
+}
+
+/**
+ * @summary Messages in one thread (marks them read)
+ */
+export const getMessageThread = async (vidyaId: string,
+    otherVidyaId: string, options?: RequestInit): Promise<MessageThreadResponse> => {
+
+  return customFetch<MessageThreadResponse>(getGetMessageThreadUrl(vidyaId,otherVidyaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMessageThreadQueryKey = (vidyaId: string,
+    otherVidyaId: string,) => {
+    return [
+    `/api/messages/${vidyaId}/thread/${otherVidyaId}`
+    ] as const;
+    }
+
+
+export const getGetMessageThreadQueryOptions = <TData = Awaited<ReturnType<typeof getMessageThread>>, TError = ErrorType<ErrorResponse>>(vidyaId: string,
+    otherVidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMessageThread>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMessageThreadQueryKey(vidyaId,otherVidyaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMessageThread>>> = ({ signal }) => getMessageThread(vidyaId,otherVidyaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId && otherVidyaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMessageThread>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMessageThreadQueryResult = NonNullable<Awaited<ReturnType<typeof getMessageThread>>>
+export type GetMessageThreadQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Messages in one thread (marks them read)
+ */
+
+export function useGetMessageThread<TData = Awaited<ReturnType<typeof getMessageThread>>, TError = ErrorType<ErrorResponse>>(
+ vidyaId: string,
+    otherVidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMessageThread>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMessageThreadQueryOptions(vidyaId,otherVidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getSendMessageUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/messages/${vidyaId}/send`
+}
+
+/**
+ * @summary Send a message to a tutor/parent who shares a student
+ */
+export const sendMessage = async (vidyaId: string,
+    sendMessageInput: SendMessageInput, options?: RequestInit): Promise<MessageThreadResponse> => {
+
+  return customFetch<MessageThreadResponse>(getSendMessageUrl(vidyaId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      sendMessageInput,)
+  }
+);}
+
+
+
+
+export const getSendMessageMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendMessage>>, TError,{vidyaId: string;data: BodyType<SendMessageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof sendMessage>>, TError,{vidyaId: string;data: BodyType<SendMessageInput>}, TContext> => {
+
+const mutationKey = ['sendMessage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendMessage>>, {vidyaId: string;data: BodyType<SendMessageInput>}> = (props) => {
+          const {vidyaId,data} = props ?? {};
+
+          return  sendMessage(vidyaId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SendMessageMutationResult = NonNullable<Awaited<ReturnType<typeof sendMessage>>>
+    export type SendMessageMutationBody = BodyType<SendMessageInput>
+    export type SendMessageMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Send a message to a tutor/parent who shares a student
+ */
+export const useSendMessage = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendMessage>>, TError,{vidyaId: string;data: BodyType<SendMessageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof sendMessage>>,
+        TError,
+        {vidyaId: string;data: BodyType<SendMessageInput>},
+        TContext
+      > => {
+      return useMutation(getSendMessageMutationOptions(options));
     }
 

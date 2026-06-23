@@ -69,6 +69,19 @@ All coin/XP grants are race-safe — see `gamification.ts`:
 
 The i18n parity test only checks cross-dict consistency, NOT that component-used keys exist in the dicts. Missing keys silently render as raw key strings while tests stay green. After adding UI strings, verify every `t("...")` key exists in `i18n.tsx` (0-missing grep check) in addition to running the parity test.
 
+## Engagement features (weekly goals, worksheet, flashcards, speed arena, messaging, bookmarks)
+
+Six features spanning the student, parent, and tutor portals. New tables: `weekly_goals`, `bookmarks`, `direct_messages`. Client components in `artifacts/vidya-ganit/src/components/`.
+
+- **Weekly XP goals** — student sets a target (`WeeklyGoal.tsx`); parent sees the child's ring (`ParentWeeklyGoal.tsx`). Progress is derived as `users.xp - startXp` snapshot (no XP ledger); IST week starting Monday.
+- **Printable worksheet PDF** (`WorksheetGenerator.tsx` + `src/lib/worksheetPdf.ts`) — tutor/parent only. The endpoint returns an answer key and is gated `requireAuth + requireParentOrTutor`; it must never be reachable by a student. Questions reuse the api-server assessment generator; PDF built client-side via jspdf.
+- **Formula flashcards** (`FormulaFlashcards.tsx`) — flip cards over the shared client concept catalog `src/lib/concepts.ts` (same source as ConceptLibrary). Purely numeric counters (e.g. "3 / 8") are rendered inline, NOT via i18n keys (the verbatim-English guard flags `{current} / {total}`).
+- **Speed math arena** (`SpeedArena.tsx`) — timed mental math; reuses the existing race-safe `/games/score` award path (`game: "speed"`, capped by `MAX_GAME_XP`). No new reward path. A `roundRef` token guards against a stale score-submit response (from a quick "Play Again") overwriting the current round's XP.
+- **Tutor⇄parent messaging** (`Messages.tsx`) — 1:1 thread keyed by (tutorVidyaId, parentVidyaId), allowed only when they share a student in `parent_student_links`; receiving a message creates a notification.
+- **Student bookmarks** (`BookmarksPanel.tsx`) — save concepts/questions to revisit; toggle lives in `ConceptLibrary.tsx`, which takes an optional `vidyaId` prop (omitted = read-only library).
+
+Server routes: `artifacts/api-server/src/routes/{goals,worksheet,bookmarks,messages}.ts` (+ `src/lib/links.ts`). i18n keys added across all 23 dicts. ConceptLibrary's `vidyaId` prop is optional so tutor previews stay read-only.
+
 ## Auth & abuse controls
 
 - Login/registration are unchanged in flow but now also set a stateless HMAC-signed `vg_session` httpOnly cookie (`src/lib/session.ts`, signed with `SESSION_SECRET`).

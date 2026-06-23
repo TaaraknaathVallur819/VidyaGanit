@@ -12,3 +12,4 @@
 - [Coins/rewards concurrency + i18n blind spot](coins-rewards-concurrency.md) — reward grants: unique+onConflict(+txn) for awards, row-lock+txn for debits; i18n parity test misses keys absent from ALL dicts
 - [Daily streaks](daily-streaks.md) — streaks use IST calendar days; advance-on-activity persists, read-side reports 0 if stale without mutating
 - [Mistake Notebook](mistake-notebook.md) — missed questions DERIVED (collectMistakes) from assessments' nullable submittedAnswers; own+completed only; never store a mistakes table
+- [Six engagement features](six-engagement-features.md) — weekly-goal xp-snapshot; worksheet answer-key must stay parent/tutor-gated; speed arena reuses /games/score + needs round-token vs stale awards; numeric display ≠ i18n key

@@ -28,6 +28,9 @@ import SavedHistory from "@/components/parent/SavedHistory";
 import ParentConsultantChat from "@/components/parent/ParentConsultantChat";
 import WeeklyDigest from "@/components/parent/WeeklyDigest";
 import ParentAlerts from "@/components/parent/ParentAlerts";
+import Messages from "@/components/Messages";
+import WorksheetGenerator from "@/components/WorksheetGenerator";
+import ParentWeeklyGoal from "@/components/ParentWeeklyGoal";
 import {
   useGetProfile,
   getGetProfileQueryKey,
@@ -57,6 +60,7 @@ import {
   Search,
   FileText,
   Bell,
+  MessageCircle,
 } from "lucide-react";
 
 function getPasswordStrength(pwd: string) {
@@ -308,6 +312,14 @@ export default function ParentDashboard() {
                 <Sparkles className="w-4 h-4" />
                 {t("tab.strategy")}
               </TabsTrigger>
+              <TabsTrigger value="messages" className={tabTriggerClass}>
+                <MessageCircle className="w-4 h-4" />
+                {t("tab.messages")}
+              </TabsTrigger>
+              <TabsTrigger value="worksheet" className={tabTriggerClass}>
+                <FileText className="w-4 h-4" />
+                {t("tab.worksheet")}
+              </TabsTrigger>
             </TabsList>
           </div>
         </div>
@@ -545,9 +557,16 @@ export default function ParentDashboard() {
 
         {/* ── Progress Tab ── */}
         <TabsContent value="progress" className="mt-0 p-6">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-3xl mx-auto space-y-6">
             {selectedStudent ? (
-              <ProgressAnalytics vidyaId={vidyaId} studentVidyaId={selectedStudent.vidyaId} />
+              <>
+                <ParentWeeklyGoal
+                  vidyaId={vidyaId}
+                  studentVidyaId={selectedStudent.vidyaId}
+                  studentName={selectedStudent.name}
+                />
+                <ProgressAnalytics vidyaId={vidyaId} studentVidyaId={selectedStudent.vidyaId} />
+              </>
             ) : (
               <NoStudentState
                 title={t("picker.empty.title")}
@@ -594,6 +613,20 @@ export default function ParentDashboard() {
               selectedStudentId={selectedStudent?.vidyaId ?? null}
               selectedStudentName={selectedStudent?.name ?? null}
             />
+          </div>
+        </TabsContent>
+
+        {/* ── Messages Tab ── */}
+        <TabsContent value="messages" className="mt-0 p-6">
+          <div className="max-w-3xl mx-auto">
+            <Messages vidyaId={vidyaId} />
+          </div>
+        </TabsContent>
+
+        {/* ── Worksheet Tab ── */}
+        <TabsContent value="worksheet" className="mt-0 p-6">
+          <div className="max-w-3xl mx-auto">
+            <WorksheetGenerator vidyaId={vidyaId} />
           </div>
         </TabsContent>
       </Tabs>

@@ -10,3 +10,6 @@ export * from "./reviewItems";
 export * from "./purchases";
 export * from "./assignments";
 export * from "./announcements";
+export * from "./weeklyGoals";
+export * from "./bookmarks";
+export * from "./directMessages";

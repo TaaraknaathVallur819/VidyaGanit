@@ -10,6 +10,10 @@ import curriculumRouter from "./curriculum";
 import gamificationRouter from "./gamification";
 import notificationsRouter from "./notifications";
 import tutorRouter from "./tutor";
+import goalsRouter from "./goals";
+import worksheetRouter from "./worksheet";
+import bookmarksRouter from "./bookmarks";
+import messagesRouter from "./messages";
 
 const router: IRouter = Router();
 
@@ -24,5 +28,9 @@ router.use(curriculumRouter);
 router.use(gamificationRouter);
 router.use(notificationsRouter);
 router.use(tutorRouter);
+router.use(goalsRouter);
+router.use(worksheetRouter);
+router.use(bookmarksRouter);
+router.use(messagesRouter);
 
 export default router;

@@ -52,6 +52,10 @@ import SmartReview from "@/components/SmartReview";
 import Shop from "@/components/Shop";
 import ConceptLibrary from "@/components/ConceptLibrary";
 import StudentAssignments from "@/components/StudentAssignments";
+import WeeklyGoal from "@/components/WeeklyGoal";
+import SpeedArena from "@/components/SpeedArena";
+import FormulaFlashcards from "@/components/FormulaFlashcards";
+import BookmarksPanel from "@/components/BookmarksPanel";
 import NotificationsCenter from "@/components/NotificationsCenter";
 import OnboardingTour from "@/components/OnboardingTour";
 import { BADGE_CATALOG } from "@/lib/badges";
@@ -597,7 +601,8 @@ export default function StudentDashboard() {
 
         {/* ── My Progress Tab ── */}
         <TabsContent value="progress" className="mt-0 p-6 relative overflow-y-auto">
-          <div className="max-w-3xl mx-auto relative">
+          <div className="max-w-3xl mx-auto space-y-6 relative">
+            <WeeklyGoal vidyaId={vidyaId} />
             <StudentProgress vidyaId={vidyaId} />
           </div>
         </TabsContent>
@@ -617,6 +622,11 @@ export default function StudentDashboard() {
         <TabsContent value="challenge" className="mt-0 p-6 relative overflow-y-auto">
           <div className="max-w-3xl mx-auto space-y-6 relative">
             <DailyChallenge vidyaId={vidyaId} onXpAwarded={() => refetch()} />
+            <SpeedArena
+              vidyaId={vidyaId}
+              cls={displayed?.studentClass ? Number(displayed.studentClass) : null}
+              onXpAwarded={() => refetch()}
+            />
             <SmartReview vidyaId={vidyaId} onXpAwarded={() => refetch()} />
           </div>
         </TabsContent>
@@ -633,7 +643,9 @@ export default function StudentDashboard() {
         <TabsContent value="library" className="mt-0 p-6 relative overflow-y-auto">
           <div className="max-w-3xl mx-auto space-y-6 relative">
             <StudentAssignments vidyaId={vidyaId} />
-            <ConceptLibrary />
+            <FormulaFlashcards />
+            <ConceptLibrary vidyaId={vidyaId} />
+            <BookmarksPanel vidyaId={vidyaId} />
           </div>
         </TabsContent>
       </Tabs>

@@ -30,6 +30,8 @@ import CurriculumPlanner from "@/components/tutor/CurriculumPlanner";
 import TutorAssignments from "@/components/tutor/TutorAssignments";
 import TutorAnnouncements from "@/components/tutor/TutorAnnouncements";
 import ClassHeatmap from "@/components/tutor/ClassHeatmap";
+import Messages from "@/components/Messages";
+import WorksheetGenerator from "@/components/WorksheetGenerator";
 import {
   useGetProfile,
   getGetProfileQueryKey,
@@ -62,6 +64,8 @@ import {
   ClipboardList,
   Megaphone,
   Grid3x3,
+  MessageCircle,
+  FileText,
 } from "lucide-react";
 
 const UNASSIGNED_BATCH = "__unassigned__";
@@ -374,6 +378,14 @@ export default function TutorDashboard() {
               <TabsTrigger value="coach" className={tabTriggerClass}>
                 <Sparkles className="w-4 h-4" />
                 {t("tab.coach")}
+              </TabsTrigger>
+              <TabsTrigger value="messages" className={tabTriggerClass}>
+                <MessageCircle className="w-4 h-4" />
+                {t("tab.messages")}
+              </TabsTrigger>
+              <TabsTrigger value="worksheet" className={tabTriggerClass}>
+                <FileText className="w-4 h-4" />
+                {t("tab.worksheet")}
               </TabsTrigger>
             </TabsList>
           </div>
@@ -692,6 +704,20 @@ export default function TutorDashboard() {
               selectedStudentName={selectedStudent?.name ?? null}
               variant="coach"
             />
+          </div>
+        </TabsContent>
+
+        {/* ── Messages Tab ── */}
+        <TabsContent value="messages" className="mt-0 p-6">
+          <div className="max-w-3xl mx-auto">
+            <Messages vidyaId={vidyaId} />
+          </div>
+        </TabsContent>
+
+        {/* ── Worksheet Tab ── */}
+        <TabsContent value="worksheet" className="mt-0 p-6">
+          <div className="max-w-3xl mx-auto">
+            <WorksheetGenerator vidyaId={vidyaId} />
           </div>
         </TabsContent>
       </Tabs>

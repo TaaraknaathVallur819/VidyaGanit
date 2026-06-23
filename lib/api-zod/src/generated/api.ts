@@ -1236,3 +1236,214 @@ export const ScanAlertsResponse = zod.object({
 })
 
 
+/**
+ * @summary The student's weekly XP goal and progress
+ */
+export const GetWeeklygoalParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetWeeklygoalResponse = zod.object({
+  "weekStart": zod.string(),
+  "targetXp": zod.number(),
+  "earnedXp": zod.number(),
+  "percent": zod.number()
+})
+
+
+/**
+ * @summary Set the student's weekly XP target
+ */
+export const SetWeeklyGoalParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const setWeeklyGoalBodyTargetXpMin = 20;
+export const setWeeklyGoalBodyTargetXpMax = 5000;
+
+
+
+export const SetWeeklyGoalBody = zod.object({
+  "targetXp": zod.number().min(setWeeklyGoalBodyTargetXpMin).max(setWeeklyGoalBodyTargetXpMax)
+})
+
+export const SetWeeklyGoalResponse = zod.object({
+  "weekStart": zod.string(),
+  "targetXp": zod.number(),
+  "earnedXp": zod.number(),
+  "percent": zod.number()
+})
+
+
+/**
+ * @summary A linked student's weekly XP goal and progress
+ */
+export const GetStudentWeeklyGoalParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "studentVidyaId": zod.coerce.string()
+})
+
+export const GetStudentWeeklyGoalResponse = zod.object({
+  "weekStart": zod.string(),
+  "targetXp": zod.number(),
+  "earnedXp": zod.number(),
+  "percent": zod.number()
+})
+
+
+/**
+ * @summary Generate a printable practice worksheet (parent/tutor only)
+ */
+export const GetWorksheetParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetWorksheetBody = zod.object({
+  "topic": zod.string(),
+  "klass": zod.string().nullish(),
+  "count": zod.number().nullish()
+})
+
+export const GetWorksheetResponse = zod.object({
+  "topic": zod.string(),
+  "topicLabel": zod.string(),
+  "klass": zod.string().nullable(),
+  "questions": zod.array(zod.object({
+  "prompt": zod.string(),
+  "options": zod.array(zod.string()),
+  "answer": zod.number()
+}))
+})
+
+
+/**
+ * @summary The student's saved concepts and questions
+ */
+export const GetBookmarksParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetBookmarksResponse = zod.object({
+  "bookmarks": zod.array(zod.object({
+  "id": zod.number(),
+  "kind": zod.string(),
+  "refId": zod.string(),
+  "label": zod.string(),
+  "payload": zod.record(zod.string(), zod.unknown()).nullish(),
+  "createdAt": zod.string()
+}))
+})
+
+
+/**
+ * @summary Save a concept or question
+ */
+export const AddBookmarkParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const AddBookmarkBody = zod.object({
+  "kind": zod.enum(['concept', 'question']),
+  "refId": zod.string(),
+  "label": zod.string(),
+  "payload": zod.record(zod.string(), zod.unknown()).nullish()
+})
+
+export const AddBookmarkResponse = zod.object({
+  "bookmarks": zod.array(zod.object({
+  "id": zod.number(),
+  "kind": zod.string(),
+  "refId": zod.string(),
+  "label": zod.string(),
+  "payload": zod.record(zod.string(), zod.unknown()).nullish(),
+  "createdAt": zod.string()
+}))
+})
+
+
+/**
+ * @summary Remove a saved item
+ */
+export const RemoveBookmarkParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "kind": zod.coerce.string(),
+  "refId": zod.coerce.string()
+})
+
+export const RemoveBookmarkResponse = zod.object({
+  "bookmarks": zod.array(zod.object({
+  "id": zod.number(),
+  "kind": zod.string(),
+  "refId": zod.string(),
+  "label": zod.string(),
+  "payload": zod.record(zod.string(), zod.unknown()).nullish(),
+  "createdAt": zod.string()
+}))
+})
+
+
+/**
+ * @summary Tutor⇄parent message threads for the user
+ */
+export const GetMessageThreadsParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetMessageThreadsResponse = zod.object({
+  "threads": zod.array(zod.object({
+  "otherVidyaId": zod.string(),
+  "otherName": zod.string(),
+  "otherRole": zod.string(),
+  "lastBody": zod.string(),
+  "lastAt": zod.string(),
+  "unread": zod.number()
+}))
+})
+
+
+/**
+ * @summary Messages in one thread (marks them read)
+ */
+export const GetMessageThreadParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "otherVidyaId": zod.coerce.string()
+})
+
+export const GetMessageThreadResponse = zod.object({
+  "otherVidyaId": zod.string(),
+  "otherName": zod.string(),
+  "otherRole": zod.string(),
+  "messages": zod.array(zod.object({
+  "id": zod.number(),
+  "mine": zod.boolean(),
+  "body": zod.string(),
+  "createdAt": zod.string()
+}))
+})
+
+
+/**
+ * @summary Send a message to a tutor/parent who shares a student
+ */
+export const SendMessageParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const SendMessageBody = zod.object({
+  "to": zod.string(),
+  "body": zod.string()
+})
+
+export const SendMessageResponse = zod.object({
+  "otherVidyaId": zod.string(),
+  "otherName": zod.string(),
+  "otherRole": zod.string(),
+  "messages": zod.array(zod.object({
+  "id": zod.number(),
+  "mine": zod.boolean(),
+  "body": zod.string(),
+  "createdAt": zod.string()
+}))
+})
+
+

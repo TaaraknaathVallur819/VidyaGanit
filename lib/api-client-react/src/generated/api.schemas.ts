@@ -1100,3 +1100,112 @@ export interface DigestResponse {
   weakTopics: string[];
 }
 
+export interface WeeklyGoalResponse {
+  weekStart: string;
+  targetXp: number;
+  earnedXp: number;
+  percent: number;
+}
+
+export interface WeeklyGoalInput {
+  /**
+     * @minimum 20
+     * @maximum 5000
+     */
+  targetXp: number;
+}
+
+export interface WorksheetInput {
+  topic: string;
+  /** @nullable */
+  klass?: string | null;
+  /** @nullable */
+  count?: number | null;
+}
+
+export interface WorksheetQuestion {
+  prompt: string;
+  options: string[];
+  answer: number;
+}
+
+export interface WorksheetResponse {
+  topic: string;
+  topicLabel: string;
+  /** @nullable */
+  klass: string | null;
+  questions: WorksheetQuestion[];
+}
+
+/**
+ * @nullable
+ */
+export type BookmarkItemPayload = { [key: string]: unknown } | null;
+
+export interface BookmarkItem {
+  id: number;
+  kind: string;
+  refId: string;
+  label: string;
+  /** @nullable */
+  payload?: BookmarkItemPayload;
+  createdAt: string;
+}
+
+export interface BookmarksResponse {
+  bookmarks: BookmarkItem[];
+}
+
+export type BookmarkInputKind = typeof BookmarkInputKind[keyof typeof BookmarkInputKind];
+
+
+export const BookmarkInputKind = {
+  concept: 'concept',
+  question: 'question',
+} as const;
+
+/**
+ * @nullable
+ */
+export type BookmarkInputPayload = { [key: string]: unknown } | null;
+
+export interface BookmarkInput {
+  kind: BookmarkInputKind;
+  refId: string;
+  label: string;
+  /** @nullable */
+  payload?: BookmarkInputPayload;
+}
+
+export interface MessageThread {
+  otherVidyaId: string;
+  otherName: string;
+  otherRole: string;
+  lastBody: string;
+  lastAt: string;
+  unread: number;
+}
+
+export interface MessageThreadsResponse {
+  threads: MessageThread[];
+}
+
+export interface DirectMessageItem {
+  id: number;
+  mine: boolean;
+  body: string;
+  createdAt: string;
+}
+
+export interface MessageThreadResponse {
+  otherVidyaId: string;
+  otherName: string;
+  otherRole: string;
+  messages: DirectMessageItem[];
+}
+
+export interface SendMessageInput {
+  to: string;
+  body: string;
+}
+

@@ -16,6 +16,8 @@ tags:
     description: Socratic math tutor chat
   - name: parent
     description: Parent dashboard analytics, history, and strategy AI
+  - name: messages
+    description: Tutor and parent direct messaging
 paths:
   /healthz:
     get:
@@ -1472,6 +1474,278 @@ paths:
               schema:
                 $ref: "#/components/schemas/NotificationsResponse"
 
+  /goals/{vidyaId}:
+    get:
+      operationId: getWeeklygoal
+      tags: [gamification]
+      summary: The student's weekly XP goal and progress
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Current week's goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeeklyGoalResponse"
+    put:
+      operationId: setWeeklyGoal
+      tags: [gamification]
+      summary: Set the student's weekly XP target
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WeeklyGoalInput"
+      responses:
+        "200":
+          description: Updated goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeeklyGoalResponse"
+        "400":
+          description: Invalid target
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /parent/{vidyaId}/students/{studentVidyaId}/goal:
+    get:
+      operationId: getStudentWeeklyGoal
+      tags: [parent]
+      summary: A linked student's weekly XP goal and progress
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: studentVidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The student's weekly goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeeklyGoalResponse"
+        "403":
+          description: Student not linked to this parent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /worksheet/{vidyaId}:
+    post:
+      operationId: getWorksheet
+      tags: [gamification]
+      summary: Generate a printable practice worksheet (parent/tutor only)
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorksheetInput"
+      responses:
+        "200":
+          description: Worksheet questions with answer key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorksheetResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /bookmarks/{vidyaId}:
+    get:
+      operationId: getBookmarks
+      tags: [gamification]
+      summary: The student's saved concepts and questions
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Saved items, newest first
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookmarksResponse"
+    post:
+      operationId: addBookmark
+      tags: [gamification]
+      summary: Save a concept or question
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookmarkInput"
+      responses:
+        "200":
+          description: Updated bookmark list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookmarksResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /bookmarks/{vidyaId}/{kind}/{refId}:
+    delete:
+      operationId: removeBookmark
+      tags: [gamification]
+      summary: Remove a saved item
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: kind
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: refId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Updated bookmark list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookmarksResponse"
+
+  /messages/{vidyaId}/threads:
+    get:
+      operationId: getMessageThreads
+      tags: [messages]
+      summary: Tutor⇄parent message threads for the user
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Threads, most recent first
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageThreadsResponse"
+
+  /messages/{vidyaId}/thread/{otherVidyaId}:
+    get:
+      operationId: getMessageThread
+      tags: [messages]
+      summary: Messages in one thread (marks them read)
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: otherVidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageThreadResponse"
+        "403":
+          description: No shared student with the other user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /messages/{vidyaId}/send:
+    post:
+      operationId: sendMessage
+      tags: [messages]
+      summary: Send a message to a tutor/parent who shares a student
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendMessageInput"
+      responses:
+        "200":
+          description: Updated conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageThreadResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: No shared student with the recipient
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -2702,3 +2976,169 @@ components:
           type: array
           items:
             type: string
+
+    WeeklyGoalResponse:
+      type: object
+      required: [weekStart, targetXp, earnedXp, percent]
+      properties:
+        weekStart:
+          type: string
+        targetXp:
+          type: integer
+        earnedXp:
+          type: integer
+        percent:
+          type: integer
+
+    WeeklyGoalInput:
+      type: object
+      required: [targetXp]
+      properties:
+        targetXp:
+          type: integer
+          minimum: 20
+          maximum: 5000
+
+    WorksheetInput:
+      type: object
+      required: [topic]
+      properties:
+        topic:
+          type: string
+        klass:
+          type: ["string", "null"]
+        count:
+          type: ["integer", "null"]
+
+    WorksheetQuestion:
+      type: object
+      required: [prompt, options, answer]
+      properties:
+        prompt:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        answer:
+          type: integer
+
+    WorksheetResponse:
+      type: object
+      required: [topic, topicLabel, klass, questions]
+      properties:
+        topic:
+          type: string
+        topicLabel:
+          type: string
+        klass:
+          type: ["string", "null"]
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorksheetQuestion"
+
+    BookmarkItem:
+      type: object
+      required: [id, kind, refId, label, createdAt]
+      properties:
+        id:
+          type: integer
+        kind:
+          type: string
+        refId:
+          type: string
+        label:
+          type: string
+        payload:
+          type: ["object", "null"]
+          additionalProperties: true
+        createdAt:
+          type: string
+
+    BookmarksResponse:
+      type: object
+      required: [bookmarks]
+      properties:
+        bookmarks:
+          type: array
+          items:
+            $ref: "#/components/schemas/BookmarkItem"
+
+    BookmarkInput:
+      type: object
+      required: [kind, refId, label]
+      properties:
+        kind:
+          type: string
+          enum: [concept, question]
+        refId:
+          type: string
+        label:
+          type: string
+        payload:
+          type: ["object", "null"]
+          additionalProperties: true
+
+    MessageThread:
+      type: object
+      required: [otherVidyaId, otherName, otherRole, lastBody, lastAt, unread]
+      properties:
+        otherVidyaId:
+          type: string
+        otherName:
+          type: string
+        otherRole:
+          type: string
+        lastBody:
+          type: string
+        lastAt:
+          type: string
+        unread:
+          type: integer
+
+    MessageThreadsResponse:
+      type: object
+      required: [threads]
+      properties:
+        threads:
+          type: array
+          items:
+            $ref: "#/components/schemas/MessageThread"
+
+    DirectMessageItem:
+      type: object
+      required: [id, mine, body, createdAt]
+      properties:
+        id:
+          type: integer
+        mine:
+          type: boolean
+        body:
+          type: string
+        createdAt:
+          type: string
+
+    MessageThreadResponse:
+      type: object
+      required: [otherVidyaId, otherName, otherRole, messages]
+      properties:
+        otherVidyaId:
+          type: string
+        otherName:
+          type: string
+        otherRole:
+          type: string
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/DirectMessageItem"
+
+    SendMessageInput:
+      type: object
+      required: [to, body]
+      properties:
+        to:
+          type: string
+        body:
+          type: string
