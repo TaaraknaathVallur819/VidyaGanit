@@ -27,6 +27,9 @@ import VoiceSettings from "@/components/VoiceSettings";
 import SavedHistory from "@/components/parent/SavedHistory";
 import ParentConsultantChat from "@/components/parent/ParentConsultantChat";
 import CurriculumPlanner from "@/components/tutor/CurriculumPlanner";
+import TutorAssignments from "@/components/tutor/TutorAssignments";
+import TutorAnnouncements from "@/components/tutor/TutorAnnouncements";
+import ClassHeatmap from "@/components/tutor/ClassHeatmap";
 import {
   useGetProfile,
   getGetProfileQueryKey,
@@ -56,6 +59,9 @@ import {
   Sparkles,
   Layers,
   Search,
+  ClipboardList,
+  Megaphone,
+  Grid3x3,
 } from "lucide-react";
 
 const UNASSIGNED_BATCH = "__unassigned__";
@@ -345,6 +351,18 @@ export default function TutorDashboard() {
                 <BookOpen className="w-4 h-4" />
                 {t("tab.curriculum")}
               </TabsTrigger>
+              <TabsTrigger value="assignments" className={tabTriggerClass}>
+                <ClipboardList className="w-4 h-4" />
+                {t("tab.assignments")}
+              </TabsTrigger>
+              <TabsTrigger value="announcements" className={tabTriggerClass}>
+                <Megaphone className="w-4 h-4" />
+                {t("tab.announcements")}
+              </TabsTrigger>
+              <TabsTrigger value="heatmap" className={tabTriggerClass}>
+                <Grid3x3 className="w-4 h-4" />
+                {t("tab.heatmap")}
+              </TabsTrigger>
               <TabsTrigger value="progress" className={tabTriggerClass}>
                 <TrendingUp className="w-4 h-4" />
                 {t("tab.progress")}
@@ -612,6 +630,27 @@ export default function TutorDashboard() {
         <TabsContent value="curriculum" className="mt-0 p-6">
           <div className="max-w-3xl mx-auto">
             <CurriculumPlanner />
+          </div>
+        </TabsContent>
+
+        {/* ── Assignments Tab ── */}
+        <TabsContent value="assignments" className="mt-0 p-6">
+          <div className="max-w-3xl mx-auto">
+            <TutorAssignments vidyaId={vidyaId} batches={tutorBatches} />
+          </div>
+        </TabsContent>
+
+        {/* ── Announcements Tab ── */}
+        <TabsContent value="announcements" className="mt-0 p-6">
+          <div className="max-w-3xl mx-auto">
+            <TutorAnnouncements vidyaId={vidyaId} batches={tutorBatches} />
+          </div>
+        </TabsContent>
+
+        {/* ── Class Heatmap Tab ── */}
+        <TabsContent value="heatmap" className="mt-0 p-6">
+          <div className="max-w-3xl mx-auto">
+            <ClassHeatmap vidyaId={vidyaId} />
           </div>
         </TabsContent>
 

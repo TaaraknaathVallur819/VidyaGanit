@@ -55,7 +55,7 @@ router.post(
 
     await db
       .update(usersTable)
-      .set({ xp: newXp, badges: allBadges })
+      .set({ xp: newXp, coins: (user.coins ?? 0) + xpAwarded, badges: allBadges })
       .where(eq(usersTable.vidyaId, vidyaId));
 
     res.json({ xp: newXp, xpAwarded, badges: allBadges, newBadges });

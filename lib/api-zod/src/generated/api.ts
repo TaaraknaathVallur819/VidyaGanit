@@ -803,3 +803,436 @@ export const GetClassCurriculumResponse = zod.object({
 })
 
 
+/**
+ * @summary XP leaderboard for the student's batch and class
+ */
+export const GetLeaderboardParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetLeaderboardResponse = zod.object({
+  "scope": zod.enum(['batch', 'class', 'global']),
+  "selfRank": zod.number(),
+  "entries": zod.array(zod.object({
+  "rank": zod.number(),
+  "name": zod.string(),
+  "xp": zod.number(),
+  "level": zod.number(),
+  "isSelf": zod.boolean()
+}))
+})
+
+
+/**
+ * @summary Today's Problem of the Day for the student
+ */
+export const GetDailyChallengeParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetDailyChallengeResponse = zod.object({
+  "date": zod.string(),
+  "question": zod.string(),
+  "options": zod.array(zod.number()),
+  "completed": zod.boolean(),
+  "correct": zod.boolean().nullable(),
+  "xpAwarded": zod.number()
+})
+
+
+/**
+ * @summary Submit an answer to today's challenge
+ */
+export const SubmitDailyChallengeParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const SubmitDailyChallengeBody = zod.object({
+  "answer": zod.number()
+})
+
+export const SubmitDailyChallengeResponse = zod.object({
+  "date": zod.string(),
+  "question": zod.string(),
+  "options": zod.array(zod.number()),
+  "completed": zod.boolean(),
+  "correct": zod.boolean().nullable(),
+  "xpAwarded": zod.number()
+})
+
+
+/**
+ * @summary Spaced-repetition review items that are due
+ */
+export const GetReviewDueParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetReviewDueResponse = zod.object({
+  "dueCount": zod.number(),
+  "totalCount": zod.number(),
+  "items": zod.array(zod.object({
+  "id": zod.number(),
+  "question": zod.string(),
+  "topic": zod.string().nullable()
+}))
+})
+
+
+/**
+ * @summary Record a review outcome and reschedule
+ */
+export const GradeReviewItemParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const gradeReviewItemBodyQualityMin = 0;
+export const gradeReviewItemBodyQualityMax = 5;
+
+
+
+export const GradeReviewItemBody = zod.object({
+  "itemId": zod.number(),
+  "quality": zod.number().min(gradeReviewItemBodyQualityMin).max(gradeReviewItemBodyQualityMax)
+})
+
+export const GradeReviewItemResponse = zod.object({
+  "dueCount": zod.number(),
+  "totalCount": zod.number(),
+  "items": zod.array(zod.object({
+  "id": zod.number(),
+  "question": zod.string(),
+  "topic": zod.string().nullable()
+}))
+})
+
+
+/**
+ * @summary Reward shop catalog, balance, and owned items
+ */
+export const GetShopParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetShopResponse = zod.object({
+  "coins": zod.number(),
+  "equippedAvatar": zod.string().nullable(),
+  "equippedTheme": zod.string().nullable(),
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['avatar', 'theme']),
+  "name": zod.string(),
+  "emoji": zod.string(),
+  "price": zod.number(),
+  "owned": zod.boolean(),
+  "equipped": zod.boolean()
+}))
+})
+
+
+/**
+ * @summary Buy a shop item with coins
+ */
+export const BuyShopItemParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const BuyShopItemBody = zod.object({
+  "itemId": zod.string()
+})
+
+export const BuyShopItemResponse = zod.object({
+  "coins": zod.number(),
+  "equippedAvatar": zod.string().nullable(),
+  "equippedTheme": zod.string().nullable(),
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['avatar', 'theme']),
+  "name": zod.string(),
+  "emoji": zod.string(),
+  "price": zod.number(),
+  "owned": zod.boolean(),
+  "equipped": zod.boolean()
+}))
+})
+
+
+/**
+ * @summary Equip or unequip an owned cosmetic
+ */
+export const EquipShopItemParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const EquipShopItemBody = zod.object({
+  "kind": zod.enum(['avatar', 'theme']),
+  "itemId": zod.string().nullish()
+})
+
+export const EquipShopItemResponse = zod.object({
+  "coins": zod.number(),
+  "equippedAvatar": zod.string().nullable(),
+  "equippedTheme": zod.string().nullable(),
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['avatar', 'theme']),
+  "name": zod.string(),
+  "emoji": zod.string(),
+  "price": zod.number(),
+  "owned": zod.boolean(),
+  "equipped": zod.boolean()
+}))
+})
+
+
+/**
+ * @summary The user's notification feed
+ */
+export const GetNotificationsParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetNotificationsResponse = zod.object({
+  "unreadCount": zod.number(),
+  "notifications": zod.array(zod.object({
+  "id": zod.number(),
+  "type": zod.string(),
+  "title": zod.string(),
+  "body": zod.string(),
+  "linkTab": zod.string().nullish(),
+  "read": zod.boolean(),
+  "createdAt": zod.string()
+}))
+})
+
+
+/**
+ * @summary Mark notifications as read
+ */
+export const MarkNotificationsReadParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const MarkNotificationsReadBody = zod.object({
+  "ids": zod.array(zod.number()).nullish(),
+  "all": zod.boolean().nullish()
+})
+
+export const MarkNotificationsReadResponse = zod.object({
+  "unreadCount": zod.number(),
+  "notifications": zod.array(zod.object({
+  "id": zod.number(),
+  "type": zod.string(),
+  "title": zod.string(),
+  "body": zod.string(),
+  "linkTab": zod.string().nullish(),
+  "read": zod.boolean(),
+  "createdAt": zod.string()
+}))
+})
+
+
+/**
+ * @summary Assignments addressed to the student's batches
+ */
+export const GetStudentAssignmentsParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetStudentAssignmentsResponse = zod.object({
+  "assignments": zod.array(zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "kind": zod.string(),
+  "topic": zod.string().nullish(),
+  "dueDate": zod.string().nullish(),
+  "status": zod.string(),
+  "tutorName": zod.string().nullish()
+}))
+})
+
+
+/**
+ * @summary Mark an assignment complete for the student
+ */
+export const CompleteAssignmentParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "assignmentId": zod.coerce.number()
+})
+
+export const CompleteAssignmentResponse = zod.object({
+  "assignments": zod.array(zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "kind": zod.string(),
+  "topic": zod.string().nullish(),
+  "dueDate": zod.string().nullish(),
+  "status": zod.string(),
+  "tutorName": zod.string().nullish()
+}))
+})
+
+
+/**
+ * @summary Assignments the tutor has created
+ */
+export const ListTutorAssignmentsParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const ListTutorAssignmentsResponse = zod.object({
+  "assignments": zod.array(zod.object({
+  "id": zod.number(),
+  "batch": zod.string(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "kind": zod.string(),
+  "topic": zod.string().nullish(),
+  "dueDate": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "completedCount": zod.number(),
+  "totalCount": zod.number()
+}))
+})
+
+
+/**
+ * @summary Assign work to a batch
+ */
+export const CreateAssignmentParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+
+
+
+export const CreateAssignmentBody = zod.object({
+  "batch": zod.string(),
+  "title": zod.string().min(1),
+  "description": zod.string().nullish(),
+  "kind": zod.enum(['practice', 'test']),
+  "topic": zod.string().nullish(),
+  "dueDate": zod.string().nullish()
+})
+
+export const CreateAssignmentResponse = zod.object({
+  "assignments": zod.array(zod.object({
+  "id": zod.number(),
+  "batch": zod.string(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "kind": zod.string(),
+  "topic": zod.string().nullish(),
+  "dueDate": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "completedCount": zod.number(),
+  "totalCount": zod.number()
+}))
+})
+
+
+/**
+ * @summary Announcements the tutor has sent
+ */
+export const ListAnnouncementsParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const ListAnnouncementsResponse = zod.object({
+  "announcements": zod.array(zod.object({
+  "id": zod.number(),
+  "batch": zod.string(),
+  "message": zod.string(),
+  "createdAt": zod.string()
+}))
+})
+
+
+/**
+ * @summary Broadcast a message to a batch
+ */
+export const CreateAnnouncementParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+
+
+
+export const CreateAnnouncementBody = zod.object({
+  "batch": zod.string(),
+  "message": zod.string().min(1)
+})
+
+export const CreateAnnouncementResponse = zod.object({
+  "announcements": zod.array(zod.object({
+  "id": zod.number(),
+  "batch": zod.string(),
+  "message": zod.string(),
+  "createdAt": zod.string()
+}))
+})
+
+
+/**
+ * @summary Per-topic mastery across a batch
+ */
+export const GetClassHeatmapParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetClassHeatmapResponse = zod.object({
+  "topics": zod.array(zod.string()),
+  "rows": zod.array(zod.object({
+  "studentVidyaId": zod.string(),
+  "name": zod.string(),
+  "batch": zod.string().nullable(),
+  "topics": zod.record(zod.string(), zod.number())
+}))
+})
+
+
+/**
+ * @summary A student's weekly progress digest
+ */
+export const GetWeeklyDigestParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "studentVidyaId": zod.coerce.string()
+})
+
+export const GetWeeklyDigestResponse = zod.object({
+  "studentVidyaId": zod.string(),
+  "name": zod.string(),
+  "weekStart": zod.string(),
+  "messages": zod.number(),
+  "testsTaken": zod.number(),
+  "avgScore": zod.number().nullable(),
+  "xpGained": zod.number(),
+  "currentStreak": zod.number(),
+  "topTopics": zod.array(zod.string()),
+  "weakTopics": zod.array(zod.string())
+})
+
+
+/**
+ * @summary Recompute inactivity and milestone alerts for linked students
+ */
+export const ScanAlertsParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const ScanAlertsResponse = zod.object({
+  "unreadCount": zod.number(),
+  "notifications": zod.array(zod.object({
+  "id": zod.number(),
+  "type": zod.string(),
+  "title": zod.string(),
+  "body": zod.string(),
+  "linkTab": zod.string().nullish(),
+  "read": zod.boolean(),
+  "createdAt": zod.string()
+}))
+})
+
+

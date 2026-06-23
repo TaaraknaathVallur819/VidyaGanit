@@ -430,6 +430,7 @@ router.post(
     .update(usersTable)
     .set({
       xp: newXp,
+      coins: (user.coins ?? 0) + xpGained,
       badges: allBadges,
       streakCurrent: streak.streakCurrent,
       streakLongest: streak.streakLongest,

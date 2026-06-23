@@ -26,6 +26,8 @@ import BulkAddStudents from "@/components/BulkAddStudents";
 import VoiceSettings from "@/components/VoiceSettings";
 import SavedHistory from "@/components/parent/SavedHistory";
 import ParentConsultantChat from "@/components/parent/ParentConsultantChat";
+import WeeklyDigest from "@/components/parent/WeeklyDigest";
+import ParentAlerts from "@/components/parent/ParentAlerts";
 import {
   useGetProfile,
   getGetProfileQueryKey,
@@ -53,6 +55,8 @@ import {
   History as HistoryIcon,
   Sparkles,
   Search,
+  FileText,
+  Bell,
 } from "lucide-react";
 
 function getPasswordStrength(pwd: string) {
@@ -291,6 +295,14 @@ export default function ParentDashboard() {
               <TabsTrigger value="history" className={tabTriggerClass}>
                 <HistoryIcon className="w-4 h-4" />
                 {t("tab.history")}
+              </TabsTrigger>
+              <TabsTrigger value="digest" className={tabTriggerClass}>
+                <FileText className="w-4 h-4" />
+                {t("tab.digest")}
+              </TabsTrigger>
+              <TabsTrigger value="alerts" className={tabTriggerClass}>
+                <Bell className="w-4 h-4" />
+                {t("tab.alerts")}
               </TabsTrigger>
               <TabsTrigger value="strategy" className={tabTriggerClass}>
                 <Sparkles className="w-4 h-4" />
@@ -556,6 +568,20 @@ export default function ParentDashboard() {
                 hint={t("picker.empty.hint")}
               />
             )}
+          </div>
+        </TabsContent>
+
+        {/* ── Weekly Digest Tab ── */}
+        <TabsContent value="digest" className="mt-0 p-6">
+          <div className="max-w-3xl mx-auto">
+            <WeeklyDigest vidyaId={vidyaId} students={students} />
+          </div>
+        </TabsContent>
+
+        {/* ── Alerts Tab ── */}
+        <TabsContent value="alerts" className="mt-0 p-6">
+          <div className="max-w-3xl mx-auto">
+            <ParentAlerts vidyaId={vidyaId} />
           </div>
         </TabsContent>
 

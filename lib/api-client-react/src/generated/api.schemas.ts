@@ -867,3 +867,236 @@ export interface RecommendationResponse {
   recommendations: LessonRecommendation[];
 }
 
+export interface LeaderboardEntry {
+  rank: number;
+  name: string;
+  xp: number;
+  level: number;
+  isSelf: boolean;
+}
+
+export type LeaderboardResponseScope = typeof LeaderboardResponseScope[keyof typeof LeaderboardResponseScope];
+
+
+export const LeaderboardResponseScope = {
+  batch: 'batch',
+  class: 'class',
+  global: 'global',
+} as const;
+
+export interface LeaderboardResponse {
+  scope: LeaderboardResponseScope;
+  selfRank: number;
+  entries: LeaderboardEntry[];
+}
+
+export interface DailyChallengeSubmitInput {
+  answer: number;
+}
+
+export interface DailyChallengeResponse {
+  date: string;
+  question: string;
+  options: number[];
+  completed: boolean;
+  /** @nullable */
+  correct: boolean | null;
+  xpAwarded: number;
+}
+
+export interface ReviewItemView {
+  id: number;
+  question: string;
+  /** @nullable */
+  topic: string | null;
+}
+
+export interface ReviewDueResponse {
+  dueCount: number;
+  totalCount: number;
+  items: ReviewItemView[];
+}
+
+export interface ReviewGradeInput {
+  itemId: number;
+  /**
+     * @minimum 0
+     * @maximum 5
+     */
+  quality: number;
+}
+
+export type ShopItemKind = typeof ShopItemKind[keyof typeof ShopItemKind];
+
+
+export const ShopItemKind = {
+  avatar: 'avatar',
+  theme: 'theme',
+} as const;
+
+export interface ShopItem {
+  id: string;
+  kind: ShopItemKind;
+  name: string;
+  emoji: string;
+  price: number;
+  owned: boolean;
+  equipped: boolean;
+}
+
+export interface ShopResponse {
+  coins: number;
+  /** @nullable */
+  equippedAvatar: string | null;
+  /** @nullable */
+  equippedTheme: string | null;
+  items: ShopItem[];
+}
+
+export interface ShopItemInput {
+  itemId: string;
+}
+
+export type ShopEquipInputKind = typeof ShopEquipInputKind[keyof typeof ShopEquipInputKind];
+
+
+export const ShopEquipInputKind = {
+  avatar: 'avatar',
+  theme: 'theme',
+} as const;
+
+export interface ShopEquipInput {
+  kind: ShopEquipInputKind;
+  /** @nullable */
+  itemId?: string | null;
+}
+
+export interface NotificationItem {
+  id: number;
+  type: string;
+  title: string;
+  body: string;
+  /** @nullable */
+  linkTab?: string | null;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface NotificationsResponse {
+  unreadCount: number;
+  notifications: NotificationItem[];
+}
+
+export interface MarkReadInput {
+  /** @nullable */
+  ids?: number[] | null;
+  /** @nullable */
+  all?: boolean | null;
+}
+
+export interface StudentAssignment {
+  id: number;
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  kind: string;
+  /** @nullable */
+  topic?: string | null;
+  /** @nullable */
+  dueDate?: string | null;
+  status: string;
+  /** @nullable */
+  tutorName?: string | null;
+}
+
+export interface StudentAssignmentsResponse {
+  assignments: StudentAssignment[];
+}
+
+export type CreateAssignmentInputKind = typeof CreateAssignmentInputKind[keyof typeof CreateAssignmentInputKind];
+
+
+export const CreateAssignmentInputKind = {
+  practice: 'practice',
+  test: 'test',
+} as const;
+
+export interface CreateAssignmentInput {
+  batch: string;
+  /** @minLength 1 */
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  kind: CreateAssignmentInputKind;
+  /** @nullable */
+  topic?: string | null;
+  /** @nullable */
+  dueDate?: string | null;
+}
+
+export interface TutorAssignment {
+  id: number;
+  batch: string;
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  kind: string;
+  /** @nullable */
+  topic?: string | null;
+  /** @nullable */
+  dueDate?: string | null;
+  createdAt: string;
+  completedCount: number;
+  totalCount: number;
+}
+
+export interface TutorAssignmentsResponse {
+  assignments: TutorAssignment[];
+}
+
+export interface Announcement {
+  id: number;
+  batch: string;
+  message: string;
+  createdAt: string;
+}
+
+export interface AnnouncementsResponse {
+  announcements: Announcement[];
+}
+
+export interface CreateAnnouncementInput {
+  batch: string;
+  /** @minLength 1 */
+  message: string;
+}
+
+export type HeatmapRowTopics = {[key: string]: number};
+
+export interface HeatmapRow {
+  studentVidyaId: string;
+  name: string;
+  /** @nullable */
+  batch: string | null;
+  topics: HeatmapRowTopics;
+}
+
+export interface HeatmapResponse {
+  topics: string[];
+  rows: HeatmapRow[];
+}
+
+export interface DigestResponse {
+  studentVidyaId: string;
+  name: string;
+  weekStart: string;
+  messages: number;
+  testsTaken: number;
+  /** @nullable */
+  avgScore: number | null;
+  xpGained: number;
+  currentStreak: number;
+  topTopics: string[];
+  weakTopics: string[];
+}
+

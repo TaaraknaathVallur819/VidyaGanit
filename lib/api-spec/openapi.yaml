@@ -1021,6 +1021,457 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /leaderboard/{vidyaId}:
+    get:
+      operationId: getLeaderboard
+      tags: [gamification]
+      summary: XP leaderboard for the student's batch and class
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ranked peers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaderboardResponse"
+
+  /daily-challenge/{vidyaId}:
+    get:
+      operationId: getDailyChallenge
+      tags: [gamification]
+      summary: Today's Problem of the Day for the student
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Today's challenge
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyChallengeResponse"
+
+  /daily-challenge/{vidyaId}/submit:
+    post:
+      operationId: submitDailyChallenge
+      tags: [gamification]
+      summary: Submit an answer to today's challenge
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DailyChallengeSubmitInput"
+      responses:
+        "200":
+          description: Result of the attempt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyChallengeResponse"
+        "400":
+          description: Invalid input or already completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /review/{vidyaId}/due:
+    get:
+      operationId: getReviewDue
+      tags: [gamification]
+      summary: Spaced-repetition review items that are due
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Due review items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewDueResponse"
+
+  /review/{vidyaId}/grade:
+    post:
+      operationId: gradeReviewItem
+      tags: [gamification]
+      summary: Record a review outcome and reschedule
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewGradeInput"
+      responses:
+        "200":
+          description: Updated due list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewDueResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /shop/{vidyaId}:
+    get:
+      operationId: getShop
+      tags: [gamification]
+      summary: Reward shop catalog, balance, and owned items
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Shop state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShopResponse"
+
+  /shop/{vidyaId}/buy:
+    post:
+      operationId: buyShopItem
+      tags: [gamification]
+      summary: Buy a shop item with coins
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShopItemInput"
+      responses:
+        "200":
+          description: Updated shop state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShopResponse"
+        "400":
+          description: Not enough coins or already owned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /shop/{vidyaId}/equip:
+    post:
+      operationId: equipShopItem
+      tags: [gamification]
+      summary: Equip or unequip an owned cosmetic
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShopEquipInput"
+      responses:
+        "200":
+          description: Updated shop state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShopResponse"
+        "400":
+          description: Item not owned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /notifications/{vidyaId}:
+    get:
+      operationId: getNotifications
+      tags: [notifications]
+      summary: The user's notification feed
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Notifications, newest first
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationsResponse"
+
+  /notifications/{vidyaId}/read:
+    post:
+      operationId: markNotificationsRead
+      tags: [notifications]
+      summary: Mark notifications as read
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarkReadInput"
+      responses:
+        "200":
+          description: Updated feed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationsResponse"
+
+  /assignments/{vidyaId}:
+    get:
+      operationId: getStudentAssignments
+      tags: [gamification]
+      summary: Assignments addressed to the student's batches
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Student assignments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentAssignmentsResponse"
+
+  /assignments/{vidyaId}/{assignmentId}/complete:
+    post:
+      operationId: completeAssignment
+      tags: [gamification]
+      summary: Mark an assignment complete for the student
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: assignmentId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated student assignments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentAssignmentsResponse"
+        "404":
+          description: Assignment not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /tutor/{vidyaId}/assignments:
+    get:
+      operationId: listTutorAssignments
+      tags: [tutor]
+      summary: Assignments the tutor has created
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Tutor assignments with completion counts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TutorAssignmentsResponse"
+    post:
+      operationId: createAssignment
+      tags: [tutor]
+      summary: Assign work to a batch
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAssignmentInput"
+      responses:
+        "200":
+          description: Updated tutor assignments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TutorAssignmentsResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /tutor/{vidyaId}/announcements:
+    get:
+      operationId: listAnnouncements
+      tags: [tutor]
+      summary: Announcements the tutor has sent
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Announcements, newest first
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnnouncementsResponse"
+    post:
+      operationId: createAnnouncement
+      tags: [tutor]
+      summary: Broadcast a message to a batch
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAnnouncementInput"
+      responses:
+        "200":
+          description: Updated announcements
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnnouncementsResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /tutor/{vidyaId}/heatmap:
+    get:
+      operationId: getClassHeatmap
+      tags: [tutor]
+      summary: Per-topic mastery across a batch
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Class heatmap
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HeatmapResponse"
+
+  /parent/{vidyaId}/students/{studentVidyaId}/digest:
+    get:
+      operationId: getWeeklyDigest
+      tags: [parent]
+      summary: A student's weekly progress digest
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: studentVidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Weekly digest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DigestResponse"
+
+  /parent/{vidyaId}/alerts/scan:
+    post:
+      operationId: scanAlerts
+      tags: [parent]
+      summary: Recompute inactivity and milestone alerts for linked students
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Updated notification feed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationsResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -1895,3 +2346,359 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LessonRecommendation"
+
+    LeaderboardEntry:
+      type: object
+      required: [rank, name, xp, level, isSelf]
+      properties:
+        rank:
+          type: integer
+        name:
+          type: string
+        xp:
+          type: integer
+        level:
+          type: integer
+        isSelf:
+          type: boolean
+
+    LeaderboardResponse:
+      type: object
+      required: [scope, selfRank, entries]
+      properties:
+        scope:
+          type: string
+          enum: [batch, class, global]
+        selfRank:
+          type: integer
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/LeaderboardEntry"
+
+    DailyChallengeSubmitInput:
+      type: object
+      required: [answer]
+      properties:
+        answer:
+          type: integer
+
+    DailyChallengeResponse:
+      type: object
+      required: [date, question, options, completed, correct, xpAwarded]
+      properties:
+        date:
+          type: string
+        question:
+          type: string
+        options:
+          type: array
+          items:
+            type: integer
+        completed:
+          type: boolean
+        correct:
+          type: ["boolean", "null"]
+        xpAwarded:
+          type: integer
+
+    ReviewItemView:
+      type: object
+      required: [id, question, topic]
+      properties:
+        id:
+          type: integer
+        question:
+          type: string
+        topic:
+          type: ["string", "null"]
+
+    ReviewDueResponse:
+      type: object
+      required: [dueCount, totalCount, items]
+      properties:
+        dueCount:
+          type: integer
+        totalCount:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReviewItemView"
+
+    ReviewGradeInput:
+      type: object
+      required: [itemId, quality]
+      properties:
+        itemId:
+          type: integer
+        quality:
+          type: integer
+          minimum: 0
+          maximum: 5
+
+    ShopItem:
+      type: object
+      required: [id, kind, name, emoji, price, owned, equipped]
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+          enum: [avatar, theme]
+        name:
+          type: string
+        emoji:
+          type: string
+        price:
+          type: integer
+        owned:
+          type: boolean
+        equipped:
+          type: boolean
+
+    ShopResponse:
+      type: object
+      required: [coins, equippedAvatar, equippedTheme, items]
+      properties:
+        coins:
+          type: integer
+        equippedAvatar:
+          type: ["string", "null"]
+        equippedTheme:
+          type: ["string", "null"]
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ShopItem"
+
+    ShopItemInput:
+      type: object
+      required: [itemId]
+      properties:
+        itemId:
+          type: string
+
+    ShopEquipInput:
+      type: object
+      required: [kind]
+      properties:
+        kind:
+          type: string
+          enum: [avatar, theme]
+        itemId:
+          type: ["string", "null"]
+
+    NotificationItem:
+      type: object
+      required: [id, type, title, body, read, createdAt]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        linkTab:
+          type: ["string", "null"]
+        read:
+          type: boolean
+        createdAt:
+          type: string
+
+    NotificationsResponse:
+      type: object
+      required: [unreadCount, notifications]
+      properties:
+        unreadCount:
+          type: integer
+        notifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/NotificationItem"
+
+    MarkReadInput:
+      type: object
+      properties:
+        ids:
+          type: ["array", "null"]
+          items:
+            type: integer
+        all:
+          type: ["boolean", "null"]
+
+    StudentAssignment:
+      type: object
+      required: [id, title, kind, status]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        kind:
+          type: string
+        topic:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+        status:
+          type: string
+        tutorName:
+          type: ["string", "null"]
+
+    StudentAssignmentsResponse:
+      type: object
+      required: [assignments]
+      properties:
+        assignments:
+          type: array
+          items:
+            $ref: "#/components/schemas/StudentAssignment"
+
+    CreateAssignmentInput:
+      type: object
+      required: [batch, title, kind]
+      properties:
+        batch:
+          type: string
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: ["string", "null"]
+        kind:
+          type: string
+          enum: [practice, test]
+        topic:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+
+    TutorAssignment:
+      type: object
+      required:
+        [id, batch, title, kind, createdAt, completedCount, totalCount]
+      properties:
+        id:
+          type: integer
+        batch:
+          type: string
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        kind:
+          type: string
+        topic:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        completedCount:
+          type: integer
+        totalCount:
+          type: integer
+
+    TutorAssignmentsResponse:
+      type: object
+      required: [assignments]
+      properties:
+        assignments:
+          type: array
+          items:
+            $ref: "#/components/schemas/TutorAssignment"
+
+    Announcement:
+      type: object
+      required: [id, batch, message, createdAt]
+      properties:
+        id:
+          type: integer
+        batch:
+          type: string
+        message:
+          type: string
+        createdAt:
+          type: string
+
+    AnnouncementsResponse:
+      type: object
+      required: [announcements]
+      properties:
+        announcements:
+          type: array
+          items:
+            $ref: "#/components/schemas/Announcement"
+
+    CreateAnnouncementInput:
+      type: object
+      required: [batch, message]
+      properties:
+        batch:
+          type: string
+        message:
+          type: string
+          minLength: 1
+
+    HeatmapRow:
+      type: object
+      required: [studentVidyaId, name, batch, topics]
+      properties:
+        studentVidyaId:
+          type: string
+        name:
+          type: string
+        batch:
+          type: ["string", "null"]
+        topics:
+          type: object
+          additionalProperties:
+            type: integer
+
+    HeatmapResponse:
+      type: object
+      required: [topics, rows]
+      properties:
+        topics:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/HeatmapRow"
+
+    DigestResponse:
+      type: object
+      required:
+        [studentVidyaId, name, weekStart, messages, testsTaken, avgScore, xpGained, currentStreak, topTopics, weakTopics]
+      properties:
+        studentVidyaId:
+          type: string
+        name:
+          type: string
+        weekStart:
+          type: string
+        messages:
+          type: integer
+        testsTaken:
+          type: integer
+        avgScore:
+          type: ["number", "null"]
+        xpGained:
+          type: integer
+        currentStreak:
+          type: integer
+        topTopics:
+          type: array
+          items:
+            type: string
+        weakTopics:
+          type: array
+          items:
+            type: string

@@ -30,6 +30,12 @@ export const usersTable = pgTable("users", {
   voicePitch: real("voice_pitch").notNull().default(1),
   voiceName: text("voice_name"),
   xp: integer("xp").notNull().default(0),
+  // Spendable currency earned alongside XP; spent in the reward shop on
+  // avatars/themes. Mirrors XP gains 1:1 but is decremented on purchase.
+  coins: integer("coins").notNull().default(0),
+  // Currently equipped cosmetic item ids from the shop catalog (null = default).
+  equippedAvatar: text("equipped_avatar"),
+  equippedTheme: text("equipped_theme"),
   badges: text("badges").array().notNull().default(sql`ARRAY[]::text[]`),
   // Daily practice streak: consecutive calendar days with at least one tutoring
   // interaction. `lastActiveDate` is the last calendar day the student practised

@@ -46,6 +46,14 @@ import AssessmentReport from "@/components/AssessmentReport";
 import StudentProgress from "@/components/StudentProgress";
 import VoiceSettings from "@/components/VoiceSettings";
 import FloatingShapes from "@/components/FloatingShapes";
+import Leaderboard from "@/components/Leaderboard";
+import DailyChallenge from "@/components/DailyChallenge";
+import SmartReview from "@/components/SmartReview";
+import Shop from "@/components/Shop";
+import ConceptLibrary from "@/components/ConceptLibrary";
+import StudentAssignments from "@/components/StudentAssignments";
+import NotificationsCenter from "@/components/NotificationsCenter";
+import OnboardingTour from "@/components/OnboardingTour";
 import { BADGE_CATALOG } from "@/lib/badges";
 import { useLanguage } from "@/lib/i18n";
 
@@ -214,11 +222,15 @@ export default function StudentDashboard() {
 
   return (
     <div className="flex-1 bg-gray-50/50 flex flex-col" style={{ height: "100dvh" }}>
+      <OnboardingTour userKey={vidyaId} />
       <Tabs defaultValue="workspace" className="flex flex-col flex-1 overflow-hidden">
         <div className="border-b bg-white px-6 pt-4">
           <div className="max-w-3xl mx-auto">
-            <h1 className="text-2xl font-bold text-foreground mb-3">{t("student.workspaceTitle")}</h1>
-            <TabsList className="bg-transparent p-0 gap-6 border-b-0">
+            <div className="flex items-center justify-between mb-3">
+              <h1 className="text-2xl font-bold text-foreground">{t("student.workspaceTitle")}</h1>
+              <NotificationsCenter vidyaId={vidyaId} />
+            </div>
+            <TabsList className="bg-transparent p-0 gap-6 border-b-0 flex-wrap h-auto justify-start">
               <TabsTrigger
                 value="profile"
                 className="px-0 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none bg-transparent font-semibold"
@@ -236,6 +248,24 @@ export default function StudentDashboard() {
                 className="px-0 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none bg-transparent font-semibold"
               >
                 {t("student.tab.workspace")}
+              </TabsTrigger>
+              <TabsTrigger
+                value="challenge"
+                className="px-0 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none bg-transparent font-semibold"
+              >
+                {t("student.tab.challenge")}
+              </TabsTrigger>
+              <TabsTrigger
+                value="rewards"
+                className="px-0 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none bg-transparent font-semibold"
+              >
+                {t("student.tab.rewards")}
+              </TabsTrigger>
+              <TabsTrigger
+                value="library"
+                className="px-0 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none bg-transparent font-semibold"
+              >
+                {t("student.tab.library")}
               </TabsTrigger>
             </TabsList>
           </div>
@@ -581,6 +611,30 @@ export default function StudentDashboard() {
             board={displayed?.board ?? null}
             onXpAwarded={() => { refetch(); }}
           />
+        </TabsContent>
+
+        {/* ── Challenges Tab ── */}
+        <TabsContent value="challenge" className="mt-0 p-6 relative overflow-y-auto">
+          <div className="max-w-3xl mx-auto space-y-6 relative">
+            <DailyChallenge vidyaId={vidyaId} onXpAwarded={() => refetch()} />
+            <SmartReview vidyaId={vidyaId} onXpAwarded={() => refetch()} />
+          </div>
+        </TabsContent>
+
+        {/* ── Rewards Tab ── */}
+        <TabsContent value="rewards" className="mt-0 p-6 relative overflow-y-auto">
+          <div className="max-w-3xl mx-auto space-y-6 relative">
+            <Leaderboard vidyaId={vidyaId} />
+            <Shop vidyaId={vidyaId} onProfileChanged={() => refetch()} />
+          </div>
+        </TabsContent>
+
+        {/* ── Library Tab ── */}
+        <TabsContent value="library" className="mt-0 p-6 relative overflow-y-auto">
+          <div className="max-w-3xl mx-auto space-y-6 relative">
+            <StudentAssignments vidyaId={vidyaId} />
+            <ConceptLibrary />
+          </div>
         </TabsContent>
       </Tabs>
 

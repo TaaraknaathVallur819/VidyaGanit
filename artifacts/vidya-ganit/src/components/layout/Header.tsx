@@ -20,12 +20,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/lib/auth";
 import { useLanguage, LANGUAGES, type Language } from "@/lib/i18n";
+import { useTheme } from "@/lib/theme";
 import { useUpdateProfile } from "@workspace/api-client-react";
-import { LogOut, Languages } from "lucide-react";
+import { LogOut, Languages, Moon, Sun } from "lucide-react";
 
 export default function Header() {
   const { user, setUser, logout } = useAuth();
   const { t, lang, setLang } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const [, setLocation] = useLocation();
   const updateProfile = useUpdateProfile();
   const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
@@ -87,6 +89,21 @@ export default function Header() {
             ))}
           </SelectContent>
         </Select>
+        <Button
+          variant="outline"
+          size="icon"
+          data-testid="button-toggle-theme"
+          onClick={toggleTheme}
+          aria-label={theme === "dark" ? t("theme.light") : t("theme.dark")}
+          title={theme === "dark" ? t("theme.light") : t("theme.dark")}
+          className="h-9 w-9 rounded-full border-border bg-gray-50 dark:bg-muted"
+        >
+          {theme === "dark" ? (
+            <Sun className="w-4 h-4 text-amber-400" />
+          ) : (
+            <Moon className="w-4 h-4 text-primary" />
+          )}
+        </Button>
         <Button
           variant="outline"
           size="sm"

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { randomUUID } from "node:crypto";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, gte } from "drizzle-orm";
 import {
   db,
   usersTable,
@@ -32,7 +32,13 @@ import {
   SetConsultantMessageFeedbackParams,
   SetConsultantMessageFeedbackBody,
   SetConsultantMessageFeedbackResponse,
+  GetWeeklyDigestParams,
+  GetWeeklyDigestResponse,
+  ScanAlertsParams,
+  GetNotificationsResponse,
 } from "@workspace/api-zod";
+import { liveStreak, istToday, shiftDate } from "../lib/streak";
+import { createNotificationOnce, getNotificationFeed } from "../lib/notify";
 import { detectTopic } from "../lib/tutor";
 import { ANALYTICS_TOPICS, computeStudentAnalytics } from "../lib/analytics";
 import { recommendNextLessons } from "../lib/curriculum";
@@ -878,6 +884,176 @@ router.post(
 
     send({ done: true, sessionId, messageId: assistantMessageId });
     res.end();
+  },
+);
+
+// ── Weekly digest ───────────────────────────────────────────────────
+router.get(
+  "/parent/:vidyaId/students/:studentVidyaId/digest",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = GetWeeklyDigestParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+    const student = await getLinkedStudent(params.data.vidyaId, params.data.studentVidyaId);
+    if (!student) {
+      res.status(403).json({ error: "This student is not linked to your account." });
+      return;
+    }
+    const [full] = await db
+      .select({
+        streakCurrent: usersTable.streakCurrent,
+        lastActiveDate: usersTable.lastActiveDate,
+      })
+      .from(usersTable)
+      .where(eq(usersTable.vidyaId, student.vidyaId));
+
+    const weekStart = shiftDate(istToday(), -7);
+    const since = new Date(`${weekStart}T00:00:00+05:30`);
+
+    const weekMessages = await db
+      .select({ id: chatMessagesTable.id })
+      .from(chatMessagesTable)
+      .where(
+        and(
+          eq(chatMessagesTable.studentVidyaId, student.vidyaId),
+          eq(chatMessagesTable.role, "user"),
+          gte(chatMessagesTable.createdAt, since),
+        ),
+      );
+
+    const weekTests = await db
+      .select({
+        score: assessmentsTable.score,
+        totalQuestions: assessmentsTable.totalQuestions,
+        pointsPerCorrect: assessmentsTable.pointsPerCorrect,
+      })
+      .from(assessmentsTable)
+      .where(
+        and(
+          eq(assessmentsTable.studentVidyaId, student.vidyaId),
+          eq(assessmentsTable.status, "completed"),
+          gte(assessmentsTable.completedAt, since),
+        ),
+      );
+
+    const pcts = weekTests
+      .map((t) => {
+        const max = t.totalQuestions * t.pointsPerCorrect;
+        return max > 0 ? ((t.score ?? 0) / max) * 100 : null;
+      })
+      .filter((p): p is number => p !== null);
+    const avgScore =
+      pcts.length > 0 ? Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length) : null;
+    const testPoints = weekTests.reduce((a, t) => a + (t.score ?? 0), 0);
+    // Honest estimate: 10 XP per question asked plus points earned on tests.
+    const xpGained = weekMessages.length * 10 + testPoints;
+
+    // Topic strengths/weaknesses from all completed tests (best % per topic).
+    const allTests = await db
+      .select({
+        topicLabel: assessmentsTable.topicLabel,
+        score: assessmentsTable.score,
+        totalQuestions: assessmentsTable.totalQuestions,
+        pointsPerCorrect: assessmentsTable.pointsPerCorrect,
+      })
+      .from(assessmentsTable)
+      .where(
+        and(
+          eq(assessmentsTable.studentVidyaId, student.vidyaId),
+          eq(assessmentsTable.status, "completed"),
+        ),
+      );
+    const bestByTopic = new Map<string, number>();
+    for (const t of allTests) {
+      const max = t.totalQuestions * t.pointsPerCorrect;
+      if (max <= 0) continue;
+      const pct = Math.round(((t.score ?? 0) / max) * 100);
+      bestByTopic.set(t.topicLabel, Math.max(bestByTopic.get(t.topicLabel) ?? 0, pct));
+    }
+    const sorted = [...bestByTopic.entries()].sort((a, b) => b[1] - a[1]);
+    const topTopics = sorted.filter(([, p]) => p >= 80).slice(0, 3).map(([t]) => t);
+    const weakTopics = sorted
+      .filter(([, p]) => p < 60)
+      .sort((a, b) => a[1] - b[1])
+      .slice(0, 3)
+      .map(([t]) => t);
+
+    res.json(
+      GetWeeklyDigestResponse.parse({
+        studentVidyaId: student.vidyaId,
+        name: student.name,
+        weekStart,
+        messages: weekMessages.length,
+        testsTaken: weekTests.length,
+        avgScore,
+        xpGained,
+        currentStreak: liveStreak(full?.streakCurrent ?? 0, full?.lastActiveDate ?? null),
+        topTopics,
+        weakTopics,
+      }),
+    );
+  },
+);
+
+// ── Inactivity & milestone alerts ───────────────────────────────────
+router.post(
+  "/parent/:vidyaId/alerts/scan",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    const params = ScanAlertsParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+    const links = await db
+      .select({ studentVidyaId: parentStudentLinksTable.studentVidyaId })
+      .from(parentStudentLinksTable)
+      .where(eq(parentStudentLinksTable.parentVidyaId, params.data.vidyaId));
+
+    const today = istToday();
+    for (const link of links) {
+      const [s] = await db
+        .select({
+          name: usersTable.name,
+          xp: usersTable.xp,
+          lastActiveDate: usersTable.lastActiveDate,
+        })
+        .from(usersTable)
+        .where(eq(usersTable.vidyaId, link.studentVidyaId));
+      if (!s) continue;
+
+      // Inactivity: no practice for 3+ days.
+      const threeDaysAgo = shiftDate(today, -3);
+      if (!s.lastActiveDate || s.lastActiveDate < threeDaysAgo) {
+        await createNotificationOnce({
+          recipientVidyaId: params.data.vidyaId,
+          type: "inactivity",
+          title: `${s.name} hasn't practised lately`,
+          body: `${s.name} hasn't done any maths since ${s.lastActiveDate ?? "a while ago"}. A gentle nudge could help!`,
+          linkTab: "students",
+        });
+      }
+
+      // Milestone: crossed an XP threshold.
+      const milestones = [100, 250, 500, 1000];
+      const reached = milestones.filter((m) => (s.xp ?? 0) >= m).pop();
+      if (reached) {
+        await createNotificationOnce({
+          recipientVidyaId: params.data.vidyaId,
+          type: "milestone",
+          title: `${s.name} reached ${reached} XP! 🎉`,
+          body: `${s.name} has now earned ${s.xp} XP. Celebrate the progress!`,
+          linkTab: "students",
+        });
+      }
+    }
+
+    res.json(GetNotificationsResponse.parse(await getNotificationFeed(params.data.vidyaId)));
   },
 );
 

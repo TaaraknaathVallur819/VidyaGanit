@@ -48,6 +48,27 @@ VidyaGanit is a Socratic math tuition web app for Indian school kids (Classes 4�
 - `GET /api/assessment/:vidyaId/mistakes` (requireAuth + requireSelf) returns missed questions newest-first, derived on read by `collectMistakes` (`artifacts/api-server/src/lib/assessment.ts`) — there is no separate mistakes table. Only the student's own `status="completed"` tests are exposed; the answer key never leaves the server otherwise.
 - UI: `MistakeNotebook.tsx` in the student Progress tab. i18n keys `student.notebook.*` (×23).
 
+## Gamification & engagement features
+
+These 12 features span the student, parent, and tutor portals. Server routes live in `artifacts/api-server/src/routes/gamification.ts` (plus notifications); client components in `artifacts/vidya-ganit/src/components/`. New `usersTable` columns: `coins`, `equippedAvatar`, `equippedTheme`. New tables: `notifications`, `daily_challenge_completions`, `review_items`, `purchases`, `assignments`, `assignment_completions`, `announcements`.
+
+- **Leaderboards** — scope is computed server-side (batch → class → global, surfaced as `data.scope`); the client shows it as a read-only badge and never chooses scope.
+- **Daily Challenge** — one per day per student, enforced by `daily_challenge_unique (vidyaId, challengeDate)`. Submit awards XP/coins.
+- **Smart Review** — spaced repetition derived over `review_items`.
+- **Avatar/reward shop** — coins economy (coins awarded 1:1 with XP); `equippedAvatar`/`equippedTheme` persist the selection; ownership via `purchase_unique`.
+- **Concept/formula library**, **Tutor assignments** (`assignment_completion_unique`), **Tutor announcements**, **Class analytics heatmap**, **Notification center** (foundation for inactivity/milestone alerts + assignment/announcement notices).
+
+### Reward-grant concurrency (important)
+
+All coin/XP grants are race-safe — see `gamification.ts`:
+- **Idempotent one-time awards** (daily challenge, assignment complete): `insert(...).onConflictDoNothing().returning()` is the source of truth (empty result = already done), with the insert + atomic `sql` XP/coins increment wrapped in one `db.transaction`.
+- **Balance debits** (shop buy): `db.transaction` + `SELECT ... FOR UPDATE` (`.for("update")`) row-lock on the user, then ownership/balance checks and an atomic `coins = coins - price`.
+- Always use atomic `sql\`${col} + n\`` increments — never read-modify-write. Any new reward path must follow the same patterns.
+
+### i18n caveat for new UI strings
+
+The i18n parity test only checks cross-dict consistency, NOT that component-used keys exist in the dicts. Missing keys silently render as raw key strings while tests stay green. After adding UI strings, verify every `t("...")` key exists in `i18n.tsx` (0-missing grep check) in addition to running the parity test.
+
 ## Auth & abuse controls
 
 - Login/registration are unchanged in flow but now also set a stateless HMAC-signed `vg_session` httpOnly cookie (`src/lib/session.ts`, signed with `SESSION_SECRET`).
