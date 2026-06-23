@@ -15,9 +15,11 @@ describe("normalizeChatModel", () => {
     }
   });
 
-  it("covers all three providers", () => {
+  it("covers all four providers", () => {
     const providers = new Set(CHAT_MODELS.map((m) => m.provider));
-    expect(providers).toEqual(new Set(["openai", "anthropic", "gemini"]));
+    expect(providers).toEqual(
+      new Set(["openai", "anthropic", "gemini", "openrouter"]),
+    );
   });
 
   it("defaults to gpt-5-mini for unknown / missing values", () => {

@@ -2,14 +2,18 @@ import type OpenAI from "openai";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { anthropic } from "@workspace/integrations-anthropic-ai";
 import { ai as gemini } from "@workspace/integrations-gemini-ai";
+import { openrouter } from "@workspace/integrations-openrouter-ai";
 
 /**
  * Multi-provider streaming chat abstraction. The student tutor and the parent
  * counselor both speak through this so a single `provider` field switches the
  * underlying model without changing any route logic. Image generation (the
  * `[[DRAW:]]` flow) stays on OpenAI and is handled by the routes directly.
+ *
+ * `openrouter` is an OpenAI-compatible chat-completions endpoint used to reach
+ * providers the other integrations can't (DeepSeek, Perplexity Sonar).
  */
-export type ChatProvider = "openai" | "anthropic" | "gemini";
+export type ChatProvider = "openai" | "anthropic" | "gemini" | "openrouter";
 
 /** Stable key sent by the client (kept in sync with the OpenAPI `chatModel` enum). */
 export type ChatModelKey =
@@ -21,7 +25,12 @@ export type ChatModelKey =
   | "claude-haiku-4-5"
   | "gemini-3-pro"
   | "gemini-3-flash"
-  | "gemini-2.5-flash";
+  | "gemini-2.5-flash"
+  | "perplexity-sonar"
+  | "perplexity-sonar-pro"
+  | "perplexity-sonar-reasoning"
+  | "deepseek-chat-v3"
+  | "deepseek-r1";
 
 export interface ChatModelDef {
   /** Client-facing key (matches the OpenAPI enum). */
@@ -47,6 +56,27 @@ export const CHAT_MODELS: readonly ChatModelDef[] = [
   { key: "gemini-3-pro", provider: "gemini", model: "gemini-3.1-pro-preview" },
   { key: "gemini-3-flash", provider: "gemini", model: "gemini-3-flash-preview" },
   { key: "gemini-2.5-flash", provider: "gemini", model: "gemini-2.5-flash" },
+  {
+    key: "perplexity-sonar",
+    provider: "openrouter",
+    model: "perplexity/sonar",
+  },
+  {
+    key: "perplexity-sonar-pro",
+    provider: "openrouter",
+    model: "perplexity/sonar-pro",
+  },
+  {
+    key: "perplexity-sonar-reasoning",
+    provider: "openrouter",
+    model: "perplexity/sonar-reasoning-pro",
+  },
+  {
+    key: "deepseek-chat-v3",
+    provider: "openrouter",
+    model: "deepseek/deepseek-chat-v3.1",
+  },
+  { key: "deepseek-r1", provider: "openrouter", model: "deepseek/deepseek-r1" },
 ];
 
 /** Default model — kept on gpt-5-mini for low chat latency + credit conservation. */
@@ -189,6 +219,44 @@ export async function* streamChat(
     } as Parameters<typeof gemini.models.generateContentStream>[0]);
     for await (const chunk of stream) {
       if (chunk.text) yield chunk.text;
+    }
+    return;
+  }
+
+  if (provider === "openrouter") {
+    // OpenAI-compatible chat completions (DeepSeek, Perplexity Sonar). Sonar
+    // models are text-only and these providers reject OpenAI-specific params
+    // like `reasoning_effort`, so keep the request to the common subset.
+    let orUserContent: OpenAI.Chat.Completions.ChatCompletionUserMessageParam["content"];
+    if (image) {
+      orUserContent = [
+        { type: "text", text: fallbackText(userText) },
+        { type: "image_url", image_url: { url: image.dataUrl } },
+      ];
+    } else {
+      orUserContent = userText;
+    }
+
+    const orMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+      { role: "system", content: system },
+      ...history.map(
+        (h): OpenAI.Chat.Completions.ChatCompletionMessageParam =>
+          h.role === "assistant"
+            ? { role: "assistant", content: h.content }
+            : { role: "user", content: h.content },
+      ),
+      { role: "user", content: orUserContent },
+    ];
+
+    const stream = await openrouter.chat.completions.create({
+      model,
+      max_tokens: MAX_OUTPUT_TOKENS,
+      stream: true,
+      messages: orMessages,
+    });
+    for await (const part of stream) {
+      const content = part.choices[0]?.delta?.content;
+      if (content) yield content;
     }
     return;
   }

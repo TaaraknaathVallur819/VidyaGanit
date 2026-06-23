@@ -19,4 +19,9 @@ export const ChatMessageInputChatModel = {
   'gemini-3-pro': 'gemini-3-pro',
   'gemini-3-flash': 'gemini-3-flash',
   'gemini-25-flash': 'gemini-2.5-flash',
+  'perplexity-sonar': 'perplexity-sonar',
+  'perplexity-sonar-pro': 'perplexity-sonar-pro',
+  'perplexity-sonar-reasoning': 'perplexity-sonar-reasoning',
+  'deepseek-chat-v3': 'deepseek-chat-v3',
+  'deepseek-r1': 'deepseek-r1',
 } as const;

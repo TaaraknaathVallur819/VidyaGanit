@@ -1227,6 +1227,11 @@ components:
               gemini-3-pro,
               gemini-3-flash,
               gemini-2.5-flash,
+              perplexity-sonar,
+              perplexity-sonar-pro,
+              perplexity-sonar-reasoning,
+              deepseek-chat-v3,
+              deepseek-r1,
             ]
         imageModel:
           type: string
@@ -1605,6 +1610,11 @@ components:
               gemini-3-pro,
               gemini-3-flash,
               gemini-2.5-flash,
+              perplexity-sonar,
+              perplexity-sonar-pro,
+              perplexity-sonar-reasoning,
+              deepseek-chat-v3,
+              deepseek-r1,
             ]
         imageModel:
           type: string

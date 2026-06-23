@@ -1,4 +1,5 @@
 - [AI tutor chat](ai-tutor-chat.md) — SSE chat contract, gpt-5.4/gpt-image-1, [[DRAW]] marker stripping
+- [OpenRouter chat provider](openrouter-chat-models.md) — Perplexity Sonar + DeepSeek via OpenRouter integration; slug/max_tokens gotchas; catalog↔enum↔UI parity guards
 - [Student-linking authz](student-linking-authz.md) — link/unlink routes need requireParentOrTutor (not just requireSelf); batches/bulk-add/report-export shape; types come from @workspace/api-client-react
 - [Brain Games tailoring](brain-games-tailoring.md) — board tailoring is sequencing+pacing only (not fake topic pools); complexity-driven timerFor; symbolic prompts
 - [Indian education boards](india-boards.md) — `@workspace/india-boards` is the single catalog shared by the picker + AI prompt; keep stored board values backward-compatible

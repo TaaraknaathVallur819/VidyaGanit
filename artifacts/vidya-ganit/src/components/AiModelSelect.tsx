@@ -12,7 +12,12 @@ export type ChatModelKey =
   | "claude-haiku-4-5"
   | "gemini-3-pro"
   | "gemini-3-flash"
-  | "gemini-2.5-flash";
+  | "gemini-2.5-flash"
+  | "perplexity-sonar"
+  | "perplexity-sonar-pro"
+  | "perplexity-sonar-reasoning"
+  | "deepseek-chat-v3"
+  | "deepseek-r1";
 
 // Brand/model names are intentionally hardcoded (not translated).
 const CHAT_MODEL_GROUPS: {
@@ -43,7 +48,29 @@ const CHAT_MODEL_GROUPS: {
       { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
     ],
   },
+  {
+    provider: "Perplexity",
+    models: [
+      { value: "perplexity-sonar", label: "Sonar" },
+      { value: "perplexity-sonar-pro", label: "Sonar Pro" },
+      { value: "perplexity-sonar-reasoning", label: "Sonar Reasoning Pro" },
+    ],
+  },
+  {
+    provider: "DeepSeek",
+    models: [
+      { value: "deepseek-chat-v3", label: "DeepSeek V3.1" },
+      { value: "deepseek-r1", label: "DeepSeek R1" },
+    ],
+  },
 ];
+
+// Flat list of every selectable key the UI can send. Exported so a test can
+// guard against drift from the OpenAPI `chatModel` enum (the server silently
+// falls back to the default model for any key it doesn't recognise).
+export const CHAT_MODEL_KEYS: ChatModelKey[] = CHAT_MODEL_GROUPS.flatMap((g) =>
+  g.models.map((m) => m.value),
+);
 
 export default function AiModelSelect({
   value,

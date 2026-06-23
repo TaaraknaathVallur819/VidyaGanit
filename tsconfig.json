@@ -22,6 +22,9 @@
       "path": "./lib/integrations-openai-ai-server"
     },
     {
+      "path": "./lib/integrations-openrouter-ai"
+    },
+    {
       "path": "./lib/india-boards"
     }
   ]
