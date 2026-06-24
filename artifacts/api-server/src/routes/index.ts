@@ -14,6 +14,7 @@ import goalsRouter from "./goals";
 import worksheetRouter from "./worksheet";
 import bookmarksRouter from "./bookmarks";
 import messagesRouter from "./messages";
+import feesRouter from "./fees";
 
 const router: IRouter = Router();
 
@@ -32,5 +33,6 @@ router.use(goalsRouter);
 router.use(worksheetRouter);
 router.use(bookmarksRouter);
 router.use(messagesRouter);
+router.use(feesRouter);
 
 export default router;

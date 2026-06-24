@@ -13,3 +13,4 @@ export * from "./announcements";
 export * from "./weeklyGoals";
 export * from "./bookmarks";
 export * from "./directMessages";
+export * from "./fees";

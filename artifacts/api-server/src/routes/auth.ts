@@ -59,6 +59,7 @@ function profileResponse(user: typeof usersTable.$inferSelect) {
     batch: user.batch ?? null,
     batches: user.batches ?? null,
     academyName: user.academyName ?? null,
+    branch: user.branch ?? null,
     language: user.language ?? null,
     xp: user.xp ?? 0,
     badges: user.badges ?? [],
@@ -72,7 +73,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
     return;
   }
 
-  const { name, password, role, gender, studentClass, board, parentType, contact, batch, batches, academyName } =
+  const { name, password, role, gender, studentClass, board, parentType, contact, batch, batches, academyName, branch } =
     parsed.data;
 
   // Tutors can teach several batches. Normalise the list (trim, drop blanks,
@@ -112,6 +113,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
       batch: legacyBatch,
       batches: batchesValue,
       academyName: academyName ?? null,
+      branch: role === "tutor" ? branch ?? null : null,
     })
     .returning();
 

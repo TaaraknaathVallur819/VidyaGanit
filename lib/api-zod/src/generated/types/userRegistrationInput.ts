@@ -31,4 +31,6 @@ export interface UserRegistrationInput {
   batches?: string[] | null;
   /** @nullable */
   academyName?: string | null;
+  /** @nullable */
+  branch?: string | null;
 }

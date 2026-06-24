@@ -65,6 +65,7 @@ import type {
   NotificationsResponse,
   ProfileUpdate,
   RecommendationResponse,
+  RecordFeePaymentInput,
   ResetPasswordInput,
   ReviewDueResponse,
   ReviewGradeInput,
@@ -79,6 +80,7 @@ import type {
   SubmitAssessmentInput,
   TranscriptionResponse,
   TutorAssignmentsResponse,
+  TutorFeesResponse,
   UserProfile,
   UserRegistrationInput,
   WeeklyGoalInput,
@@ -3999,6 +4001,227 @@ export function useGetClassHeatmap<TData = Awaited<ReturnType<typeof getClassHea
 
 
 
+
+export const getGetTutorFeesUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/tutor/${vidyaId}/fees`
+}
+
+/**
+ * @summary Fee payment records and per-student status for a tutor's students
+ */
+export const getTutorFees = async (vidyaId: string, options?: RequestInit): Promise<TutorFeesResponse> => {
+
+  return customFetch<TutorFeesResponse>(getGetTutorFeesUrl(vidyaId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTutorFeesQueryKey = (vidyaId: string,) => {
+    return [
+    `/api/tutor/${vidyaId}/fees`
+    ] as const;
+    }
+
+
+export const getGetTutorFeesQueryOptions = <TData = Awaited<ReturnType<typeof getTutorFees>>, TError = ErrorType<unknown>>(vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTutorFees>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTutorFeesQueryKey(vidyaId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTutorFees>>> = ({ signal }) => getTutorFees(vidyaId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(vidyaId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTutorFees>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetTutorFeesQueryResult = NonNullable<Awaited<ReturnType<typeof getTutorFees>>>
+export type GetTutorFeesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Fee payment records and per-student status for a tutor's students
+ */
+
+export function useGetTutorFees<TData = Awaited<ReturnType<typeof getTutorFees>>, TError = ErrorType<unknown>>(
+ vidyaId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTutorFees>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetTutorFeesQueryOptions(vidyaId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getRecordFeePaymentUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/tutor/${vidyaId}/fees`
+}
+
+/**
+ * @summary Record a tuition fee payment for a linked student
+ */
+export const recordFeePayment = async (vidyaId: string,
+    recordFeePaymentInput: RecordFeePaymentInput, options?: RequestInit): Promise<TutorFeesResponse> => {
+
+  return customFetch<TutorFeesResponse>(getRecordFeePaymentUrl(vidyaId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      recordFeePaymentInput,)
+  }
+);}
+
+
+
+
+export const getRecordFeePaymentMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordFeePayment>>, TError,{vidyaId: string;data: BodyType<RecordFeePaymentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof recordFeePayment>>, TError,{vidyaId: string;data: BodyType<RecordFeePaymentInput>}, TContext> => {
+
+const mutationKey = ['recordFeePayment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof recordFeePayment>>, {vidyaId: string;data: BodyType<RecordFeePaymentInput>}> = (props) => {
+          const {vidyaId,data} = props ?? {};
+
+          return  recordFeePayment(vidyaId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RecordFeePaymentMutationResult = NonNullable<Awaited<ReturnType<typeof recordFeePayment>>>
+    export type RecordFeePaymentMutationBody = BodyType<RecordFeePaymentInput>
+    export type RecordFeePaymentMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Record a tuition fee payment for a linked student
+ */
+export const useRecordFeePayment = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordFeePayment>>, TError,{vidyaId: string;data: BodyType<RecordFeePaymentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof recordFeePayment>>,
+        TError,
+        {vidyaId: string;data: BodyType<RecordFeePaymentInput>},
+        TContext
+      > => {
+      return useMutation(getRecordFeePaymentMutationOptions(options));
+    }
+
+export const getDeleteFeePaymentUrl = (vidyaId: string,
+    feeId: string,) => {
+
+
+
+
+  return `/api/tutor/${vidyaId}/fees/${feeId}`
+}
+
+/**
+ * @summary Delete a fee payment record
+ */
+export const deleteFeePayment = async (vidyaId: string,
+    feeId: string, options?: RequestInit): Promise<TutorFeesResponse> => {
+
+  return customFetch<TutorFeesResponse>(getDeleteFeePaymentUrl(vidyaId,feeId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteFeePaymentMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteFeePayment>>, TError,{vidyaId: string;feeId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteFeePayment>>, TError,{vidyaId: string;feeId: string}, TContext> => {
+
+const mutationKey = ['deleteFeePayment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteFeePayment>>, {vidyaId: string;feeId: string}> = (props) => {
+          const {vidyaId,feeId} = props ?? {};
+
+          return  deleteFeePayment(vidyaId,feeId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteFeePaymentMutationResult = NonNullable<Awaited<ReturnType<typeof deleteFeePayment>>>
+
+    export type DeleteFeePaymentMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Delete a fee payment record
+ */
+export const useDeleteFeePayment = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteFeePayment>>, TError,{vidyaId: string;feeId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteFeePayment>>,
+        TError,
+        {vidyaId: string;feeId: string},
+        TContext
+      > => {
+      return useMutation(getDeleteFeePaymentMutationOptions(options));
+    }
 
 export const getGetWeeklyDigestUrl = (vidyaId: string,
     studentVidyaId: string,) => {

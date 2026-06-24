@@ -19,6 +19,9 @@ export const usersTable = pgTable("users", {
   // mirrors the first entry of this list; `batches` is the authoritative list.
   batches: text("batches").array(),
   academyName: text("academy_name"),
+  // The academy branch / centre location a tutor belongs to (e.g. "Andheri West").
+  // Captured at tutor registration; null for parents/students.
+  branch: text("branch"),
   // Free-text "About me" personal context the user shares so the AI (tutor for
   // students, Strategy/Coach AI for parents/tutors) can personalise its replies.
   aboutMe: text("about_me"),

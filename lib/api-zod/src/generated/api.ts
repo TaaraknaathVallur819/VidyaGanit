@@ -36,7 +36,8 @@ export const RegisterUserBody = zod.object({
   "contact": zod.string().nullish(),
   "batch": zod.string().nullish(),
   "batches": zod.array(zod.string()).nullish(),
-  "academyName": zod.string().nullish()
+  "academyName": zod.string().nullish(),
+  "branch": zod.string().nullish()
 })
 
 
@@ -72,6 +73,7 @@ export const LoginUserResponse = zod.object({
   "batch": zod.string().nullish(),
   "batches": zod.array(zod.string()).nullish(),
   "academyName": zod.string().nullish(),
+  "branch": zod.string().nullish(),
   "aboutMe": zod.string().max(loginUserResponseAboutMeMax).nullish(),
   "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
   "voiceRate": zod.number().min(loginUserResponseVoiceRateMin).max(loginUserResponseVoiceRateMax).default(loginUserResponseVoiceRateDefault),
@@ -113,6 +115,7 @@ export const GetProfileResponse = zod.object({
   "batch": zod.string().nullish(),
   "batches": zod.array(zod.string()).nullish(),
   "academyName": zod.string().nullish(),
+  "branch": zod.string().nullish(),
   "aboutMe": zod.string().max(getProfileResponseAboutMeMax).nullish(),
   "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
   "voiceRate": zod.number().min(getProfileResponseVoiceRateMin).max(getProfileResponseVoiceRateMax).default(getProfileResponseVoiceRateDefault),
@@ -176,6 +179,7 @@ export const UpdateProfileResponse = zod.object({
   "batch": zod.string().nullish(),
   "batches": zod.array(zod.string()).nullish(),
   "academyName": zod.string().nullish(),
+  "branch": zod.string().nullish(),
   "aboutMe": zod.string().max(updateProfileResponseAboutMeMax).nullish(),
   "language": zod.union([zod.literal('en'),zod.literal('hi'),zod.literal('bn'),zod.literal('mr'),zod.literal('te'),zod.literal('ta'),zod.literal('gu'),zod.literal('ur'),zod.literal('kn'),zod.literal('ml'),zod.literal('pa'),zod.literal('or'),zod.literal('as'),zod.literal('brx'),zod.literal('doi'),zod.literal('ks'),zod.literal('kok'),zod.literal('mai'),zod.literal('mni'),zod.literal('ne'),zod.literal('sa'),zod.literal('sat'),zod.literal('sd'),zod.literal(null)]).nullish(),
   "voiceRate": zod.number().min(updateProfileResponseVoiceRateMin).max(updateProfileResponseVoiceRateMax).default(updateProfileResponseVoiceRateDefault),
@@ -1189,6 +1193,126 @@ export const GetClassHeatmapResponse = zod.object({
   "name": zod.string(),
   "batch": zod.string().nullable(),
   "topics": zod.record(zod.string(), zod.number())
+}))
+})
+
+
+/**
+ * @summary Fee payment records and per-student status for a tutor's students
+ */
+export const GetTutorFeesParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetTutorFeesResponse = zod.object({
+  "records": zod.array(zod.object({
+  "id": zod.number(),
+  "studentVidyaId": zod.string(),
+  "studentName": zod.string(),
+  "amount": zod.number(),
+  "method": zod.enum(['cash', 'upi', 'card', 'bank_transfer', 'cheque', 'other']),
+  "status": zod.enum(['paid', 'unpaid', 'pending']),
+  "period": zod.string().nullish(),
+  "note": zod.string().nullish(),
+  "paidOn": zod.string().nullish(),
+  "createdAt": zod.string()
+})),
+  "summaries": zod.array(zod.object({
+  "studentVidyaId": zod.string(),
+  "name": zod.string(),
+  "batch": zod.string().nullish(),
+  "latestStatus": zod.union([zod.literal('paid'),zod.literal('unpaid'),zod.literal('pending'),zod.literal(null)]).nullish(),
+  "latestAmount": zod.number().nullish(),
+  "latestMethod": zod.string().nullish(),
+  "latestPaidOn": zod.string().nullish(),
+  "totalPaid": zod.number()
+}))
+})
+
+
+/**
+ * @summary Record a tuition fee payment for a linked student
+ */
+export const RecordFeePaymentParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const recordFeePaymentBodyAmountMin = 0;
+export const recordFeePaymentBodyAmountMax = 10000000;
+
+export const recordFeePaymentBodyStatusDefault = `paid`;
+export const recordFeePaymentBodyPeriodMax = 60;
+
+export const recordFeePaymentBodyNoteMax = 500;
+
+
+
+export const RecordFeePaymentBody = zod.object({
+  "studentVidyaId": zod.string(),
+  "amount": zod.number().min(recordFeePaymentBodyAmountMin).max(recordFeePaymentBodyAmountMax),
+  "method": zod.enum(['cash', 'upi', 'card', 'bank_transfer', 'cheque', 'other']),
+  "status": zod.enum(['paid', 'unpaid', 'pending']).default(recordFeePaymentBodyStatusDefault),
+  "period": zod.string().max(recordFeePaymentBodyPeriodMax).nullish(),
+  "note": zod.string().max(recordFeePaymentBodyNoteMax).nullish(),
+  "paidOn": zod.string().nullish()
+})
+
+export const RecordFeePaymentResponse = zod.object({
+  "records": zod.array(zod.object({
+  "id": zod.number(),
+  "studentVidyaId": zod.string(),
+  "studentName": zod.string(),
+  "amount": zod.number(),
+  "method": zod.enum(['cash', 'upi', 'card', 'bank_transfer', 'cheque', 'other']),
+  "status": zod.enum(['paid', 'unpaid', 'pending']),
+  "period": zod.string().nullish(),
+  "note": zod.string().nullish(),
+  "paidOn": zod.string().nullish(),
+  "createdAt": zod.string()
+})),
+  "summaries": zod.array(zod.object({
+  "studentVidyaId": zod.string(),
+  "name": zod.string(),
+  "batch": zod.string().nullish(),
+  "latestStatus": zod.union([zod.literal('paid'),zod.literal('unpaid'),zod.literal('pending'),zod.literal(null)]).nullish(),
+  "latestAmount": zod.number().nullish(),
+  "latestMethod": zod.string().nullish(),
+  "latestPaidOn": zod.string().nullish(),
+  "totalPaid": zod.number()
+}))
+})
+
+
+/**
+ * @summary Delete a fee payment record
+ */
+export const DeleteFeePaymentParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "feeId": zod.coerce.string()
+})
+
+export const DeleteFeePaymentResponse = zod.object({
+  "records": zod.array(zod.object({
+  "id": zod.number(),
+  "studentVidyaId": zod.string(),
+  "studentName": zod.string(),
+  "amount": zod.number(),
+  "method": zod.enum(['cash', 'upi', 'card', 'bank_transfer', 'cheque', 'other']),
+  "status": zod.enum(['paid', 'unpaid', 'pending']),
+  "period": zod.string().nullish(),
+  "note": zod.string().nullish(),
+  "paidOn": zod.string().nullish(),
+  "createdAt": zod.string()
+})),
+  "summaries": zod.array(zod.object({
+  "studentVidyaId": zod.string(),
+  "name": zod.string(),
+  "batch": zod.string().nullish(),
+  "latestStatus": zod.union([zod.literal('paid'),zod.literal('unpaid'),zod.literal('pending'),zod.literal(null)]).nullish(),
+  "latestAmount": zod.number().nullish(),
+  "latestMethod": zod.string().nullish(),
+  "latestPaidOn": zod.string().nullish(),
+  "totalPaid": zod.number()
 }))
 })
 

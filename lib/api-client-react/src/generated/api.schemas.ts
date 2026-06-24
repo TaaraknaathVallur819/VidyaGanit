@@ -71,6 +71,8 @@ export interface UserRegistrationInput {
   batches?: string[] | null;
   /** @nullable */
   academyName?: string | null;
+  /** @nullable */
+  branch?: string | null;
 }
 
 export interface LoginInput {
@@ -157,6 +159,8 @@ export interface UserProfile {
   batches?: string[] | null;
   /** @nullable */
   academyName?: string | null;
+  /** @nullable */
+  branch?: string | null;
   /**
      * @maxLength 1000
      * @nullable
@@ -178,6 +182,120 @@ export interface UserProfile {
   voiceName?: string | null;
   xp: number;
   badges: string[];
+}
+
+export type FeePaymentMethod = typeof FeePaymentMethod[keyof typeof FeePaymentMethod];
+
+
+export const FeePaymentMethod = {
+  cash: 'cash',
+  upi: 'upi',
+  card: 'card',
+  bank_transfer: 'bank_transfer',
+  cheque: 'cheque',
+  other: 'other',
+} as const;
+
+export type FeePaymentStatus = typeof FeePaymentStatus[keyof typeof FeePaymentStatus];
+
+
+export const FeePaymentStatus = {
+  paid: 'paid',
+  unpaid: 'unpaid',
+  pending: 'pending',
+} as const;
+
+export interface FeePayment {
+  id: number;
+  studentVidyaId: string;
+  studentName: string;
+  amount: number;
+  method: FeePaymentMethod;
+  status: FeePaymentStatus;
+  /** @nullable */
+  period?: string | null;
+  /** @nullable */
+  note?: string | null;
+  /** @nullable */
+  paidOn?: string | null;
+  createdAt: string;
+}
+
+/**
+ * @nullable
+ */
+export type FeeStudentSummaryLatestStatus = typeof FeeStudentSummaryLatestStatus[keyof typeof FeeStudentSummaryLatestStatus] | null;
+
+
+export const FeeStudentSummaryLatestStatus = {
+  paid: 'paid',
+  unpaid: 'unpaid',
+  pending: 'pending',
+} as const;
+
+export interface FeeStudentSummary {
+  studentVidyaId: string;
+  name: string;
+  /** @nullable */
+  batch?: string | null;
+  /** @nullable */
+  latestStatus?: FeeStudentSummaryLatestStatus;
+  /** @nullable */
+  latestAmount?: number | null;
+  /** @nullable */
+  latestMethod?: string | null;
+  /** @nullable */
+  latestPaidOn?: string | null;
+  totalPaid: number;
+}
+
+export interface TutorFeesResponse {
+  records: FeePayment[];
+  summaries: FeeStudentSummary[];
+}
+
+export type RecordFeePaymentInputMethod = typeof RecordFeePaymentInputMethod[keyof typeof RecordFeePaymentInputMethod];
+
+
+export const RecordFeePaymentInputMethod = {
+  cash: 'cash',
+  upi: 'upi',
+  card: 'card',
+  bank_transfer: 'bank_transfer',
+  cheque: 'cheque',
+  other: 'other',
+} as const;
+
+export type RecordFeePaymentInputStatus = typeof RecordFeePaymentInputStatus[keyof typeof RecordFeePaymentInputStatus];
+
+
+export const RecordFeePaymentInputStatus = {
+  paid: 'paid',
+  unpaid: 'unpaid',
+  pending: 'pending',
+} as const;
+
+export interface RecordFeePaymentInput {
+  studentVidyaId: string;
+  /**
+     * @minimum 0
+     * @maximum 10000000
+     */
+  amount: number;
+  method: RecordFeePaymentInputMethod;
+  status?: RecordFeePaymentInputStatus;
+  /**
+     * @maxLength 60
+     * @nullable
+     */
+  period?: string | null;
+  /**
+     * @maxLength 500
+     * @nullable
+     */
+  note?: string | null;
+  /** @nullable */
+  paidOn?: string | null;
 }
 
 export type ProfileUpdateGender = typeof ProfileUpdateGender[keyof typeof ProfileUpdateGender];

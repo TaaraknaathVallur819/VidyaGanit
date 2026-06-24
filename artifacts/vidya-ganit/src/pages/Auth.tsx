@@ -76,6 +76,7 @@ export default function Auth() {
   const [regContact, setRegContact] = useState("");
   const [regBatches, setRegBatches] = useState<string[]>([""]);
   const [regAcademyName, setRegAcademyName] = useState("");
+  const [regBranch, setRegBranch] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [nameError, setNameError] = useState("");
   const [gender, setGender] = useState<Gender | null>(null);
@@ -176,6 +177,7 @@ export default function Auth() {
           batch: role === "tutor" ? cleanedBatches[0] ?? null : null,
           batches: role === "tutor" ? cleanedBatches : null,
           academyName: role === "tutor" ? regAcademyName.trim() || null : null,
+          branch: role === "tutor" ? regBranch.trim() || null : null,
         },
       },
       {
@@ -509,6 +511,23 @@ export default function Auth() {
                       value={regAcademyName}
                       onChange={(e) => setRegAcademyName(e.target.value)}
                       placeholder={t("auth.academyNamePlaceholder")}
+                      className="h-12 text-lg px-4 bg-gray-50 border-gray-200"
+                    />
+                  </div>
+                )}
+
+                {role === "tutor" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-branch" className="text-foreground font-medium">
+                      {t("auth.branch")}{" "}
+                      <span className="text-muted-foreground font-normal text-sm">{t("auth.optional")}</span>
+                    </Label>
+                    <Input
+                      id="reg-branch"
+                      data-testid="input-register-branch"
+                      value={regBranch}
+                      onChange={(e) => setRegBranch(e.target.value)}
+                      placeholder={t("auth.branchPlaceholder")}
                       className="h-12 text-lg px-4 bg-gray-50 border-gray-200"
                     />
                   </div>

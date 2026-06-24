@@ -1431,6 +1431,90 @@ paths:
               schema:
                 $ref: "#/components/schemas/HeatmapResponse"
 
+  /tutor/{vidyaId}/fees:
+    get:
+      operationId: getTutorFees
+      tags: [tutor]
+      summary: Fee payment records and per-student status for a tutor's students
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Fee records and summaries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TutorFeesResponse"
+    post:
+      operationId: recordFeePayment
+      tags: [tutor]
+      summary: Record a tuition fee payment for a linked student
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecordFeePaymentInput"
+      responses:
+        "200":
+          description: Updated fee records and summaries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TutorFeesResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Student not linked to this tutor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /tutor/{vidyaId}/fees/{feeId}:
+    delete:
+      operationId: deleteFeePayment
+      tags: [tutor]
+      summary: Delete a fee payment record
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: feeId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Updated fee records and summaries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TutorFeesResponse"
+        "404":
+          description: Fee record not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /parent/{vidyaId}/students/{studentVidyaId}/digest:
     get:
       operationId: getWeeklyDigest
@@ -1790,6 +1874,8 @@ components:
             type: string
         academyName:
           type: ["string", "null"]
+        branch:
+          type: ["string", "null"]
 
     LoginInput:
       type: object
@@ -1849,6 +1935,8 @@ components:
             type: string
         academyName:
           type: ["string", "null"]
+        branch:
+          type: ["string", "null"]
         aboutMe:
           type: ["string", "null"]
           maxLength: 1000
@@ -1874,6 +1962,94 @@ components:
           type: array
           items:
             type: string
+
+    FeePayment:
+      type: object
+      required: [id, studentVidyaId, studentName, amount, method, status, createdAt]
+      properties:
+        id:
+          type: integer
+        studentVidyaId:
+          type: string
+        studentName:
+          type: string
+        amount:
+          type: integer
+        method:
+          type: string
+          enum: [cash, upi, card, bank_transfer, cheque, other]
+        status:
+          type: string
+          enum: [paid, unpaid, pending]
+        period:
+          type: ["string", "null"]
+        note:
+          type: ["string", "null"]
+        paidOn:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    FeeStudentSummary:
+      type: object
+      required: [studentVidyaId, name, totalPaid]
+      properties:
+        studentVidyaId:
+          type: string
+        name:
+          type: string
+        batch:
+          type: ["string", "null"]
+        latestStatus:
+          type: ["string", "null"]
+          enum: [paid, unpaid, pending, null]
+        latestAmount:
+          type: ["integer", "null"]
+        latestMethod:
+          type: ["string", "null"]
+        latestPaidOn:
+          type: ["string", "null"]
+        totalPaid:
+          type: integer
+
+    TutorFeesResponse:
+      type: object
+      required: [records, summaries]
+      properties:
+        records:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeePayment"
+        summaries:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeeStudentSummary"
+
+    RecordFeePaymentInput:
+      type: object
+      required: [studentVidyaId, amount, method]
+      properties:
+        studentVidyaId:
+          type: string
+        amount:
+          type: integer
+          minimum: 0
+          maximum: 10000000
+        method:
+          type: string
+          enum: [cash, upi, card, bank_transfer, cheque, other]
+        status:
+          type: string
+          enum: [paid, unpaid, pending]
+          default: paid
+        period:
+          type: ["string", "null"]
+          maxLength: 60
+        note:
+          type: ["string", "null"]
+          maxLength: 500
+        paidOn:
+          type: ["string", "null"]
 
     ProfileUpdate:
       type: object

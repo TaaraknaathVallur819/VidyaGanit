@@ -48,6 +48,7 @@ function toProfile(user: typeof usersTable.$inferSelect) {
     batch: user.batch ?? null,
     batches: user.batches ?? null,
     academyName: user.academyName ?? null,
+    branch: user.branch ?? null,
     aboutMe: user.aboutMe ?? null,
     language: user.language ?? null,
     xp: user.xp ?? 0,
