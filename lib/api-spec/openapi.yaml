@@ -1960,7 +1960,7 @@ components:
             ]
         imageModel:
           type: string
-          enum: [openai, gemini-nano-banana, gemini-nano-banana-pro]
+          enum: [openai, openai-hd, gemini-nano-banana, gemini-nano-banana-pro]
 
     ChatAttachment:
       type: object
@@ -2343,7 +2343,7 @@ components:
             ]
         imageModel:
           type: string
-          enum: [openai, gemini-nano-banana, gemini-nano-banana-pro]
+          enum: [openai, openai-hd, gemini-nano-banana, gemini-nano-banana-pro]
 
     GameScoreInput:
       type: object

@@ -112,7 +112,7 @@ export interface StreamChatInput {
   image?: ChatImage | null;
 }
 
-const MAX_OUTPUT_TOKENS = 8192;
+const MAX_OUTPUT_TOKENS = 4096;
 
 function base64FromDataUrl(dataUrl: string): string {
   const idx = dataUrl.indexOf("base64,");
@@ -215,7 +215,13 @@ export async function* streamChat(
     const stream = await gemini.models.generateContentStream({
       model,
       contents,
-      config: { maxOutputTokens: MAX_OUTPUT_TOKENS, systemInstruction: system },
+      config: {
+        maxOutputTokens: MAX_OUTPUT_TOKENS,
+        systemInstruction: system,
+        // Skip Gemini's internal "thinking" pass for faster responses — the
+        // Socratic hints are short and don't need a deliberation budget.
+        thinkingConfig: { thinkingBudget: 0 },
+      },
     } as Parameters<typeof gemini.models.generateContentStream>[0]);
     for await (const chunk of stream) {
       if (chunk.text) yield chunk.text;

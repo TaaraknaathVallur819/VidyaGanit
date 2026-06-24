@@ -3,22 +3,28 @@ import { generateImage } from "@workspace/integrations-gemini-ai/image";
 
 /**
  * Selectable image-generation backends for the tutor's inline diagrams.
- * - `openai`                 → OpenAI gpt-image-1
+ * - `openai`                 → OpenAI gpt-image-1 (fast, "low" quality)
+ * - `openai-hd`              → OpenAI gpt-image-1 (sharper, "high" quality)
  * - `gemini-nano-banana`     → Gemini "Nano Banana" (gemini-2.5-flash-image)
  * - `gemini-nano-banana-pro` → Gemini "Nano Banana Pro" (gemini-3-pro-image-preview)
  *
  * Claude is intentionally excluded — Anthropic offers no image generation.
  */
-export type ImageModel = "openai" | "gemini-nano-banana" | "gemini-nano-banana-pro";
+export type ImageModel =
+  | "openai"
+  | "openai-hd"
+  | "gemini-nano-banana"
+  | "gemini-nano-banana-pro";
 
 const IMAGE_MODELS: readonly ImageModel[] = [
   "openai",
+  "openai-hd",
   "gemini-nano-banana",
   "gemini-nano-banana-pro",
 ];
 
 const GEMINI_MODEL_IDS: Record<
-  Exclude<ImageModel, "openai">,
+  Exclude<ImageModel, "openai" | "openai-hd">,
   string
 > = {
   "gemini-nano-banana": "gemini-2.5-flash-image",
@@ -40,12 +46,15 @@ export async function generateImageDataUrl(
   model: ImageModel,
   prompt: string,
 ): Promise<string> {
-  if (model === "openai") {
-    // Use "low" quality for the tutor's inline diagrams: they are deliberately
-    // simple flat-vector illustrations with short labels, so the lowest quality
-    // tier renders an acceptable image while generating noticeably faster (and
-    // cheaper) than the default high/auto tier.
-    const buffer = await generateImageBuffer(prompt, "1024x1024", "low");
+  if (model === "openai" || model === "openai-hd") {
+    // Default `openai` uses "low" quality for the tutor's inline diagrams: they
+    // are deliberately simple flat-vector illustrations with short labels, so
+    // the lowest quality tier renders an acceptable image while generating
+    // noticeably faster (and cheaper) than the default high/auto tier.
+    // `openai-hd` opts into "high" quality for a sharper render at the cost of
+    // extra latency.
+    const quality = model === "openai-hd" ? "high" : "low";
+    const buffer = await generateImageBuffer(prompt, "1024x1024", quality);
     return `data:image/png;base64,${buffer.toString("base64")}`;
   }
 

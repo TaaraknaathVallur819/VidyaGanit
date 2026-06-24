@@ -364,7 +364,7 @@ export const SendChatMessageBody = zod.object({
   "dataUrl": zod.string().describe('Base64 data URL of the attached file (data:<mime>;base64,...)')
 }).optional(),
   "chatModel": zod.enum(['gpt-5.4', 'gpt-5-mini', 'gpt-5-nano', 'claude-opus-4-8', 'claude-sonnet-4-6', 'claude-haiku-4-5', 'gemini-3-pro', 'gemini-3-flash', 'gemini-2.5-flash', 'perplexity-sonar', 'perplexity-sonar-pro', 'perplexity-sonar-reasoning', 'deepseek-chat-v3', 'deepseek-r1']).optional(),
-  "imageModel": zod.enum(['openai', 'gemini-nano-banana', 'gemini-nano-banana-pro']).optional()
+  "imageModel": zod.enum(['openai', 'openai-hd', 'gemini-nano-banana', 'gemini-nano-banana-pro']).optional()
 })
 
 
@@ -569,7 +569,7 @@ export const SendConsultantMessageBody = zod.object({
   "dataUrl": zod.string().describe('Base64 data URL of the attached file (data:<mime>;base64,...)')
 }).optional(),
   "chatModel": zod.enum(['gpt-5.4', 'gpt-5-mini', 'gpt-5-nano', 'claude-opus-4-8', 'claude-sonnet-4-6', 'claude-haiku-4-5', 'gemini-3-pro', 'gemini-3-flash', 'gemini-2.5-flash', 'perplexity-sonar', 'perplexity-sonar-pro', 'perplexity-sonar-reasoning', 'deepseek-chat-v3', 'deepseek-r1']).optional(),
-  "imageModel": zod.enum(['openai', 'gemini-nano-banana', 'gemini-nano-banana-pro']).optional()
+  "imageModel": zod.enum(['openai', 'openai-hd', 'gemini-nano-banana', 'gemini-nano-banana-pro']).optional()
 })
 
 

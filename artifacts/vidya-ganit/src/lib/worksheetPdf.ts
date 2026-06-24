@@ -9,6 +9,7 @@ const LETTERS = ["A", "B", "C", "D", "E", "F"];
 export function exportWorksheetPdf(
   t: Translate,
   worksheet: WorksheetResponse,
+  meta?: { studentName?: string | null; board?: string | null },
 ): void {
   const doc = new jsPDF();
   const marginX = 14;
@@ -30,9 +31,21 @@ export function exportWorksheetPdf(
 
   doc.setTextColor(0);
   doc.setFontSize(11);
-  doc.text(t("worksheet.pdf.name"), marginX, y);
+  if (meta?.studentName) {
+    doc.text(
+      t("worksheet.pdf.student").replace("{name}", meta.studentName),
+      marginX,
+      y,
+    );
+  } else {
+    doc.text(t("worksheet.pdf.name"), marginX, y);
+  }
   doc.text(t("worksheet.pdf.date"), 130, y);
   y += 8;
+  if (meta?.board) {
+    doc.text(t("worksheet.pdf.board").replace("{board}", meta.board), marginX, y);
+    y += 8;
+  }
 
   doc.setFontSize(13);
   doc.text(t("worksheet.pdf.questions"), marginX, y);

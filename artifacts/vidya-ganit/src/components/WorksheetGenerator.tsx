@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,28 +11,44 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FileText, Download } from "lucide-react";
-import { useGetWorksheet } from "@workspace/api-client-react";
+import {
+  useGetWorksheet,
+  useGetLinkedStudents,
+} from "@workspace/api-client-react";
 import { exportWorksheetPdf } from "@/lib/worksheetPdf";
 import { useLanguage } from "@/lib/i18n";
-
-const WORKSHEET_TOPICS: { topic: string; key: string }[] = [
-  { topic: "fraction", key: "test.topic.fraction" },
-  { topic: "multiply", key: "test.topic.multiply" },
-  { topic: "divide", key: "test.topic.divide" },
-  { topic: "decimal", key: "test.topic.decimal" },
-  { topic: "percent", key: "test.topic.percent" },
-  { topic: "geometry", key: "test.topic.geometry" },
-];
+import { topicsForClass, TOPIC_I18N } from "@/lib/worksheetTopics";
 
 const COUNTS = [5, 10, 15, 20];
-const CLASSES = ["4", "5", "6", "7"];
 
 export default function WorksheetGenerator({ vidyaId }: { vidyaId: string }) {
   const { t } = useLanguage();
-  const [topic, setTopic] = useState("fraction");
+  const [selectedStudentId, setSelectedStudentId] = useState<string>("");
+  const [topic, setTopic] = useState("");
   const [count, setCount] = useState(10);
-  const [klass, setKlass] = useState<string>("any");
   const [error, setError] = useState("");
+
+  const { data: linkedData } = useGetLinkedStudents(vidyaId);
+  const students = linkedData?.students ?? [];
+  const selectedStudent =
+    students.find((s) => s.vidyaId === selectedStudentId) ?? null;
+  const klass = selectedStudent?.studentClass ?? null;
+  const board = selectedStudent?.board ?? null;
+  const topics = topicsForClass(klass);
+
+  // Default to the first linked student once they load.
+  useEffect(() => {
+    if (!selectedStudentId && students.length > 0) {
+      setSelectedStudentId(students[0].vidyaId);
+    }
+  }, [students, selectedStudentId]);
+
+  // Keep the chosen topic valid for the selected student's class curriculum.
+  useEffect(() => {
+    if (!topics.includes(topic as never)) {
+      setTopic(topics[0]);
+    }
+  }, [topics, topic]);
 
   const worksheetMutation = useGetWorksheet();
 
@@ -41,14 +57,14 @@ export default function WorksheetGenerator({ vidyaId }: { vidyaId: string }) {
     worksheetMutation.mutate(
       {
         vidyaId,
-        data: {
-          topic,
-          count,
-          klass: klass === "any" ? null : klass,
-        },
+        data: { topic, count, klass },
       },
       {
-        onSuccess: (data) => exportWorksheetPdf(t, data),
+        onSuccess: (data) =>
+          exportWorksheetPdf(t, data, {
+            studentName: selectedStudent?.name ?? null,
+            board,
+          }),
         onError: () => setError(t("worksheet.error")),
       },
     );
@@ -74,74 +90,109 @@ export default function WorksheetGenerator({ vidyaId }: { vidyaId: string }) {
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-3 gap-4">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">{t("worksheet.topic")}</Label>
-              <Select value={topic} onValueChange={setTopic}>
-                <SelectTrigger data-testid="select-worksheet-topic" className="h-11 rounded-xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {WORKSHEET_TOPICS.map((ws) => (
-                    <SelectItem key={ws.topic} value={ws.topic}>
-                      {t(ws.key)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          {students.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              {t("worksheet.noStudents")}
+            </p>
+          ) : (
+            <>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">
+                  {t("worksheet.student")}
+                </Label>
+                <Select
+                  value={selectedStudentId}
+                  onValueChange={setSelectedStudentId}
+                >
+                  <SelectTrigger
+                    data-testid="select-worksheet-student"
+                    className="h-11 rounded-xl"
+                  >
+                    <SelectValue placeholder={t("worksheet.selectStudent")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {students.map((s) => (
+                      <SelectItem key={s.vidyaId} value={s.vidyaId}>
+                        {s.name}
+                        {s.studentClass ? ` · ${s.studentClass}` : ""}
+                        {s.board ? ` · ${s.board}` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selectedStudent && (
+                  <p className="text-xs text-muted-foreground pt-0.5">
+                    {t("worksheet.tailoredNote").replace(
+                      "{name}",
+                      selectedStudent.name,
+                    )}
+                  </p>
+                )}
+              </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">{t("worksheet.count")}</Label>
-              <Select
-                value={String(count)}
-                onValueChange={(v) => setCount(Number(v))}
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">
+                    {t("worksheet.topic")}
+                  </Label>
+                  <Select value={topic} onValueChange={setTopic}>
+                    <SelectTrigger
+                      data-testid="select-worksheet-topic"
+                      className="h-11 rounded-xl"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {topics.map((tk) => (
+                        <SelectItem key={tk} value={tk}>
+                          {t(TOPIC_I18N[tk])}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">
+                    {t("worksheet.count")}
+                  </Label>
+                  <Select
+                    value={String(count)}
+                    onValueChange={(v) => setCount(Number(v))}
+                  >
+                    <SelectTrigger
+                      data-testid="select-worksheet-count"
+                      className="h-11 rounded-xl"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COUNTS.map((n) => (
+                        <SelectItem key={n} value={String(n)}>
+                          {n}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {error && <p className="text-sm text-red-600">{error}</p>}
+
+              <Button
+                type="button"
+                data-testid="button-worksheet-generate"
+                onClick={generate}
+                disabled={worksheetMutation.isPending || !selectedStudent}
+                className="w-full h-11 rounded-xl font-semibold gap-1.5"
               >
-                <SelectTrigger data-testid="select-worksheet-count" className="h-11 rounded-xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {COUNTS.map((n) => (
-                    <SelectItem key={n} value={String(n)}>
-                      {n}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">{t("worksheet.klass")}</Label>
-              <Select value={klass} onValueChange={setKlass}>
-                <SelectTrigger data-testid="select-worksheet-class" className="h-11 rounded-xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="any">{t("worksheet.anyClass")}</SelectItem>
-                  {CLASSES.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {error && <p className="text-sm text-red-600">{error}</p>}
-
-          <Button
-            type="button"
-            data-testid="button-worksheet-generate"
-            onClick={generate}
-            disabled={worksheetMutation.isPending}
-            className="w-full h-11 rounded-xl font-semibold gap-1.5"
-          >
-            <Download className="w-4 h-4" />
-            {worksheetMutation.isPending
-              ? t("worksheet.generating")
-              : t("worksheet.generate")}
-          </Button>
+                <Download className="w-4 h-4" />
+                {worksheetMutation.isPending
+                  ? t("worksheet.generating")
+                  : t("worksheet.generate")}
+              </Button>
+            </>
+          )}
         </CardContent>
       </Card>
     </motion.div>

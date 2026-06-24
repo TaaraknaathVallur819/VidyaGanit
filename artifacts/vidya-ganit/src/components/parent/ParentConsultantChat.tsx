@@ -99,7 +99,7 @@ export default function ParentConsultantChat({
   const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
   const [isContinuing, setIsContinuing] = useState(false);
   const [chatModel, setChatModel] = useState<ChatModelKey>("gpt-5-mini");
-  const [imageModel, setImageModel] = useState<ImageModel>("openai");
+  const [imageModel, setImageModel] = useState<ImageModel>("gemini-nano-banana");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);

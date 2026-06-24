@@ -11,6 +11,7 @@ export type ConsultantMessageInputImageModel = typeof ConsultantMessageInputImag
 
 export const ConsultantMessageInputImageModel = {
   openai: 'openai',
+  'openai-hd': 'openai-hd',
   'gemini-nano-banana': 'gemini-nano-banana',
   'gemini-nano-banana-pro': 'gemini-nano-banana-pro',
 } as const;

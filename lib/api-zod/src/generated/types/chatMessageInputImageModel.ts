@@ -11,6 +11,7 @@ export type ChatMessageInputImageModel = typeof ChatMessageInputImageModel[keyof
 
 export const ChatMessageInputImageModel = {
   openai: 'openai',
+  'openai-hd': 'openai-hd',
   'gemini-nano-banana': 'gemini-nano-banana',
   'gemini-nano-banana-pro': 'gemini-nano-banana-pro',
 } as const;
