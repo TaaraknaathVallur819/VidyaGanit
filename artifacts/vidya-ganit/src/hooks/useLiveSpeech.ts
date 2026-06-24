@@ -59,11 +59,22 @@ export type LiveSpeech = {
   toggle: () => void;
 };
 
+// Cap consecutive failed (re)starts so a permanently failing engine surfaces an
+// error instead of spinning forever. Reset on the first successful onstart.
+const MAX_START_RETRIES = 5;
+const RESTART_DELAY_MS = 100;
+
 /**
  * Live, continuous speech-to-text built on the Web Speech API. Emits interim
- * results AS the user speaks (snappy), keeps listening across the browser's
- * silence-driven auto-stops by transparently restarting, and accumulates
- * finalized segments so nothing is lost between restarts.
+ * results AS the user speaks (snappy, word-by-word), keeps listening across the
+ * browser's silence-driven auto-stops, and accumulates finalized segments so
+ * nothing is lost between restarts.
+ *
+ * Reliability: after a pause Chrome ENDS the session, and restarting the *same*
+ * SpeechRecognition object throws InvalidStateError — which previously killed
+ * dictation after the first pause. We therefore restart with a FRESH instance
+ * and retry briefly through Chrome's start-up race so live transcription keeps
+ * flowing until the user explicitly stops.
  */
 export function useLiveSpeech({ lang, onResult, onError }: Options): LiveSpeech {
   const [isListening, setIsListening] = useState(false);
@@ -73,6 +84,11 @@ export function useLiveSpeech({ lang, onResult, onError }: Options): LiveSpeech 
   // True while the user wants to keep listening. Distinguishes an intentional
   // stop from the browser auto-ending on a pause (which we restart through).
   const wantListeningRef = useRef(false);
+  const restartTimerRef = useRef<number | null>(null);
+  const startRetriesRef = useRef(0);
+  // Indirection so an instance's onend can trigger a fresh begin() without a
+  // stale closure (begin is recreated, the ref always points at the latest).
+  const beginRef = useRef<() => void>(() => {});
 
   // Keep the latest callbacks/lang without re-creating recognition handlers.
   const onResultRef = useRef(onResult);
@@ -89,6 +105,13 @@ export function useLiveSpeech({ lang, onResult, onError }: Options): LiveSpeech 
 
   const supported = getCtor() !== null;
 
+  const clearRestartTimer = useCallback(() => {
+    if (restartTimerRef.current !== null) {
+      window.clearTimeout(restartTimerRef.current);
+      restartTimerRef.current = null;
+    }
+  }, []);
+
   const createRecognition = useCallback((): SpeechRecognition | null => {
     const Ctor = getCtor();
     if (!Ctor) return null;
@@ -101,6 +124,12 @@ export function useLiveSpeech({ lang, onResult, onError }: Options): LiveSpeech 
     // Handlers are bound to THIS instance. A stale instance (e.g. after the
     // user stops and quickly restarts) must never mutate state or restart, so
     // every handler first checks it is still the active recognition.
+    recognition.onstart = () => {
+      if (recognitionRef.current !== recognition) return;
+      startRetriesRef.current = 0;
+      setIsListening(true);
+    };
+
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       if (recognitionRef.current !== recognition) return;
       let interim = "";
@@ -124,6 +153,7 @@ export function useLiveSpeech({ lang, onResult, onError }: Options): LiveSpeech 
       }
       wantListeningRef.current = false;
       recognitionRef.current = null;
+      clearRestartTimer();
       setIsListening(false);
       if (event.error === "not-allowed" || event.error === "service-not-allowed") {
         onErrorRef.current?.("permission");
@@ -135,53 +165,74 @@ export function useLiveSpeech({ lang, onResult, onError }: Options): LiveSpeech 
     recognition.onend = () => {
       // Ignore the tail end of a recognition we've already replaced/stopped.
       if (recognitionRef.current !== recognition) return;
-      // The engine stops itself after a pause; restart the SAME instance to
-      // stay live until the user explicitly stops. Guard tight loops.
-      if (wantListeningRef.current) {
-        try {
-          recognition.start();
-          return;
-        } catch {
-          wantListeningRef.current = false;
-        }
-      }
       recognitionRef.current = null;
+      // The engine stops itself after a pause; spin up a FRESH instance to stay
+      // live (restarting the just-ended object throws in Chrome).
+      if (wantListeningRef.current) {
+        beginRef.current();
+        return;
+      }
       setIsListening(false);
     };
 
     return recognition;
-  }, [getCtor]);
+  }, [getCtor, clearRestartTimer]);
+
+  // Create + start a fresh recognition session. On Chrome's transient start
+  // race (InvalidStateError while the prior session tears down) retry shortly
+  // instead of giving up, bounded by MAX_START_RETRIES.
+  const begin = useCallback(() => {
+    if (!wantListeningRef.current) return;
+    const recognition = createRecognition();
+    if (!recognition) {
+      wantListeningRef.current = false;
+      setIsListening(false);
+      onErrorRef.current?.("unsupported");
+      return;
+    }
+    recognitionRef.current = recognition;
+    try {
+      recognition.start();
+    } catch {
+      recognitionRef.current = null;
+      startRetriesRef.current += 1;
+      if (wantListeningRef.current && startRetriesRef.current < MAX_START_RETRIES) {
+        clearRestartTimer();
+        restartTimerRef.current = window.setTimeout(() => {
+          restartTimerRef.current = null;
+          beginRef.current();
+        }, RESTART_DELAY_MS);
+      } else {
+        wantListeningRef.current = false;
+        setIsListening(false);
+        onErrorRef.current?.("start");
+      }
+    }
+  }, [createRecognition, clearRestartTimer]);
+  beginRef.current = begin;
 
   const stop = useCallback(() => {
     wantListeningRef.current = false;
+    clearRestartTimer();
     setIsListening(false);
     const recognition = recognitionRef.current;
     // Clear the ref FIRST so this instance's pending onend/onerror see they are
     // stale and skip restarting. abort() ends immediately without a final event.
     recognitionRef.current = null;
     recognition?.abort();
-  }, []);
+  }, [clearRestartTimer]);
 
   const start = useCallback(() => {
     if (wantListeningRef.current) return;
-    const recognition = createRecognition();
-    if (!recognition) {
+    if (!supported) {
       onErrorRef.current?.("unsupported");
       return;
     }
     finalTranscriptRef.current = "";
-    recognitionRef.current = recognition;
+    startRetriesRef.current = 0;
     wantListeningRef.current = true;
-    try {
-      recognition.start();
-      setIsListening(true);
-    } catch {
-      wantListeningRef.current = false;
-      recognitionRef.current = null;
-      setIsListening(false);
-      onErrorRef.current?.("start");
-    }
-  }, [createRecognition]);
+    begin();
+  }, [begin, supported]);
 
   const toggle = useCallback(() => {
     if (wantListeningRef.current) stop();
@@ -191,10 +242,11 @@ export function useLiveSpeech({ lang, onResult, onError }: Options): LiveSpeech 
   useEffect(() => {
     return () => {
       wantListeningRef.current = false;
+      clearRestartTimer();
       recognitionRef.current?.abort();
       recognitionRef.current = null;
     };
-  }, []);
+  }, [clearRestartTimer]);
 
   return { isListening, supported, start, stop, toggle };
 }
