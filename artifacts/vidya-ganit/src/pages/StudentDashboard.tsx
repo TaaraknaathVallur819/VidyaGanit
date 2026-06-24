@@ -58,6 +58,9 @@ import FormulaFlashcards from "@/components/FormulaFlashcards";
 import BookmarksPanel from "@/components/BookmarksPanel";
 import NotificationsCenter from "@/components/NotificationsCenter";
 import OnboardingTour from "@/components/OnboardingTour";
+import MockExam from "@/components/MockExam";
+import MathDuel from "@/components/MathDuel";
+import Certificates from "@/components/Certificates";
 import { BADGE_CATALOG } from "@/lib/badges";
 import { useLanguage } from "@/lib/i18n";
 
@@ -270,6 +273,24 @@ export default function StudentDashboard() {
                 className="px-0 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none bg-transparent font-semibold"
               >
                 {t("student.tab.library")}
+              </TabsTrigger>
+              <TabsTrigger
+                value="exam"
+                className="px-0 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none bg-transparent font-semibold"
+              >
+                {t("student.tab.exam")}
+              </TabsTrigger>
+              <TabsTrigger
+                value="duels"
+                className="px-0 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none bg-transparent font-semibold"
+              >
+                {t("student.tab.duels")}
+              </TabsTrigger>
+              <TabsTrigger
+                value="certificates"
+                className="px-0 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none bg-transparent font-semibold"
+              >
+                {t("student.tab.certificates")}
               </TabsTrigger>
             </TabsList>
           </div>
@@ -646,6 +667,27 @@ export default function StudentDashboard() {
             <FormulaFlashcards />
             <ConceptLibrary vidyaId={vidyaId} />
             <BookmarksPanel vidyaId={vidyaId} />
+          </div>
+        </TabsContent>
+
+        {/* ── Mock Exam Tab ── */}
+        <TabsContent value="exam" className="mt-0 p-6 relative overflow-y-auto">
+          <div className="max-w-3xl mx-auto relative">
+            <MockExam vidyaId={vidyaId} />
+          </div>
+        </TabsContent>
+
+        {/* ── Duels Tab ── */}
+        <TabsContent value="duels" className="mt-0 p-6 relative overflow-y-auto">
+          <div className="max-w-3xl mx-auto relative">
+            <MathDuel vidyaId={vidyaId} />
+          </div>
+        </TabsContent>
+
+        {/* ── Certificates Tab ── */}
+        <TabsContent value="certificates" className="mt-0 p-6 relative overflow-y-auto">
+          <div className="max-w-3xl mx-auto relative">
+            <Certificates vidyaId={vidyaId} />
           </div>
         </TabsContent>
       </Tabs>

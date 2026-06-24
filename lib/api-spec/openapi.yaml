@@ -1867,6 +1867,458 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /report-card/{vidyaId}:
+    get:
+      operationId: getReportCard
+      tags: [parent]
+      summary: Assembled progress report card for a student (self or linked parent/tutor)
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Report card data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportCardResponse"
+        "403":
+          description: Not allowed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /tutor/{vidyaId}/attendance:
+    get:
+      operationId: getTutorAttendance
+      tags: [tutor]
+      summary: Attendance records and per-student summary for a tutor's students
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Attendance records and summaries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TutorAttendanceResponse"
+    post:
+      operationId: markAttendance
+      tags: [tutor]
+      summary: Mark (or update) a student's attendance for a session date
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarkAttendanceInput"
+      responses:
+        "200":
+          description: Updated attendance records and summaries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TutorAttendanceResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Student not linked to this tutor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /parent/{vidyaId}/students/{studentVidyaId}/attendance:
+    get:
+      operationId: getStudentAttendance
+      tags: [parent]
+      summary: A linked student's attendance history and summary
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: studentVidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Attendance history and summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentAttendanceResponse"
+        "404":
+          description: Student not linked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /mock-exam/{vidyaId}/start:
+    post:
+      operationId: startMockExam
+      tags: [assessment]
+      summary: Generate and start a timed multi-topic mock exam
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StartMockExamInput"
+      responses:
+        "200":
+          description: The generated paper (no answer key)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MockExamPaper"
+
+  /mock-exam/{vidyaId}/submit:
+    post:
+      operationId: submitMockExam
+      tags: [assessment]
+      summary: Submit a mock exam for grading and analysis
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmitMockExamInput"
+      responses:
+        "200":
+          description: Graded result with per-topic analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MockExamResult"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Exam not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /mock-exam/{vidyaId}/history:
+    get:
+      operationId: getMockExamHistory
+      tags: [assessment]
+      summary: A student's past mock exams
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Past mock exams, newest first
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MockExamHistoryResponse"
+
+  /duels/{vidyaId}:
+    get:
+      operationId: getDuels
+      tags: [gamification]
+      summary: A student's math duels and challengeable classmates
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Duels grouped by state plus opponents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DuelsResponse"
+
+  /duels/{vidyaId}/challenge:
+    post:
+      operationId: createDuel
+      tags: [gamification]
+      summary: Challenge a classmate to a math duel
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDuelInput"
+      responses:
+        "200":
+          description: The created duel id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DuelCreated"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Opponent not a valid classmate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /duels/{vidyaId}/{duelId}:
+    get:
+      operationId: getDuelQuestions
+      tags: [gamification]
+      summary: Fetch the questions for a duel you are part of and have not played
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: duelId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The duel questions (no answer key)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DuelPaper"
+        "404":
+          description: Duel not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Already submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /duels/{vidyaId}/{duelId}/submit:
+    post:
+      operationId: submitDuel
+      tags: [gamification]
+      summary: Submit your answers for a duel
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: duelId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmitDuelInput"
+      responses:
+        "200":
+          description: Updated duel summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DuelSummary"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Duel not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /meetings/{vidyaId}:
+    get:
+      operationId: getMeetings
+      tags: [parent]
+      summary: Parent-tutor meetings and contacts for a user
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Meetings and contacts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeetingsResponse"
+
+  /meetings/{vidyaId}/propose:
+    post:
+      operationId: proposeMeeting
+      tags: [parent]
+      summary: Propose a meeting slot to a linked parent/tutor
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProposeMeetingInput"
+      responses:
+        "200":
+          description: Updated meetings list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeetingsResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not a shared contact
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /meetings/{vidyaId}/{meetingId}/respond:
+    post:
+      operationId: respondMeeting
+      tags: [parent]
+      summary: Confirm or decline a proposed meeting
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: meetingId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RespondMeetingInput"
+      responses:
+        "200":
+          description: Updated meetings list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeetingsResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Meeting not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /meetings/{vidyaId}/{meetingId}/cancel:
+    post:
+      operationId: cancelMeeting
+      tags: [parent]
+      summary: Cancel a meeting you are part of
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: meetingId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Updated meetings list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeetingsResponse"
+        "404":
+          description: Meeting not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -3377,3 +3829,488 @@ components:
           type: string
         body:
           type: string
+
+    ReportCardStudent:
+      type: object
+      required: [vidyaId, name]
+      properties:
+        vidyaId:
+          type: string
+        name:
+          type: string
+        studentClass:
+          type: ["string", "null"]
+        board:
+          type: ["string", "null"]
+        batch:
+          type: ["string", "null"]
+
+    ReportCardTopic:
+      type: object
+      required: [topic, label, attempts, avgScorePct, bestScorePct]
+      properties:
+        topic:
+          type: string
+        label:
+          type: string
+        attempts:
+          type: integer
+        avgScorePct:
+          type: integer
+        bestScorePct:
+          type: integer
+
+    ReportCardTest:
+      type: object
+      required: [topicLabel, scorePct, totalQuestions, correctCount, completedAt]
+      properties:
+        topicLabel:
+          type: string
+        scorePct:
+          type: integer
+        totalQuestions:
+          type: integer
+        correctCount:
+          type: integer
+        completedAt:
+          type: string
+
+    ReportCardResponse:
+      type: object
+      required: [student, xp, coins, streakCurrent, streakLongest, badges, totalTests, averageScorePct, topics, recentTests, generatedAt]
+      properties:
+        student:
+          $ref: "#/components/schemas/ReportCardStudent"
+        xp:
+          type: integer
+        coins:
+          type: integer
+        streakCurrent:
+          type: integer
+        streakLongest:
+          type: integer
+        badges:
+          type: array
+          items:
+            type: string
+        totalTests:
+          type: integer
+        averageScorePct:
+          type: integer
+        topics:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReportCardTopic"
+        recentTests:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReportCardTest"
+        generatedAt:
+          type: string
+
+    AttendanceRecord:
+      type: object
+      required: [id, studentVidyaId, studentName, sessionDate, status, createdAt]
+      properties:
+        id:
+          type: integer
+        studentVidyaId:
+          type: string
+        studentName:
+          type: string
+        sessionDate:
+          type: string
+        status:
+          type: string
+          enum: [present, absent, late]
+        note:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    AttendanceSummary:
+      type: object
+      required: [studentVidyaId, name, present, absent, late, total, attendancePct]
+      properties:
+        studentVidyaId:
+          type: string
+        name:
+          type: string
+        batch:
+          type: ["string", "null"]
+        present:
+          type: integer
+        absent:
+          type: integer
+        late:
+          type: integer
+        total:
+          type: integer
+        attendancePct:
+          type: integer
+
+    TutorAttendanceResponse:
+      type: object
+      required: [records, summaries]
+      properties:
+        records:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttendanceRecord"
+        summaries:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttendanceSummary"
+
+    MarkAttendanceInput:
+      type: object
+      required: [studentVidyaId, sessionDate, status]
+      properties:
+        studentVidyaId:
+          type: string
+        sessionDate:
+          type: string
+        status:
+          type: string
+          enum: [present, absent, late]
+        note:
+          type: ["string", "null"]
+          maxLength: 300
+
+    StudentAttendanceResponse:
+      type: object
+      required: [records, summary]
+      properties:
+        records:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttendanceRecord"
+        summary:
+          $ref: "#/components/schemas/AttendanceSummary"
+
+    MockExamQuestion:
+      type: object
+      required: [prompt, options]
+      properties:
+        prompt:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+
+    StartMockExamInput:
+      type: object
+      properties:
+        questionCount:
+          type: integer
+          minimum: 5
+          maximum: 30
+        durationMin:
+          type: integer
+          minimum: 5
+          maximum: 120
+
+    MockExamPaper:
+      type: object
+      required: [examId, questions, totalQuestions, durationSec, topics]
+      properties:
+        examId:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/MockExamQuestion"
+        totalQuestions:
+          type: integer
+        durationSec:
+          type: integer
+        topics:
+          type: array
+          items:
+            type: string
+
+    SubmitMockExamInput:
+      type: object
+      required: [examId, answers]
+      properties:
+        examId:
+          type: string
+        answers:
+          type: array
+          items:
+            type: integer
+          maxItems: 50
+        timeTakenSec:
+          type: integer
+          minimum: 0
+
+    MockExamReviewItem:
+      type: object
+      required: [prompt, options, answerIndex, chosenIndex, topic]
+      properties:
+        prompt:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        answerIndex:
+          type: integer
+        chosenIndex:
+          type: integer
+        topic:
+          type: string
+
+    MockExamTopicBreakdown:
+      type: object
+      required: [topic, label, correct, total]
+      properties:
+        topic:
+          type: string
+        label:
+          type: string
+        correct:
+          type: integer
+        total:
+          type: integer
+
+    MockExamResult:
+      type: object
+      required: [examId, score, correctCount, totalQuestions, durationSec, xpAwarded, topicBreakdown, review]
+      properties:
+        examId:
+          type: string
+        score:
+          type: integer
+        correctCount:
+          type: integer
+        totalQuestions:
+          type: integer
+        durationSec:
+          type: integer
+        timeTakenSec:
+          type: ["integer", "null"]
+        xpAwarded:
+          type: integer
+        topicBreakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/MockExamTopicBreakdown"
+        review:
+          type: array
+          items:
+            $ref: "#/components/schemas/MockExamReviewItem"
+
+    MockExamHistoryItem:
+      type: object
+      required: [examId, score, correctCount, totalQuestions, completedAt, topics]
+      properties:
+        examId:
+          type: string
+        score:
+          type: integer
+        correctCount:
+          type: integer
+        totalQuestions:
+          type: integer
+        timeTakenSec:
+          type: ["integer", "null"]
+        completedAt:
+          type: string
+        topics:
+          type: array
+          items:
+            type: string
+
+    MockExamHistoryResponse:
+      type: object
+      required: [exams]
+      properties:
+        exams:
+          type: array
+          items:
+            $ref: "#/components/schemas/MockExamHistoryItem"
+
+    DuelOpponent:
+      type: object
+      required: [vidyaId, name]
+      properties:
+        vidyaId:
+          type: string
+        name:
+          type: string
+
+    DuelSummary:
+      type: object
+      required: [duelId, role, challengerName, opponentName, status, youSubmitted, theySubmitted, totalQuestions, createdAt]
+      properties:
+        duelId:
+          type: string
+        role:
+          type: string
+          enum: [challenger, opponent]
+        challengerName:
+          type: string
+        opponentName:
+          type: string
+        status:
+          type: string
+          enum: [pending, completed]
+        youSubmitted:
+          type: boolean
+        theySubmitted:
+          type: boolean
+        yourScore:
+          type: ["integer", "null"]
+        theirScore:
+          type: ["integer", "null"]
+        winner:
+          type: ["string", "null"]
+          enum: [you, them, tie, null]
+        totalQuestions:
+          type: integer
+        createdAt:
+          type: string
+
+    DuelsResponse:
+      type: object
+      required: [opponents, incoming, outgoing, completed]
+      properties:
+        opponents:
+          type: array
+          items:
+            $ref: "#/components/schemas/DuelOpponent"
+        incoming:
+          type: array
+          items:
+            $ref: "#/components/schemas/DuelSummary"
+        outgoing:
+          type: array
+          items:
+            $ref: "#/components/schemas/DuelSummary"
+        completed:
+          type: array
+          items:
+            $ref: "#/components/schemas/DuelSummary"
+
+    CreateDuelInput:
+      type: object
+      required: [opponentVidyaId]
+      properties:
+        opponentVidyaId:
+          type: string
+
+    DuelCreated:
+      type: object
+      required: [duelId]
+      properties:
+        duelId:
+          type: string
+
+    DuelPaper:
+      type: object
+      required: [duelId, questions, totalQuestions]
+      properties:
+        duelId:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/MockExamQuestion"
+        totalQuestions:
+          type: integer
+
+    SubmitDuelInput:
+      type: object
+      required: [answers]
+      properties:
+        answers:
+          type: array
+          items:
+            type: integer
+          maxItems: 20
+
+    Meeting:
+      type: object
+      required: [id, tutorVidyaId, parentVidyaId, tutorName, parentName, counterpartName, role, proposedBy, scheduledAt, durationMin, status, createdAt]
+      properties:
+        id:
+          type: integer
+        tutorVidyaId:
+          type: string
+        parentVidyaId:
+          type: string
+        tutorName:
+          type: string
+        parentName:
+          type: string
+        counterpartName:
+          type: string
+        role:
+          type: string
+          enum: [tutor, parent]
+        proposedBy:
+          type: string
+          enum: [tutor, parent]
+        scheduledAt:
+          type: string
+        durationMin:
+          type: integer
+        note:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [pending, confirmed, declined, cancelled]
+        createdAt:
+          type: string
+
+    MeetingContact:
+      type: object
+      required: [vidyaId, name, role]
+      properties:
+        vidyaId:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+
+    MeetingsResponse:
+      type: object
+      required: [meetings, contacts]
+      properties:
+        meetings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Meeting"
+        contacts:
+          type: array
+          items:
+            $ref: "#/components/schemas/MeetingContact"
+
+    ProposeMeetingInput:
+      type: object
+      required: [counterpartVidyaId, scheduledAt]
+      properties:
+        counterpartVidyaId:
+          type: string
+        scheduledAt:
+          type: string
+        durationMin:
+          type: integer
+          minimum: 5
+          maximum: 240
+        note:
+          type: ["string", "null"]
+          maxLength: 500
+        studentVidyaId:
+          type: ["string", "null"]
+
+    RespondMeetingInput:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [confirmed, declined]

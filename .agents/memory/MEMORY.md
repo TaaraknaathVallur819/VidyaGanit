@@ -10,6 +10,8 @@
 - [i18n parity guard](i18n-parity.md) — all DICTS languages must key-match English; enforced by vitest in web artifact; `test` validation runs all packages
 - [Orval codegen gotchas](orval-openapi-codegen-gotchas.md) — OpenAPI `format: date` on a string field generates a Date-typed zod, breaking string-mode Drizzle date inserts; run full typecheck after codegen
 - [Assessment tests & voice settings](assessment-and-voice.md) — topic tests have NO negative marking; VoiceSettings must sit in "My Profile" for all 3 roles
+- [Student reward gating](student-reward-gating.md) — student XP/coin routes (duels, mock exam) must gate the caller with requireStudent, not just validate the opponent
+- [i18n inject script bug](i18n-inject-script.md) — injector's whole-file dedup skips ta/hi/te in i18n.tsx after en; re-inject those 3 block-scoped
 - [Worksheet tailoring](worksheet-tailoring.md) — generator tailored to a selected linked student; client topic catalog mirrors server curriculum (drift risk, test-guarded); board = label only
 - [Coins/rewards concurrency + i18n blind spot](coins-rewards-concurrency.md) — reward grants: unique+onConflict(+txn) for awards, row-lock+txn for debits; i18n parity test misses keys absent from ALL dicts
 - [Daily streaks](daily-streaks.md) — streaks use IST calendar days; advance-on-activity persists, read-side reports 0 if stale without mutating

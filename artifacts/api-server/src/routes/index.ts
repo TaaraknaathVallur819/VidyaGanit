@@ -15,6 +15,11 @@ import worksheetRouter from "./worksheet";
 import bookmarksRouter from "./bookmarks";
 import messagesRouter from "./messages";
 import feesRouter from "./fees";
+import reportCardRouter from "./reportCard";
+import attendanceRouter from "./attendance";
+import mockExamRouter from "./mockExam";
+import duelsRouter from "./duels";
+import meetingsRouter from "./meetings";
 
 const router: IRouter = Router();
 
@@ -34,5 +39,10 @@ router.use(worksheetRouter);
 router.use(bookmarksRouter);
 router.use(messagesRouter);
 router.use(feesRouter);
+router.use(reportCardRouter);
+router.use(attendanceRouter);
+router.use(mockExamRouter);
+router.use(duelsRouter);
+router.use(meetingsRouter);
 
 export default router;

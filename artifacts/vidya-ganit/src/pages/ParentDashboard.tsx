@@ -31,6 +31,9 @@ import ParentAlerts from "@/components/parent/ParentAlerts";
 import Messages from "@/components/Messages";
 import WorksheetGenerator from "@/components/WorksheetGenerator";
 import ParentWeeklyGoal from "@/components/ParentWeeklyGoal";
+import ReportCard from "@/components/ReportCard";
+import AttendanceView from "@/components/AttendanceView";
+import MeetingScheduler from "@/components/MeetingScheduler";
 import {
   useGetProfile,
   getGetProfileQueryKey,
@@ -61,6 +64,8 @@ import {
   FileText,
   Bell,
   MessageCircle,
+  CalendarCheck,
+  CalendarClock,
 } from "lucide-react";
 
 function getPasswordStrength(pwd: string) {
@@ -319,6 +324,18 @@ export default function ParentDashboard() {
               <TabsTrigger value="worksheet" className={tabTriggerClass}>
                 <FileText className="w-4 h-4" />
                 {t("tab.worksheet")}
+              </TabsTrigger>
+              <TabsTrigger value="reportcard" className={tabTriggerClass}>
+                <FileText className="w-4 h-4" />
+                {t("tab.reportcard")}
+              </TabsTrigger>
+              <TabsTrigger value="attendance" className={tabTriggerClass}>
+                <CalendarCheck className="w-4 h-4" />
+                {t("tab.attendance")}
+              </TabsTrigger>
+              <TabsTrigger value="meetings" className={tabTriggerClass}>
+                <CalendarClock className="w-4 h-4" />
+                {t("tab.meetings")}
               </TabsTrigger>
             </TabsList>
           </div>
@@ -627,6 +644,27 @@ export default function ParentDashboard() {
         <TabsContent value="worksheet" className="mt-0 p-6">
           <div className="max-w-3xl mx-auto">
             <WorksheetGenerator vidyaId={vidyaId} />
+          </div>
+        </TabsContent>
+
+        {/* ── Report Card Tab ── */}
+        <TabsContent value="reportcard" className="mt-0 p-6">
+          <div className="max-w-3xl mx-auto">
+            <ReportCard vidyaId={vidyaId} />
+          </div>
+        </TabsContent>
+
+        {/* ── Attendance Tab ── */}
+        <TabsContent value="attendance" className="mt-0 p-6">
+          <div className="max-w-3xl mx-auto">
+            <AttendanceView vidyaId={vidyaId} />
+          </div>
+        </TabsContent>
+
+        {/* ── Meetings Tab ── */}
+        <TabsContent value="meetings" className="mt-0 p-6">
+          <div className="max-w-3xl mx-auto">
+            <MeetingScheduler vidyaId={vidyaId} role="parent" />
           </div>
         </TabsContent>
       </Tabs>

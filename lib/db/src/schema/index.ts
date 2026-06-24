@@ -14,3 +14,7 @@ export * from "./weeklyGoals";
 export * from "./bookmarks";
 export * from "./directMessages";
 export * from "./fees";
+export * from "./attendance";
+export * from "./mockExams";
+export * from "./duels";
+export * from "./meetings";

@@ -69,6 +69,33 @@ export async function requireTutor(
 
 /**
  * Must run after `requireAuth`. Rejects authenticated users whose account role
+ * is not `student`, so student-only surfaces (e.g. peer math duels, mock exams)
+ * cannot be reached by parents or tutors even if they call the API directly.
+ */
+export async function requireStudent(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  const vidyaId = req.vidyaId;
+  if (!vidyaId) {
+    res.status(401).json({ error: "Please log in to continue." });
+    return;
+  }
+  const rows = await db
+    .select({ role: usersTable.role })
+    .from(usersTable)
+    .where(eq(usersTable.vidyaId, vidyaId))
+    .limit(1);
+  if (rows[0]?.role !== "student") {
+    res.status(403).json({ error: "This area is for students only." });
+    return;
+  }
+  next();
+}
+
+/**
+ * Must run after `requireAuth`. Rejects authenticated users whose account role
  * is not `parent` or `tutor`. Linking students to an account is a parent/tutor
  * capability, so a student must never be able to attach other students to their
  * own account even if they call the API directly.

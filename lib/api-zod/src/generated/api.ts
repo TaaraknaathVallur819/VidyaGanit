@@ -1594,3 +1594,508 @@ export const SendMessageResponse = zod.object({
 })
 
 
+/**
+ * @summary Assembled progress report card for a student (self or linked parent/tutor)
+ */
+export const GetReportCardParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetReportCardResponse = zod.object({
+  "student": zod.object({
+  "vidyaId": zod.string(),
+  "name": zod.string(),
+  "studentClass": zod.string().nullish(),
+  "board": zod.string().nullish(),
+  "batch": zod.string().nullish()
+}),
+  "xp": zod.number(),
+  "coins": zod.number(),
+  "streakCurrent": zod.number(),
+  "streakLongest": zod.number(),
+  "badges": zod.array(zod.string()),
+  "totalTests": zod.number(),
+  "averageScorePct": zod.number(),
+  "topics": zod.array(zod.object({
+  "topic": zod.string(),
+  "label": zod.string(),
+  "attempts": zod.number(),
+  "avgScorePct": zod.number(),
+  "bestScorePct": zod.number()
+})),
+  "recentTests": zod.array(zod.object({
+  "topicLabel": zod.string(),
+  "scorePct": zod.number(),
+  "totalQuestions": zod.number(),
+  "correctCount": zod.number(),
+  "completedAt": zod.string()
+})),
+  "generatedAt": zod.string()
+})
+
+
+/**
+ * @summary Attendance records and per-student summary for a tutor's students
+ */
+export const GetTutorAttendanceParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetTutorAttendanceResponse = zod.object({
+  "records": zod.array(zod.object({
+  "id": zod.number(),
+  "studentVidyaId": zod.string(),
+  "studentName": zod.string(),
+  "sessionDate": zod.string(),
+  "status": zod.enum(['present', 'absent', 'late']),
+  "note": zod.string().nullish(),
+  "createdAt": zod.string()
+})),
+  "summaries": zod.array(zod.object({
+  "studentVidyaId": zod.string(),
+  "name": zod.string(),
+  "batch": zod.string().nullish(),
+  "present": zod.number(),
+  "absent": zod.number(),
+  "late": zod.number(),
+  "total": zod.number(),
+  "attendancePct": zod.number()
+}))
+})
+
+
+/**
+ * @summary Mark (or update) a student's attendance for a session date
+ */
+export const MarkAttendanceParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const markAttendanceBodyNoteMax = 300;
+
+
+
+export const MarkAttendanceBody = zod.object({
+  "studentVidyaId": zod.string(),
+  "sessionDate": zod.string(),
+  "status": zod.enum(['present', 'absent', 'late']),
+  "note": zod.string().max(markAttendanceBodyNoteMax).nullish()
+})
+
+export const MarkAttendanceResponse = zod.object({
+  "records": zod.array(zod.object({
+  "id": zod.number(),
+  "studentVidyaId": zod.string(),
+  "studentName": zod.string(),
+  "sessionDate": zod.string(),
+  "status": zod.enum(['present', 'absent', 'late']),
+  "note": zod.string().nullish(),
+  "createdAt": zod.string()
+})),
+  "summaries": zod.array(zod.object({
+  "studentVidyaId": zod.string(),
+  "name": zod.string(),
+  "batch": zod.string().nullish(),
+  "present": zod.number(),
+  "absent": zod.number(),
+  "late": zod.number(),
+  "total": zod.number(),
+  "attendancePct": zod.number()
+}))
+})
+
+
+/**
+ * @summary A linked student's attendance history and summary
+ */
+export const GetStudentAttendanceParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "studentVidyaId": zod.coerce.string()
+})
+
+export const GetStudentAttendanceResponse = zod.object({
+  "records": zod.array(zod.object({
+  "id": zod.number(),
+  "studentVidyaId": zod.string(),
+  "studentName": zod.string(),
+  "sessionDate": zod.string(),
+  "status": zod.enum(['present', 'absent', 'late']),
+  "note": zod.string().nullish(),
+  "createdAt": zod.string()
+})),
+  "summary": zod.object({
+  "studentVidyaId": zod.string(),
+  "name": zod.string(),
+  "batch": zod.string().nullish(),
+  "present": zod.number(),
+  "absent": zod.number(),
+  "late": zod.number(),
+  "total": zod.number(),
+  "attendancePct": zod.number()
+})
+})
+
+
+/**
+ * @summary Generate and start a timed multi-topic mock exam
+ */
+export const StartMockExamParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const startMockExamBodyQuestionCountMin = 5;
+export const startMockExamBodyQuestionCountMax = 30;
+
+export const startMockExamBodyDurationMinMin = 5;
+export const startMockExamBodyDurationMinMax = 120;
+
+
+
+export const StartMockExamBody = zod.object({
+  "questionCount": zod.number().min(startMockExamBodyQuestionCountMin).max(startMockExamBodyQuestionCountMax).optional(),
+  "durationMin": zod.number().min(startMockExamBodyDurationMinMin).max(startMockExamBodyDurationMinMax).optional()
+})
+
+export const StartMockExamResponse = zod.object({
+  "examId": zod.string(),
+  "questions": zod.array(zod.object({
+  "prompt": zod.string(),
+  "options": zod.array(zod.string())
+})),
+  "totalQuestions": zod.number(),
+  "durationSec": zod.number(),
+  "topics": zod.array(zod.string())
+})
+
+
+/**
+ * @summary Submit a mock exam for grading and analysis
+ */
+export const SubmitMockExamParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const submitMockExamBodyAnswersMax = 50;
+
+export const submitMockExamBodyTimeTakenSecMin = 0;
+
+
+
+export const SubmitMockExamBody = zod.object({
+  "examId": zod.string(),
+  "answers": zod.array(zod.number()).max(submitMockExamBodyAnswersMax),
+  "timeTakenSec": zod.number().min(submitMockExamBodyTimeTakenSecMin).optional()
+})
+
+export const SubmitMockExamResponse = zod.object({
+  "examId": zod.string(),
+  "score": zod.number(),
+  "correctCount": zod.number(),
+  "totalQuestions": zod.number(),
+  "durationSec": zod.number(),
+  "timeTakenSec": zod.number().nullish(),
+  "xpAwarded": zod.number(),
+  "topicBreakdown": zod.array(zod.object({
+  "topic": zod.string(),
+  "label": zod.string(),
+  "correct": zod.number(),
+  "total": zod.number()
+})),
+  "review": zod.array(zod.object({
+  "prompt": zod.string(),
+  "options": zod.array(zod.string()),
+  "answerIndex": zod.number(),
+  "chosenIndex": zod.number(),
+  "topic": zod.string()
+}))
+})
+
+
+/**
+ * @summary A student's past mock exams
+ */
+export const GetMockExamHistoryParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetMockExamHistoryResponse = zod.object({
+  "exams": zod.array(zod.object({
+  "examId": zod.string(),
+  "score": zod.number(),
+  "correctCount": zod.number(),
+  "totalQuestions": zod.number(),
+  "timeTakenSec": zod.number().nullish(),
+  "completedAt": zod.string(),
+  "topics": zod.array(zod.string())
+}))
+})
+
+
+/**
+ * @summary A student's math duels and challengeable classmates
+ */
+export const GetDuelsParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetDuelsResponse = zod.object({
+  "opponents": zod.array(zod.object({
+  "vidyaId": zod.string(),
+  "name": zod.string()
+})),
+  "incoming": zod.array(zod.object({
+  "duelId": zod.string(),
+  "role": zod.enum(['challenger', 'opponent']),
+  "challengerName": zod.string(),
+  "opponentName": zod.string(),
+  "status": zod.enum(['pending', 'completed']),
+  "youSubmitted": zod.boolean(),
+  "theySubmitted": zod.boolean(),
+  "yourScore": zod.number().nullish(),
+  "theirScore": zod.number().nullish(),
+  "winner": zod.union([zod.literal('you'),zod.literal('them'),zod.literal('tie'),zod.literal(null)]).nullish(),
+  "totalQuestions": zod.number(),
+  "createdAt": zod.string()
+})),
+  "outgoing": zod.array(zod.object({
+  "duelId": zod.string(),
+  "role": zod.enum(['challenger', 'opponent']),
+  "challengerName": zod.string(),
+  "opponentName": zod.string(),
+  "status": zod.enum(['pending', 'completed']),
+  "youSubmitted": zod.boolean(),
+  "theySubmitted": zod.boolean(),
+  "yourScore": zod.number().nullish(),
+  "theirScore": zod.number().nullish(),
+  "winner": zod.union([zod.literal('you'),zod.literal('them'),zod.literal('tie'),zod.literal(null)]).nullish(),
+  "totalQuestions": zod.number(),
+  "createdAt": zod.string()
+})),
+  "completed": zod.array(zod.object({
+  "duelId": zod.string(),
+  "role": zod.enum(['challenger', 'opponent']),
+  "challengerName": zod.string(),
+  "opponentName": zod.string(),
+  "status": zod.enum(['pending', 'completed']),
+  "youSubmitted": zod.boolean(),
+  "theySubmitted": zod.boolean(),
+  "yourScore": zod.number().nullish(),
+  "theirScore": zod.number().nullish(),
+  "winner": zod.union([zod.literal('you'),zod.literal('them'),zod.literal('tie'),zod.literal(null)]).nullish(),
+  "totalQuestions": zod.number(),
+  "createdAt": zod.string()
+}))
+})
+
+
+/**
+ * @summary Challenge a classmate to a math duel
+ */
+export const CreateDuelParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const CreateDuelBody = zod.object({
+  "opponentVidyaId": zod.string()
+})
+
+export const CreateDuelResponse = zod.object({
+  "duelId": zod.string()
+})
+
+
+/**
+ * @summary Fetch the questions for a duel you are part of and have not played
+ */
+export const GetDuelQuestionsParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "duelId": zod.coerce.string()
+})
+
+export const GetDuelQuestionsResponse = zod.object({
+  "duelId": zod.string(),
+  "questions": zod.array(zod.object({
+  "prompt": zod.string(),
+  "options": zod.array(zod.string())
+})),
+  "totalQuestions": zod.number()
+})
+
+
+/**
+ * @summary Submit your answers for a duel
+ */
+export const SubmitDuelParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "duelId": zod.coerce.string()
+})
+
+export const submitDuelBodyAnswersMax = 20;
+
+
+
+export const SubmitDuelBody = zod.object({
+  "answers": zod.array(zod.number()).max(submitDuelBodyAnswersMax)
+})
+
+export const SubmitDuelResponse = zod.object({
+  "duelId": zod.string(),
+  "role": zod.enum(['challenger', 'opponent']),
+  "challengerName": zod.string(),
+  "opponentName": zod.string(),
+  "status": zod.enum(['pending', 'completed']),
+  "youSubmitted": zod.boolean(),
+  "theySubmitted": zod.boolean(),
+  "yourScore": zod.number().nullish(),
+  "theirScore": zod.number().nullish(),
+  "winner": zod.union([zod.literal('you'),zod.literal('them'),zod.literal('tie'),zod.literal(null)]).nullish(),
+  "totalQuestions": zod.number(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Parent-tutor meetings and contacts for a user
+ */
+export const GetMeetingsParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const GetMeetingsResponse = zod.object({
+  "meetings": zod.array(zod.object({
+  "id": zod.number(),
+  "tutorVidyaId": zod.string(),
+  "parentVidyaId": zod.string(),
+  "tutorName": zod.string(),
+  "parentName": zod.string(),
+  "counterpartName": zod.string(),
+  "role": zod.enum(['tutor', 'parent']),
+  "proposedBy": zod.enum(['tutor', 'parent']),
+  "scheduledAt": zod.string(),
+  "durationMin": zod.number(),
+  "note": zod.string().nullish(),
+  "status": zod.enum(['pending', 'confirmed', 'declined', 'cancelled']),
+  "createdAt": zod.string()
+})),
+  "contacts": zod.array(zod.object({
+  "vidyaId": zod.string(),
+  "name": zod.string(),
+  "role": zod.string()
+}))
+})
+
+
+/**
+ * @summary Propose a meeting slot to a linked parent/tutor
+ */
+export const ProposeMeetingParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const proposeMeetingBodyDurationMinMin = 5;
+export const proposeMeetingBodyDurationMinMax = 240;
+
+export const proposeMeetingBodyNoteMax = 500;
+
+
+
+export const ProposeMeetingBody = zod.object({
+  "counterpartVidyaId": zod.string(),
+  "scheduledAt": zod.string(),
+  "durationMin": zod.number().min(proposeMeetingBodyDurationMinMin).max(proposeMeetingBodyDurationMinMax).optional(),
+  "note": zod.string().max(proposeMeetingBodyNoteMax).nullish(),
+  "studentVidyaId": zod.string().nullish()
+})
+
+export const ProposeMeetingResponse = zod.object({
+  "meetings": zod.array(zod.object({
+  "id": zod.number(),
+  "tutorVidyaId": zod.string(),
+  "parentVidyaId": zod.string(),
+  "tutorName": zod.string(),
+  "parentName": zod.string(),
+  "counterpartName": zod.string(),
+  "role": zod.enum(['tutor', 'parent']),
+  "proposedBy": zod.enum(['tutor', 'parent']),
+  "scheduledAt": zod.string(),
+  "durationMin": zod.number(),
+  "note": zod.string().nullish(),
+  "status": zod.enum(['pending', 'confirmed', 'declined', 'cancelled']),
+  "createdAt": zod.string()
+})),
+  "contacts": zod.array(zod.object({
+  "vidyaId": zod.string(),
+  "name": zod.string(),
+  "role": zod.string()
+}))
+})
+
+
+/**
+ * @summary Confirm or decline a proposed meeting
+ */
+export const RespondMeetingParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "meetingId": zod.coerce.string()
+})
+
+export const RespondMeetingBody = zod.object({
+  "status": zod.enum(['confirmed', 'declined'])
+})
+
+export const RespondMeetingResponse = zod.object({
+  "meetings": zod.array(zod.object({
+  "id": zod.number(),
+  "tutorVidyaId": zod.string(),
+  "parentVidyaId": zod.string(),
+  "tutorName": zod.string(),
+  "parentName": zod.string(),
+  "counterpartName": zod.string(),
+  "role": zod.enum(['tutor', 'parent']),
+  "proposedBy": zod.enum(['tutor', 'parent']),
+  "scheduledAt": zod.string(),
+  "durationMin": zod.number(),
+  "note": zod.string().nullish(),
+  "status": zod.enum(['pending', 'confirmed', 'declined', 'cancelled']),
+  "createdAt": zod.string()
+})),
+  "contacts": zod.array(zod.object({
+  "vidyaId": zod.string(),
+  "name": zod.string(),
+  "role": zod.string()
+}))
+})
+
+
+/**
+ * @summary Cancel a meeting you are part of
+ */
+export const CancelMeetingParams = zod.object({
+  "vidyaId": zod.coerce.string(),
+  "meetingId": zod.coerce.string()
+})
+
+export const CancelMeetingResponse = zod.object({
+  "meetings": zod.array(zod.object({
+  "id": zod.number(),
+  "tutorVidyaId": zod.string(),
+  "parentVidyaId": zod.string(),
+  "tutorName": zod.string(),
+  "parentName": zod.string(),
+  "counterpartName": zod.string(),
+  "role": zod.enum(['tutor', 'parent']),
+  "proposedBy": zod.enum(['tutor', 'parent']),
+  "scheduledAt": zod.string(),
+  "durationMin": zod.number(),
+  "note": zod.string().nullish(),
+  "status": zod.enum(['pending', 'confirmed', 'declined', 'cancelled']),
+  "createdAt": zod.string()
+})),
+  "contacts": zod.array(zod.object({
+  "vidyaId": zod.string(),
+  "name": zod.string(),
+  "role": zod.string()
+}))
+})
+
+

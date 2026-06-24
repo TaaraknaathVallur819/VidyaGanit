@@ -1346,3 +1346,343 @@ export interface SendMessageInput {
   body: string;
 }
 
+export interface ReportCardStudent {
+  vidyaId: string;
+  name: string;
+  /** @nullable */
+  studentClass?: string | null;
+  /** @nullable */
+  board?: string | null;
+  /** @nullable */
+  batch?: string | null;
+}
+
+export interface ReportCardTopic {
+  topic: string;
+  label: string;
+  attempts: number;
+  avgScorePct: number;
+  bestScorePct: number;
+}
+
+export interface ReportCardTest {
+  topicLabel: string;
+  scorePct: number;
+  totalQuestions: number;
+  correctCount: number;
+  completedAt: string;
+}
+
+export interface ReportCardResponse {
+  student: ReportCardStudent;
+  xp: number;
+  coins: number;
+  streakCurrent: number;
+  streakLongest: number;
+  badges: string[];
+  totalTests: number;
+  averageScorePct: number;
+  topics: ReportCardTopic[];
+  recentTests: ReportCardTest[];
+  generatedAt: string;
+}
+
+export type AttendanceRecordStatus = typeof AttendanceRecordStatus[keyof typeof AttendanceRecordStatus];
+
+
+export const AttendanceRecordStatus = {
+  present: 'present',
+  absent: 'absent',
+  late: 'late',
+} as const;
+
+export interface AttendanceRecord {
+  id: number;
+  studentVidyaId: string;
+  studentName: string;
+  sessionDate: string;
+  status: AttendanceRecordStatus;
+  /** @nullable */
+  note?: string | null;
+  createdAt: string;
+}
+
+export interface AttendanceSummary {
+  studentVidyaId: string;
+  name: string;
+  /** @nullable */
+  batch?: string | null;
+  present: number;
+  absent: number;
+  late: number;
+  total: number;
+  attendancePct: number;
+}
+
+export interface TutorAttendanceResponse {
+  records: AttendanceRecord[];
+  summaries: AttendanceSummary[];
+}
+
+export type MarkAttendanceInputStatus = typeof MarkAttendanceInputStatus[keyof typeof MarkAttendanceInputStatus];
+
+
+export const MarkAttendanceInputStatus = {
+  present: 'present',
+  absent: 'absent',
+  late: 'late',
+} as const;
+
+export interface MarkAttendanceInput {
+  studentVidyaId: string;
+  sessionDate: string;
+  status: MarkAttendanceInputStatus;
+  /**
+     * @maxLength 300
+     * @nullable
+     */
+  note?: string | null;
+}
+
+export interface StudentAttendanceResponse {
+  records: AttendanceRecord[];
+  summary: AttendanceSummary;
+}
+
+export interface MockExamQuestion {
+  prompt: string;
+  options: string[];
+}
+
+export interface StartMockExamInput {
+  /**
+     * @minimum 5
+     * @maximum 30
+     */
+  questionCount?: number;
+  /**
+     * @minimum 5
+     * @maximum 120
+     */
+  durationMin?: number;
+}
+
+export interface MockExamPaper {
+  examId: string;
+  questions: MockExamQuestion[];
+  totalQuestions: number;
+  durationSec: number;
+  topics: string[];
+}
+
+export interface SubmitMockExamInput {
+  examId: string;
+  /** @maxItems 50 */
+  answers: number[];
+  /** @minimum 0 */
+  timeTakenSec?: number;
+}
+
+export interface MockExamReviewItem {
+  prompt: string;
+  options: string[];
+  answerIndex: number;
+  chosenIndex: number;
+  topic: string;
+}
+
+export interface MockExamTopicBreakdown {
+  topic: string;
+  label: string;
+  correct: number;
+  total: number;
+}
+
+export interface MockExamResult {
+  examId: string;
+  score: number;
+  correctCount: number;
+  totalQuestions: number;
+  durationSec: number;
+  /** @nullable */
+  timeTakenSec?: number | null;
+  xpAwarded: number;
+  topicBreakdown: MockExamTopicBreakdown[];
+  review: MockExamReviewItem[];
+}
+
+export interface MockExamHistoryItem {
+  examId: string;
+  score: number;
+  correctCount: number;
+  totalQuestions: number;
+  /** @nullable */
+  timeTakenSec?: number | null;
+  completedAt: string;
+  topics: string[];
+}
+
+export interface MockExamHistoryResponse {
+  exams: MockExamHistoryItem[];
+}
+
+export interface DuelOpponent {
+  vidyaId: string;
+  name: string;
+}
+
+export type DuelSummaryRole = typeof DuelSummaryRole[keyof typeof DuelSummaryRole];
+
+
+export const DuelSummaryRole = {
+  challenger: 'challenger',
+  opponent: 'opponent',
+} as const;
+
+export type DuelSummaryStatus = typeof DuelSummaryStatus[keyof typeof DuelSummaryStatus];
+
+
+export const DuelSummaryStatus = {
+  pending: 'pending',
+  completed: 'completed',
+} as const;
+
+/**
+ * @nullable
+ */
+export type DuelSummaryWinner = typeof DuelSummaryWinner[keyof typeof DuelSummaryWinner] | null;
+
+
+export const DuelSummaryWinner = {
+  you: 'you',
+  them: 'them',
+  tie: 'tie',
+} as const;
+
+export interface DuelSummary {
+  duelId: string;
+  role: DuelSummaryRole;
+  challengerName: string;
+  opponentName: string;
+  status: DuelSummaryStatus;
+  youSubmitted: boolean;
+  theySubmitted: boolean;
+  /** @nullable */
+  yourScore?: number | null;
+  /** @nullable */
+  theirScore?: number | null;
+  /** @nullable */
+  winner?: DuelSummaryWinner;
+  totalQuestions: number;
+  createdAt: string;
+}
+
+export interface DuelsResponse {
+  opponents: DuelOpponent[];
+  incoming: DuelSummary[];
+  outgoing: DuelSummary[];
+  completed: DuelSummary[];
+}
+
+export interface CreateDuelInput {
+  opponentVidyaId: string;
+}
+
+export interface DuelCreated {
+  duelId: string;
+}
+
+export interface DuelPaper {
+  duelId: string;
+  questions: MockExamQuestion[];
+  totalQuestions: number;
+}
+
+export interface SubmitDuelInput {
+  /** @maxItems 20 */
+  answers: number[];
+}
+
+export type MeetingRole = typeof MeetingRole[keyof typeof MeetingRole];
+
+
+export const MeetingRole = {
+  tutor: 'tutor',
+  parent: 'parent',
+} as const;
+
+export type MeetingProposedBy = typeof MeetingProposedBy[keyof typeof MeetingProposedBy];
+
+
+export const MeetingProposedBy = {
+  tutor: 'tutor',
+  parent: 'parent',
+} as const;
+
+export type MeetingStatus = typeof MeetingStatus[keyof typeof MeetingStatus];
+
+
+export const MeetingStatus = {
+  pending: 'pending',
+  confirmed: 'confirmed',
+  declined: 'declined',
+  cancelled: 'cancelled',
+} as const;
+
+export interface Meeting {
+  id: number;
+  tutorVidyaId: string;
+  parentVidyaId: string;
+  tutorName: string;
+  parentName: string;
+  counterpartName: string;
+  role: MeetingRole;
+  proposedBy: MeetingProposedBy;
+  scheduledAt: string;
+  durationMin: number;
+  /** @nullable */
+  note?: string | null;
+  status: MeetingStatus;
+  createdAt: string;
+}
+
+export interface MeetingContact {
+  vidyaId: string;
+  name: string;
+  role: string;
+}
+
+export interface MeetingsResponse {
+  meetings: Meeting[];
+  contacts: MeetingContact[];
+}
+
+export interface ProposeMeetingInput {
+  counterpartVidyaId: string;
+  scheduledAt: string;
+  /**
+     * @minimum 5
+     * @maximum 240
+     */
+  durationMin?: number;
+  /**
+     * @maxLength 500
+     * @nullable
+     */
+  note?: string | null;
+  /** @nullable */
+  studentVidyaId?: string | null;
+}
+
+export type RespondMeetingInputStatus = typeof RespondMeetingInputStatus[keyof typeof RespondMeetingInputStatus];
+
+
+export const RespondMeetingInputStatus = {
+  confirmed: 'confirmed',
+  declined: 'declined',
+} as const;
+
+export interface RespondMeetingInput {
+  status: RespondMeetingInputStatus;
+}
+

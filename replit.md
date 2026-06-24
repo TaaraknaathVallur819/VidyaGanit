@@ -82,6 +82,21 @@ Six features spanning the student, parent, and tutor portals. New tables: `weekl
 
 Server routes: `artifacts/api-server/src/routes/{goals,worksheet,bookmarks,messages}.ts` (+ `src/lib/links.ts`). i18n keys added across all 23 dicts. ConceptLibrary's `vidyaId` prop is optional so tutor previews stay read-only.
 
+## Assessment & engagement features (mock exam, report card, attendance, certificates, duels, meetings)
+
+Six features spanning all three portals. New tables: `mock_exams`, `attendance`, `duels`, `meetings`. Server routes: `artifacts/api-server/src/routes/{mockExam,reportCard,attendance,duels,meetings}.ts`. Client components in `artifacts/vidya-ganit/src/components/`. i18n keys added across all 23 dicts (111 keys).
+
+- **Mock Exam** (`MockExam.tsx`, student) — full-length timed multi-topic paper. `start` creates a `pending` row (questions via `generateMockExam`); `submit` does the pending→completed guarded update + XP/coin increment in ONE transaction (no double-award on resubmit). XP = `XP_PER_CORRECT(5)` × correct. Student-only.
+- **Report Card PDF** (`ReportCard.tsx` + `src/lib/reportCardPdf.ts`, parent/tutor) — `GET /report-card/:vidyaId` returns a per-student progress summary (totals, avg, streak, topic breakdown, recent tests); PDF built client-side via jspdf. Parent/tutor pick a linked student.
+- **Attendance** (`AttendanceTracker.tsx` tutor marks, `AttendanceView.tsx` parent views) — `attendance` table; tutor-mark routes gated `requireTutor`; parent view is read-only over linked child.
+- **Achievement certificates** (`Certificates.tsx` + `src/lib/certificatePdf.ts`, student) — purely client-side: milestones derived from the report-card response (`MILESTONES` array with `unlocked(r)` predicates over totalTests/xp/streakLongest); unlocked ones download a landscape jspdf certificate. No new server route.
+- **Peer Math Duel** (`MathDuel.tsx`, student) — async 1v1 vs a same-`batch` classmate. `duels` table holds both sides' answers/scores. Challenge enforces opponent is a student in the same batch; each side's answer write + award is guarded/transactional (participation 10 XP, win bonus +10, tie +5; no double-award per side).
+- **Parent–tutor meeting scheduler** (`MeetingScheduler.tsx`, `role="parent"|"tutor"` prop) — `meetings` table; propose/accept/decline/cancel. Gated `requireParentOrTutor` + `sharesStudent(me, counterpart)` so only linked parent↔tutor pairs can schedule. `Meeting.id` is a number → client passes `String(m.id)` to mutation vars.
+
+### Student-only surfaces
+
+`requireStudent` (`src/middlewares/auth.ts`) mirrors `requireTutor`/`requireParentOrTutor`: rejects non-students with 403. Applied to ALL duel and mock-exam routes — without it a parent/tutor with a `batch` value could create duels and earn student rewards. `studentGating.test.ts` guards the 403s. Any new student-reward path must add this guard.
+
 ## Auth & abuse controls
 
 - Login/registration are unchanged in flow but now also set a stateless HMAC-signed `vg_session` httpOnly cookie (`src/lib/session.ts`, signed with `SESSION_SECRET`).

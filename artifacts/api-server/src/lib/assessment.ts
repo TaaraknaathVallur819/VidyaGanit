@@ -1,5 +1,5 @@
 import type { Topic } from "./tutor";
-import type { AssessmentQuestion } from "@workspace/db";
+import type { AssessmentQuestion, MockQuestion } from "@workspace/db";
 
 /**
  * Deterministic, self-checking test generator. For a GRADED test the answer key
@@ -280,6 +280,55 @@ const GENERATORS: Record<Topic, Gen> = {
 };
 
 const MIXED_POOL: Gen[] = [addSubGen, multiplyGen, divideGen, decimalGen];
+
+/** Topics a full-length mock exam draws from, scaled down for younger classes. */
+export const MOCK_TOPICS: Topic[] = [
+  "add_subtract",
+  "multiply",
+  "divide",
+  "fraction",
+  "decimal",
+  "percent",
+  "ratio",
+  "algebra",
+  "geometry",
+];
+
+const MOCK_TOPICS_JUNIOR: Topic[] = [
+  "add_subtract",
+  "multiply",
+  "divide",
+  "fraction",
+  "decimal",
+  "percent",
+  "geometry",
+];
+
+/**
+ * Generate a full-length, multi-topic mock exam scaled to the student's class.
+ * Questions round-robin across the topic pool (gentler for Classes 4–5) and each
+ * carries its source `topic` so results can be broken down per topic. Returns
+ * `count` distinct (by prompt) questions.
+ */
+export function generateMockExam(klass: string | null, count: number): MockQuestion[] {
+  const level = classLevel(klass);
+  const pool = level >= 6 ? MOCK_TOPICS : MOCK_TOPICS_JUNIOR;
+  const out: MockQuestion[] = [];
+  const seen = new Set<string>();
+  let guard = 0;
+  let i = 0;
+  while (out.length < count && guard < count * 40) {
+    guard++;
+    const topic = pool[i % pool.length];
+    i++;
+    const gen = (GENERATORS as Record<string, Gen>)[topic] ?? addSubGen;
+    const q = gen(level);
+    if (seen.has(q.prompt)) continue;
+    seen.add(q.prompt);
+    out.push({ ...q, topic });
+  }
+  return out;
+}
 
 /**
  * Generate a fresh worksheet for the topic, scaled to the student's class.
