@@ -298,6 +298,23 @@ export interface RecordFeePaymentInput {
   paidOn?: string | null;
 }
 
+export interface SendFeeRemindersInput {
+  /**
+     * @minItems 1
+     * @maxItems 200
+     */
+  studentVidyaIds: string[];
+  /**
+     * @minLength 1
+     * @maxLength 1000
+     */
+  message: string;
+}
+
+export interface FeeRemindersResult {
+  sent: number;
+}
+
 export type ProfileUpdateGender = typeof ProfileUpdateGender[keyof typeof ProfileUpdateGender];
 
 

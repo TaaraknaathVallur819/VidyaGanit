@@ -51,6 +51,7 @@ import {
   Mail,
   CheckCircle2,
   School,
+  MapPin,
   User,
   UserPlus,
   X,
@@ -472,6 +473,9 @@ export default function TutorDashboard() {
                     <InfoChip label={t("student.gender")} value={displayed.gender === "male" ? t("student.male") : t("student.female")} />
                     {displayed.academyName && (
                       <InfoChip label={t("auth.academyName")} value={displayed.academyName} icon={<School className="w-3.5 h-3.5" />} />
+                    )}
+                    {displayed.branch && (
+                      <InfoChip label={t("auth.branch")} value={displayed.branch} icon={<MapPin className="w-3.5 h-3.5" />} />
                     )}
                     <InfoChip label={t("tutor.batch")} value={tutorBatches.length > 0 ? tutorBatches.join(", ") : "—"} icon={<Users2 className="w-3.5 h-3.5" />} />
                     <InfoChip label={t("auth.emailOrPhone")} value={displayed.contact ?? "—"} icon={<Mail className="w-3.5 h-3.5" />} />

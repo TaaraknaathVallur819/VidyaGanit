@@ -122,3 +122,75 @@ export function resolveVoice(
   if (!voiceName) return undefined;
   return voices.find((v) => v.name === voiceName);
 }
+
+/** Options for the shared {@link speak} helper. */
+export interface SpeakOptions {
+  lang: Language;
+  rate?: number;
+  pitch?: number;
+  voiceName?: string | null;
+  onend?: () => void;
+  onerror?: () => void;
+}
+
+// The Chrome cancel→speak race is worked around by deferring speak() a tick.
+// That pending timer is tracked here so a stop/unmount issued in between can
+// abort it — otherwise the deferred speak fires after cancel and restarts audio.
+let pendingSpeakTimer: number | null = null;
+
+function clearPendingSpeak(): void {
+  if (pendingSpeakTimer !== null) {
+    window.clearTimeout(pendingSpeakTimer);
+    pendingSpeakTimer = null;
+  }
+}
+
+/** Stop any current or pending speech (cancels the deferred-speak race timer). */
+export function stopSpeaking(): void {
+  if (!isSpeechSupported()) return;
+  clearPendingSpeak();
+  window.speechSynthesis.cancel();
+}
+
+/**
+ * Speak text aloud robustly across browsers and languages. Resolves a concrete
+ * voice (preferred name → language match → any available) so a language whose
+ * BCP-47 locale has no installed voice still produces audible output instead of
+ * silently doing nothing. Also works around the Chrome bug where a speak() call
+ * issued synchronously right after cancel() is dropped. Returns the utterance
+ * (or null when speech is unsupported / the text is empty).
+ */
+export function speak(
+  text: string,
+  opts: SpeakOptions,
+): SpeechSynthesisUtterance | null {
+  if (!isSpeechSupported() || !text.trim()) return null;
+  const synth = window.speechSynthesis;
+  clearPendingSpeak();
+  synth.cancel();
+  const voices = getVoices();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = opts.rate ?? 1;
+  utterance.pitch = opts.pitch ?? 1;
+  const chosen =
+    resolveVoice(voices, opts.voiceName ?? null) ??
+    voicesForLang(voices, opts.lang)[0] ??
+    voices[0];
+  if (chosen) {
+    utterance.voice = chosen;
+    utterance.lang = chosen.lang;
+  } else {
+    utterance.lang = speechLocale(opts.lang);
+  }
+  if (opts.onend) utterance.onend = opts.onend;
+  if (opts.onerror) utterance.onerror = opts.onerror;
+  // Chrome drops a speak() issued synchronously right after cancel(); deferring
+  // it by a tick (and resuming a possibly-paused queue) makes playback reliable.
+  // The timer id is tracked so stopSpeaking() can abort a not-yet-fired speak.
+  pendingSpeakTimer = window.setTimeout(() => {
+    pendingSpeakTimer = null;
+    synth.resume();
+    synth.speak(utterance);
+  }, 0);
+  return utterance;
+}

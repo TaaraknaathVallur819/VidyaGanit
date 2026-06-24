@@ -15,10 +15,10 @@ import { useLanguage } from "@/lib/i18n";
 import { useVoices } from "@/lib/voice";
 import {
   isSpeechSupported,
-  speechLocale,
   voicesForLang,
   normaliseVoicePrefs,
-  resolveVoice,
+  speak,
+  stopSpeaking,
   VOICE_RATE_RANGE,
   VOICE_PITCH_RANGE,
 } from "@/lib/speech";
@@ -51,6 +51,7 @@ export default function VoiceSettings() {
   const [pitch, setPitch] = useState(initial.pitch);
   const [voiceName, setVoiceName] = useState<string | null>(initial.voiceName);
   const [saved, setSaved] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
 
   // Re-sync when the stored profile changes (e.g. after a save elsewhere).
   useEffect(() => {
@@ -58,6 +59,11 @@ export default function VoiceSettings() {
     setPitch(initial.pitch);
     setVoiceName(initial.voiceName);
   }, [initial]);
+
+  // Stop any in-flight (or pending) preview if this editor unmounts.
+  useEffect(() => {
+    return () => stopSpeaking();
+  }, []);
 
   const langVoices = useMemo(
     () => voicesForLang(voices, lang),
@@ -71,15 +77,15 @@ export default function VoiceSettings() {
   }
 
   const preview = () => {
-    const synth = window.speechSynthesis;
-    synth.cancel();
-    const u = new SpeechSynthesisUtterance(t("voice.previewText"));
-    u.lang = speechLocale(lang);
-    u.rate = rate;
-    u.pitch = pitch;
-    const chosen = resolveVoice(voices, voiceName);
-    if (chosen) u.voice = chosen;
-    synth.speak(u);
+    setSpeaking(true);
+    speak(t("voice.previewText"), {
+      lang,
+      rate,
+      pitch,
+      voiceName,
+      onend: () => setSpeaking(false),
+      onerror: () => setSpeaking(false),
+    });
   };
 
   const handleSave = () => {
@@ -192,7 +198,11 @@ export default function VoiceSettings() {
           data-testid="button-test-voice"
           className="gap-1.5 rounded-xl"
         >
-          <Play className="w-3.5 h-3.5" />
+          {speaking ? (
+            <Volume2 className="w-3.5 h-3.5 animate-pulse" />
+          ) : (
+            <Play className="w-3.5 h-3.5" />
+          )}
           {t("voice.test")}
         </Button>
         <Button

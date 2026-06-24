@@ -15,3 +15,4 @@
 - [Daily streaks](daily-streaks.md) — streaks use IST calendar days; advance-on-activity persists, read-side reports 0 if stale without mutating
 - [Mistake Notebook](mistake-notebook.md) — missed questions DERIVED (collectMistakes) from assessments' nullable submittedAnswers; own+completed only; never store a mistakes table
 - [Six engagement features](six-engagement-features.md) — weekly-goal xp-snapshot; worksheet answer-key must stay parent/tutor-gated; speed arena reuses /games/score + needs round-token vs stale awards; numeric display ≠ i18n key
+- [Web Speech cancel→speak race](speech-synthesis-race.md) — deferred speak() workaround must be abortable; stop/unmount go through stopSpeaking(), never bare cancel()

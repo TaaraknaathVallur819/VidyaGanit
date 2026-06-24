@@ -17,6 +17,7 @@ import {
   getGetTutorFeesQueryKey,
   useRecordFeePayment,
   useDeleteFeePayment,
+  useSendFeeReminders,
   FeePaymentMethod,
   FeePaymentStatus,
   type FeePaymentMethod as FeePaymentMethodT,
@@ -30,6 +31,7 @@ import {
   XCircle,
   Clock,
   Wallet,
+  BellRing,
 } from "lucide-react";
 
 const METHODS: FeePaymentMethodT[] = [
@@ -40,6 +42,8 @@ const METHODS: FeePaymentMethodT[] = [
   FeePaymentMethod.cheque,
   FeePaymentMethod.other,
 ];
+
+const ALL_KEY = "__all__";
 
 const STATUSES: FeePaymentStatusT[] = [
   FeePaymentStatus.paid,
@@ -56,6 +60,9 @@ export default function TutorFees({ vidyaId }: { vidyaId: string }) {
   });
   const records = data?.records ?? [];
   const summaries = data?.summaries ?? [];
+  const unpaidIds = summaries
+    .filter((s) => s.latestStatus !== "paid")
+    .map((s) => s.studentVidyaId);
 
   const invalidate = () =>
     qc.invalidateQueries({ queryKey: getGetTutorFeesQueryKey(vidyaId) });
@@ -66,6 +73,28 @@ export default function TutorFees({ vidyaId }: { vidyaId: string }) {
   const deleteMutation = useDeleteFeePayment({
     mutation: { onSuccess: invalidate },
   });
+  const remindMutation = useSendFeeReminders();
+
+  // The student id(s) of the reminder currently in flight, so only the relevant
+  // button shows a spinner; and the last student id we successfully reminded
+  // (or "__all__"), for inline "sent" feedback.
+  const [remindingKey, setRemindingKey] = useState<string | null>(null);
+  const [remindedKey, setRemindedKey] = useState<string | null>(null);
+
+  const sendReminders = (studentVidyaIds: string[], key: string) => {
+    if (studentVidyaIds.length === 0 || remindMutation.isPending) return;
+    setRemindingKey(key);
+    setRemindedKey(null);
+    remindMutation.mutate(
+      { vidyaId, data: { studentVidyaIds, message: t("tutor.fees.reminderMessage") } },
+      {
+        onSuccess: (res) => {
+          setRemindedKey(res.sent > 0 ? key : `none:${key}`);
+        },
+        onSettled: () => setRemindingKey(null),
+      },
+    );
+  };
 
   const [studentVidyaId, setStudentVidyaId] = useState("");
   const [amount, setAmount] = useState("");
@@ -283,28 +312,78 @@ export default function TutorFees({ vidyaId }: { vidyaId: string }) {
 
           {/* Per-student status overview */}
           <div className="space-y-3">
-            <h3 className="font-semibold text-foreground">{t("tutor.fees.overview")}</h3>
-            <div className="space-y-2">
-              {summaries.map((s) => (
-                <div
-                  key={s.studentVidyaId}
-                  className="flex items-center gap-3 p-3.5 bg-gray-50 rounded-xl border border-gray-100"
-                  data-testid={`fee-summary-${s.studentVidyaId}`}
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="font-semibold text-foreground">{t("tutor.fees.overview")}</h3>
+              {unpaidIds.length > 0 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 rounded-xl"
+                  disabled={remindMutation.isPending}
+                  onClick={() => sendReminders(unpaidIds, ALL_KEY)}
+                  data-testid="button-remind-all"
                 >
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-foreground text-sm truncate">{s.name}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {t("tutor.fees.totalPaid")}: ₹{s.totalPaid}
-                    </p>
-                  </div>
-                  <span
-                    className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full ${statusClass(s.latestStatus)}`}
+                  {remindingKey === ALL_KEY ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <BellRing className="w-3.5 h-3.5" />
+                  )}
+                  {t("tutor.fees.remindAll")}
+                </Button>
+              )}
+            </div>
+            <div className="space-y-2">
+              {summaries.map((s) => {
+                const isUnpaid = s.latestStatus !== "paid";
+                return (
+                  <div
+                    key={s.studentVidyaId}
+                    className="flex items-center gap-3 p-3.5 bg-gray-50 rounded-xl border border-gray-100"
+                    data-testid={`fee-summary-${s.studentVidyaId}`}
                   >
-                    <StatusIcon s={s.latestStatus} />
-                    {statusLabel(s.latestStatus)}
-                  </span>
-                </div>
-              ))}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-foreground text-sm truncate">{s.name}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {t("tutor.fees.totalPaid")}: ₹{s.totalPaid}
+                      </p>
+                    </div>
+                    {isUnpaid &&
+                      (remindedKey === s.studentVidyaId ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-600">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          {t("tutor.fees.reminderSent")}
+                        </span>
+                      ) : remindedKey === `none:${s.studentVidyaId}` ? (
+                        <span className="text-xs text-muted-foreground">
+                          {t("tutor.fees.reminderNone")}
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => sendReminders([s.studentVidyaId], s.studentVidyaId)}
+                          disabled={remindMutation.isPending}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 disabled:opacity-50 transition-colors shrink-0"
+                          title={t("tutor.fees.remind")}
+                          data-testid={`button-remind-${s.studentVidyaId}`}
+                        >
+                          {remindingKey === s.studentVidyaId ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <BellRing className="w-3.5 h-3.5" />
+                          )}
+                          {t("tutor.fees.remind")}
+                        </button>
+                      ))}
+                    <span
+                      className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full ${statusClass(s.latestStatus)}`}
+                    >
+                      <StatusIcon s={s.latestStatus} />
+                      {statusLabel(s.latestStatus)}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

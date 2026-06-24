@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Volume2, Square } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
-import { isSpeechSupported, speechLocale, resolveVoice } from "@/lib/speech";
-import { useVoicePrefs, useVoices } from "@/lib/voice";
+import { isSpeechSupported, speak, stopSpeaking } from "@/lib/speech";
+import { useVoicePrefs } from "@/lib/voice";
 
 /**
  * A small toggle that reads the given text aloud using the browser's built-in
@@ -22,7 +22,6 @@ export default function SpeakButton({
 }) {
   const { t, lang } = useLanguage();
   const prefs = useVoicePrefs();
-  const voices = useVoices();
   const [speaking, setSpeaking] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
@@ -30,7 +29,7 @@ export default function SpeakButton({
   useEffect(() => {
     return () => {
       if (utteranceRef.current && isSpeechSupported()) {
-        window.speechSynthesis.cancel();
+        stopSpeaking();
       }
     };
   }, []);
@@ -38,30 +37,31 @@ export default function SpeakButton({
   if (!isSpeechSupported() || !text.trim()) return null;
 
   const toggle = () => {
-    const synth = window.speechSynthesis;
     if (speaking) {
-      synth.cancel();
+      stopSpeaking();
       setSpeaking(false);
+      utteranceRef.current = null;
       return;
     }
-    // Cancel anything else currently being read elsewhere on the page.
-    synth.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = speechLocale(lang);
-    utterance.rate = prefs.rate;
-    utterance.pitch = prefs.pitch;
-    const chosen = resolveVoice(voices, prefs.voiceName);
-    if (chosen) utterance.voice = chosen;
-    utterance.onend = () => {
-      setSpeaking(false);
-      utteranceRef.current = null;
-    };
-    utterance.onerror = () => {
-      setSpeaking(false);
-      utteranceRef.current = null;
-    };
+    // Cancel anything else currently being read elsewhere on the page, then
+    // speak via the shared robust helper (concrete voice resolution + Chrome
+    // cancel/speak race workaround).
+    const utterance = speak(text, {
+      lang,
+      rate: prefs.rate,
+      pitch: prefs.pitch,
+      voiceName: prefs.voiceName,
+      onend: () => {
+        setSpeaking(false);
+        utteranceRef.current = null;
+      },
+      onerror: () => {
+        setSpeaking(false);
+        utteranceRef.current = null;
+      },
+    });
+    if (!utterance) return;
     utteranceRef.current = utterance;
-    synth.speak(utterance);
     setSpeaking(true);
   };
 

@@ -5,6 +5,7 @@ import {
   usersTable,
   feePaymentsTable,
   parentStudentLinksTable,
+  directMessagesTable,
 } from "@workspace/db";
 import {
   GetTutorFeesParams,
@@ -14,9 +15,14 @@ import {
   RecordFeePaymentResponse,
   DeleteFeePaymentParams,
   DeleteFeePaymentResponse,
+  SendFeeRemindersParams,
+  SendFeeRemindersBody,
+  SendFeeRemindersResponse,
 } from "@workspace/api-zod";
 import { requireAuth, requireSelf, requireTutor } from "../middlewares/auth";
-import { getLinkedStudentFor } from "../lib/links";
+import { getLinkedStudentFor, linkedParentsOfStudent } from "../lib/links";
+import { createNotification } from "../lib/notify";
+import { rateLimit } from "../middlewares/rateLimit";
 
 const router: IRouter = Router();
 
@@ -176,6 +182,68 @@ router.delete(
     }
 
     res.json(DeleteFeePaymentResponse.parse(await feesPayload(params.data.vidyaId)));
+  },
+);
+
+router.post(
+  "/tutor/:vidyaId/fees/remind",
+  requireAuth,
+  requireSelf,
+  requireTutor,
+  rateLimit({ windowMs: 60_000, max: 10, keyPrefix: "fee-remind" }),
+  async (req, res): Promise<void> => {
+    const params = SendFeeRemindersParams.safeParse(req.params);
+    const body = SendFeeRemindersBody.safeParse(req.body);
+    if (!params.success || !body.success) {
+      res.status(400).json({ error: "Invalid input" });
+      return;
+    }
+    const message = body.data.message.trim();
+    if (!message) {
+      res.status(400).json({ error: "Message required" });
+      return;
+    }
+
+    const [tutor] = await db
+      .select({ name: usersTable.name })
+      .from(usersTable)
+      .where(eq(usersTable.vidyaId, params.data.vidyaId))
+      .limit(1);
+    const tutorName = tutor?.name ?? "your tutor";
+
+    // Fan a personalised reminder out to every parent of each selected student.
+    // Each student is verified linked to this tutor first; the localised body is
+    // built on the client (no name) and the student name is prepended here.
+    const ids = [...new Set(body.data.studentVidyaIds)];
+    let sent = 0;
+    for (const studentVidyaId of ids) {
+      const linked = await getLinkedStudentFor(params.data.vidyaId, studentVidyaId);
+      if (!linked) continue;
+      const parents = await linkedParentsOfStudent(studentVidyaId);
+      if (parents.length === 0) continue;
+      const personalised = `${linked.name} — ${message}`;
+      for (const parent of parents) {
+        await db.insert(directMessagesTable).values({
+          tutorVidyaId: params.data.vidyaId,
+          parentVidyaId: parent.vidyaId,
+          senderRole: "tutor",
+          body: personalised,
+        });
+        await createNotification({
+          recipientVidyaId: parent.vidyaId,
+          type: "fee",
+          title: `Fee reminder from ${tutorName}`,
+          body:
+            personalised.length > 120
+              ? `${personalised.slice(0, 120)}…`
+              : personalised,
+          linkTab: "messages",
+        });
+        sent += 1;
+      }
+    }
+
+    res.json(SendFeeRemindersResponse.parse({ sent }));
   },
 );
 

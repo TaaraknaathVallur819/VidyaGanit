@@ -1515,6 +1515,43 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /tutor/{vidyaId}/fees/remind:
+    post:
+      operationId: sendFeeReminders
+      tags: [tutor]
+      summary: Send fee-payment reminders to the parents of selected students
+      parameters:
+        - in: path
+          name: vidyaId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendFeeRemindersInput"
+      responses:
+        "200":
+          description: Number of reminders sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeeRemindersResult"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /parent/{vidyaId}/students/{studentVidyaId}/digest:
     get:
       operationId: getWeeklyDigest
@@ -2050,6 +2087,28 @@ components:
           maxLength: 500
         paidOn:
           type: ["string", "null"]
+
+    SendFeeRemindersInput:
+      type: object
+      required: [studentVidyaIds, message]
+      properties:
+        studentVidyaIds:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 200
+        message:
+          type: string
+          minLength: 1
+          maxLength: 1000
+
+    FeeRemindersResult:
+      type: object
+      required: [sent]
+      properties:
+        sent:
+          type: integer
 
     ProfileUpdate:
       type: object

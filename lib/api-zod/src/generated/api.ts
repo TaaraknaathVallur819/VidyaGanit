@@ -1318,6 +1318,29 @@ export const DeleteFeePaymentResponse = zod.object({
 
 
 /**
+ * @summary Send fee-payment reminders to the parents of selected students
+ */
+export const SendFeeRemindersParams = zod.object({
+  "vidyaId": zod.coerce.string()
+})
+
+export const sendFeeRemindersBodyStudentVidyaIdsMax = 200;
+
+export const sendFeeRemindersBodyMessageMax = 1000;
+
+
+
+export const SendFeeRemindersBody = zod.object({
+  "studentVidyaIds": zod.array(zod.string()).min(1).max(sendFeeRemindersBodyStudentVidyaIdsMax),
+  "message": zod.string().min(1).max(sendFeeRemindersBodyMessageMax)
+})
+
+export const SendFeeRemindersResponse = zod.object({
+  "sent": zod.number()
+})
+
+
+/**
  * @summary A student's weekly progress digest
  */
 export const GetWeeklyDigestParams = zod.object({

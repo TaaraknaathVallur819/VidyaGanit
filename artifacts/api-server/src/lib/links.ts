@@ -58,6 +58,29 @@ export async function sharesStudent(a: string, b: string): Promise<boolean> {
   return overlap.length > 0;
 }
 
+/** The parent accounts linked to a given student (for reminders/notices). */
+export async function linkedParentsOfStudent(
+  studentVidyaId: string,
+): Promise<{ vidyaId: string; name: string }[]> {
+  const linkRows = await db
+    .select({ linker: parentStudentLinksTable.parentVidyaId })
+    .from(parentStudentLinksTable)
+    .where(eq(parentStudentLinksTable.studentVidyaId, studentVidyaId));
+  const ids = [...new Set(linkRows.map((r) => r.linker))];
+  if (ids.length === 0) return [];
+  const users = await db
+    .select({
+      vidyaId: usersTable.vidyaId,
+      name: usersTable.name,
+      role: usersTable.role,
+    })
+    .from(usersTable)
+    .where(inArray(usersTable.vidyaId, ids));
+  return users
+    .filter((u) => u.role === "parent")
+    .map((u) => ({ vidyaId: u.vidyaId, name: u.name }));
+}
+
 /**
  * The other parent/tutor accounts that share at least one student with the
  * given account, restricted to the opposite portal role (a tutor sees parents,

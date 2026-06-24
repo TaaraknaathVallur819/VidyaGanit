@@ -43,6 +43,7 @@ import type {
   DailyGoalInput,
   DigestResponse,
   ErrorResponse,
+  FeeRemindersResult,
   ForgotPasswordInput,
   GameScoreInput,
   GameScoreResponse,
@@ -69,6 +70,7 @@ import type {
   ResetPasswordInput,
   ReviewDueResponse,
   ReviewGradeInput,
+  SendFeeRemindersInput,
   SendMessageInput,
   ShopEquipInput,
   ShopItemInput,
@@ -4221,6 +4223,78 @@ export const useDeleteFeePayment = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getDeleteFeePaymentMutationOptions(options));
+    }
+
+export const getSendFeeRemindersUrl = (vidyaId: string,) => {
+
+
+
+
+  return `/api/tutor/${vidyaId}/fees/remind`
+}
+
+/**
+ * @summary Send fee-payment reminders to the parents of selected students
+ */
+export const sendFeeReminders = async (vidyaId: string,
+    sendFeeRemindersInput: SendFeeRemindersInput, options?: RequestInit): Promise<FeeRemindersResult> => {
+
+  return customFetch<FeeRemindersResult>(getSendFeeRemindersUrl(vidyaId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      sendFeeRemindersInput,)
+  }
+);}
+
+
+
+
+export const getSendFeeRemindersMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendFeeReminders>>, TError,{vidyaId: string;data: BodyType<SendFeeRemindersInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof sendFeeReminders>>, TError,{vidyaId: string;data: BodyType<SendFeeRemindersInput>}, TContext> => {
+
+const mutationKey = ['sendFeeReminders'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendFeeReminders>>, {vidyaId: string;data: BodyType<SendFeeRemindersInput>}> = (props) => {
+          const {vidyaId,data} = props ?? {};
+
+          return  sendFeeReminders(vidyaId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SendFeeRemindersMutationResult = NonNullable<Awaited<ReturnType<typeof sendFeeReminders>>>
+    export type SendFeeRemindersMutationBody = BodyType<SendFeeRemindersInput>
+    export type SendFeeRemindersMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Send fee-payment reminders to the parents of selected students
+ */
+export const useSendFeeReminders = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendFeeReminders>>, TError,{vidyaId: string;data: BodyType<SendFeeRemindersInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof sendFeeReminders>>,
+        TError,
+        {vidyaId: string;data: BodyType<SendFeeRemindersInput>},
+        TContext
+      > => {
+      return useMutation(getSendFeeRemindersMutationOptions(options));
     }
 
 export const getGetWeeklyDigestUrl = (vidyaId: string,
