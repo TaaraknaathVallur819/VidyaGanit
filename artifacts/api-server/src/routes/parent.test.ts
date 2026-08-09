@@ -1,26 +1,27 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import request from "supertest";
 
-// ── Mock the OpenAI integration so the parent strategy-AI and transcribe
-// endpoints never make real network calls during tests. ──────────────────
+// ── Mock the direct Gemini client and local audio adapter so the parent
+// strategy-AI and transcription endpoints never make real network calls. ──
 const mocks = vi.hoisted(() => ({
-  chatCreate: vi.fn(),
+  generateContentStream: vi.fn(),
+  generateContent: vi.fn(),
   speechToText: vi.fn(),
   ensureCompatibleFormat: vi.fn(),
-  generateImageBuffer: vi.fn(),
 }));
 
-vi.mock("@workspace/integrations-openai-ai-server", () => ({
-  openai: { chat: { completions: { create: mocks.chatCreate } } },
+vi.mock("../lib/googleAi", () => ({
+  gemini: {
+    models: {
+      generateContentStream: mocks.generateContentStream,
+      generateContent: mocks.generateContent,
+    },
+  },
 }));
 
-vi.mock("@workspace/integrations-openai-ai-server/audio", () => ({
+vi.mock("../lib/audio", () => ({
   speechToText: mocks.speechToText,
   ensureCompatibleFormat: mocks.ensureCompatibleFormat,
-}));
-
-vi.mock("@workspace/integrations-openai-ai-server/image", () => ({
-  generateImageBuffer: mocks.generateImageBuffer,
 }));
 
 import app from "../app";
@@ -50,12 +51,12 @@ function cookieFor(vidyaId: string): string {
   return `${SESSION_COOKIE}=${signSession(vidyaId)}`;
 }
 
-/** An async-iterable mimicking the OpenAI streaming chat response. */
+/** An async-iterable mimicking the Gemini streaming chat response. */
 function makeStream(chunks: string[]) {
   return {
     async *[Symbol.asyncIterator]() {
       for (const c of chunks) {
-        yield { choices: [{ delta: { content: c } }] };
+        yield { text: c };
       }
     },
   };
@@ -133,10 +134,16 @@ afterAll(async () => {
 
 beforeEach(async () => {
   vi.clearAllMocks();
-  mocks.chatCreate.mockResolvedValue(makeStream(["Here ", "is some advice."]));
+  mocks.generateContentStream.mockResolvedValue(makeStream(["Here ", "is some advice."]));
   mocks.ensureCompatibleFormat.mockResolvedValue({ buffer: Buffer.from("audio"), format: "wav" });
   mocks.speechToText.mockResolvedValue("transcribed text");
-  mocks.generateImageBuffer.mockResolvedValue(Buffer.from("fake-png"));
+  mocks.generateContent.mockResolvedValue({
+    candidates: [{
+      content: {
+        parts: [{ inlineData: { data: Buffer.from("fake-png").toString("base64"), mimeType: "image/png" } }],
+      },
+    }],
+  });
   await clearRateLimitBuckets();
 });
 
@@ -226,7 +233,7 @@ describe("POST /parent/:vidyaId/consultant/message", () => {
     expect(res.headers["content-type"]).toContain("text/event-stream");
     expect(res.text).toContain("Here ");
     expect(res.text).toContain('"done":true');
-    expect(mocks.chatCreate).toHaveBeenCalledTimes(1);
+    expect(mocks.generateContentStream).toHaveBeenCalledTimes(1);
   });
 
   it("accepts a linked studentVidyaId for grounded advice", async () => {
@@ -240,13 +247,13 @@ describe("POST /parent/:vidyaId/consultant/message", () => {
   });
 
   it("suppresses a [[DRAW]] marker from the stream and saved history", async () => {
-    mocks.chatCreate.mockResolvedValueOnce(
+    mocks.generateContentStream.mockResolvedValueOnce(
       makeStream(["Try this at home. ", "[[DRAW: a fraction bar split into 3 equal parts]]"]),
     );
     const res = await request(app)
       .post(url(PARENT_A))
       .set("Cookie", cookieFor(PARENT_A))
-      .send({ message: "Show me a fraction picture", imageModel: "openai" });
+      .send({ message: "Show me a fraction picture", imageModel: "gemini-nano-banana" });
 
     expect(res.status).toBe(200);
     // Visible prose streams; the marker never leaks to the client.
@@ -274,7 +281,7 @@ describe("POST /parent/:vidyaId/consultant/message", () => {
       .set("Cookie", cookieFor(PARENT_A))
       .send({ message: "Hi" });
     expect(res.status).toBe(403);
-    expect(mocks.chatCreate).not.toHaveBeenCalled();
+    expect(mocks.generateContentStream).not.toHaveBeenCalled();
   });
 
   it("rejects an unlinked studentVidyaId with 403", async () => {
@@ -283,7 +290,7 @@ describe("POST /parent/:vidyaId/consultant/message", () => {
       .set("Cookie", cookieFor(PARENT_A))
       .send({ message: "How is this child?", studentVidyaId: STUDENT_UNLINKED });
     expect(res.status).toBe(403);
-    expect(mocks.chatCreate).not.toHaveBeenCalled();
+    expect(mocks.generateContentStream).not.toHaveBeenCalled();
   });
 
   it("returns 429 once the per-minute rate limit is exceeded", async () => {
@@ -296,7 +303,7 @@ describe("POST /parent/:vidyaId/consultant/message", () => {
 
     expect(res.status).toBe(429);
     expect(res.headers["retry-after"]).toBeDefined();
-    expect(mocks.chatCreate).not.toHaveBeenCalled();
+    expect(mocks.generateContentStream).not.toHaveBeenCalled();
   });
 });
 

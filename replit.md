@@ -35,12 +35,10 @@ VidyaGanit is a Socratic math tuition web app for Indian school kids (Classes 4�
 ## AI tutor chat
 
 - Endpoint: `POST /api/chat/message` in `artifacts/api-server` — a Server-Sent Events stream (not in the OpenAPI spec; hand-written SSE + raw `fetch` on the client in `artifacts/vidya-ganit/src/components/SocraticChat.tsx`).
-- Uses Replit AI Integrations (managed OpenAI + Gemini). Image models (`aiImage.ts` / `ImageModelSelect.tsx`): `openai` (gpt-image-1, quality "low"/fast), `openai-hd` (gpt-image-1, quality "high"), `gemini-nano-banana` (gemini-2.5-flash-image), `gemini-nano-banana-pro` (gemini-3-pro-image-preview). The inline-illustration default in both student and parent chats is `gemini-nano-banana` for faster drawings. Adding an image model = update the `ImageModel` union in both `aiImage.ts` and `ImageModelSelect.tsx`, both OpenAPI `imageModel` enums, then regen codegen.
-- Chat models are pluggable across four providers via the `streamChat` abstraction + `CHAT_MODELS` catalog in `artifacts/api-server/src/lib/aiChat.ts`: OpenAI, Anthropic, Gemini, and OpenRouter (`@workspace/integrations-openrouter-ai`, OpenAI-compatible, used to reach Perplexity Sonar + DeepSeek). The client picks a `ChatModelKey`; the server resolves it to `{provider, model}`. The picker (`AiModelSelect.tsx`) is shared by the student chat and the parent/tutor consultant, so every new model lights up in all three portals at once. Adding a model = add to `CHAT_MODELS`, both `ChatModelKey` unions, both OpenAPI `chatModel` enums, the UI groups, then regen codegen. The catalog↔OpenAPI enum sync is guarded by `aiChat.test.ts`.
-- OpenRouter access is via Replit AI Integrations (env: `AI_INTEGRATIONS_OPENROUTER_BASE_URL`, `AI_INTEGRATIONS_OPENROUTER_API_KEY`); only chat completions are supported (no `/models`, no images/audio). Perplexity reasoning is served as `perplexity/sonar-reasoning-pro` (the plain `sonar-reasoning` slug 404s) and requires a non-trivial `max_tokens`.
+- The API server uses the direct `@google/genai` SDK through `src/lib/googleAi.ts`, authenticated with `process.env.GEMINI_API_KEY`; no Replit AI Integration base URL is used. Chat supports Gemini 2.5 Flash and Pro, inline diagrams use Gemini image models, and parent audio transcription uses Gemini multimodal input.
 - Persona/curriculum prompt is built in `artifacts/api-server/src/lib/tutor.ts` (`buildTutorSystemPrompt`), pulling `studentClass`/`board` from `usersTable`.
 - The model appends a `[[DRAW: ...]]` marker to request an illustration; the server strips it from the streamed text and emits the image as a base64 data-URL SSE event.
-- Required env (provisioned by the integration): `AI_INTEGRATIONS_OPENAI_BASE_URL`, `AI_INTEGRATIONS_OPENAI_API_KEY`.
+- Required env: `GEMINI_API_KEY`.
 
 ## Mistake Notebook
 

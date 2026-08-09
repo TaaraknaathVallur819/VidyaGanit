@@ -19,3 +19,4 @@
 - [Six engagement features](six-engagement-features.md) — weekly-goal xp-snapshot; worksheet answer-key must stay parent/tutor-gated; speed arena reuses /games/score + needs round-token vs stale awards; numeric display ≠ i18n key
 - [Web Speech cancel→speak race](speech-synthesis-race.md) — deferred speak() workaround must be abortable; stop/unmount go through stopSpeaking(), never bare cancel()
 - [Web Speech recognition restart](web-speech-recognition-restart.md) — live dictation must restart with a FRESH SpeechRecognition; reusing the ended one throws InvalidStateError in Chrome
+- [Direct Gemini SDK](direct-gemini-sdk.md) — API-server AI features use @google/genai directly with GEMINI_API_KEY, not Replit AI Integrations

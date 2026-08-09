@@ -255,7 +255,7 @@ export default function SocraticChat({
   const [badgeToasts, setBadgeToasts] = useState<BadgeToast[]>([]);
   const [attachment, setAttachment] = useState<Attachment | null>(null);
   const [attachError, setAttachError] = useState<string | null>(null);
-  const [chatModel, setChatModel] = useState<ChatModelKey>("gpt-5-mini");
+  const [chatModel, setChatModel] = useState<ChatModelKey>("gemini-2.5-flash");
   const [imageModel, setImageModel] = useState<ImageModel>("gemini-nano-banana");
   const [gameOffered, setGameOffered] = useState(false);
   const [gameTopic, setGameTopic] = useState<string | null>(null);

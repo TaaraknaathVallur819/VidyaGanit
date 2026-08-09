@@ -98,7 +98,7 @@ export default function ParentConsultantChat({
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
   const [isContinuing, setIsContinuing] = useState(false);
-  const [chatModel, setChatModel] = useState<ChatModelKey>("gpt-5-mini");
+  const [chatModel, setChatModel] = useState<ChatModelKey>("gemini-2.5-flash");
   const [imageModel, setImageModel] = useState<ImageModel>("gemini-nano-banana");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);

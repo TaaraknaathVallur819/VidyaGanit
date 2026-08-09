@@ -15,16 +15,14 @@ describe("normalizeChatModel", () => {
     }
   });
 
-  it("covers all four providers", () => {
+  it("uses direct Gemini for every selectable model", () => {
     const providers = new Set(CHAT_MODELS.map((m) => m.provider));
-    expect(providers).toEqual(
-      new Set(["openai", "anthropic", "gemini", "openrouter"]),
-    );
+    expect(providers).toEqual(new Set(["gemini"]));
   });
 
-  it("defaults to gpt-5-mini for unknown / missing values", () => {
+  it("defaults to Gemini 2.5 Flash for unknown / missing values", () => {
     for (const bad of [undefined, null, "", "gpt-9", 42, {}]) {
-      expect(normalizeChatModel(bad).key).toBe("gpt-5-mini");
+      expect(normalizeChatModel(bad).key).toBe("gemini-2.5-flash");
     }
   });
 

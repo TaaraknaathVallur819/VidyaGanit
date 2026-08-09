@@ -1,20 +1,20 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import request from "supertest";
 
-// ── Mock the OpenAI integration so the Socratic tutor chat never makes real
-// network calls during tests. Both the chat stream and image generation are
-// stubbed (the latter only fires when the model emits a [[DRAW]] marker). ──
+// ── Mock the direct Gemini client so the Socratic tutor chat never makes real
+// network calls during tests. ──
 const mocks = vi.hoisted(() => ({
-  chatCreate: vi.fn(),
-  generateImageBuffer: vi.fn(),
+  generateContentStream: vi.fn(),
+  generateContent: vi.fn(),
 }));
 
-vi.mock("@workspace/integrations-openai-ai-server", () => ({
-  openai: { chat: { completions: { create: mocks.chatCreate } } },
-}));
-
-vi.mock("@workspace/integrations-openai-ai-server/image", () => ({
-  generateImageBuffer: mocks.generateImageBuffer,
+vi.mock("../lib/googleAi", () => ({
+  gemini: {
+    models: {
+      generateContentStream: mocks.generateContentStream,
+      generateContent: mocks.generateContent,
+    },
+  },
 }));
 
 import app from "../app";
@@ -35,12 +35,12 @@ function cookieFor(vidyaId: string): string {
   return `${SESSION_COOKIE}=${signSession(vidyaId)}`;
 }
 
-/** An async-iterable mimicking the OpenAI streaming chat response. */
+/** An async-iterable mimicking the Gemini streaming chat response. */
 function makeStream(chunks: string[]) {
   return {
     async *[Symbol.asyncIterator]() {
       for (const c of chunks) {
-        yield { choices: [{ delta: { content: c } }] };
+        yield { text: c };
       }
     },
   };
@@ -105,7 +105,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   vi.clearAllMocks();
-  mocks.chatCreate.mockResolvedValue(makeStream(["Let's ", "think step by step."]));
+  mocks.generateContentStream.mockResolvedValue(makeStream(["Let's ", "think step by step."]));
   await clearRateLimitBuckets();
   await clearChatMessages();
 });
@@ -123,13 +123,13 @@ describe("POST /chat/message", () => {
     expect(res.headers["content-type"]).toContain("text/event-stream");
     expect(res.text).toContain("Let's ");
     expect(res.text).toContain('"done":true');
-    expect(mocks.chatCreate).toHaveBeenCalledTimes(1);
+    expect(mocks.generateContentStream).toHaveBeenCalledTimes(1);
   });
 
   it("rejects unauthenticated requests with 401", async () => {
     const res = await request(app).post(url).send({ vidyaId: STUDENT_A, message: "Hi" });
     expect(res.status).toBe(401);
-    expect(mocks.chatCreate).not.toHaveBeenCalled();
+    expect(mocks.generateContentStream).not.toHaveBeenCalled();
   });
 
   it("takes the student identity from the cookie, never the request body", async () => {
@@ -175,7 +175,7 @@ describe("POST /chat/message", () => {
 
     expect(res.status).toBe(429);
     expect(res.headers["retry-after"]).toBeDefined();
-    expect(mocks.chatCreate).not.toHaveBeenCalled();
+    expect(mocks.generateContentStream).not.toHaveBeenCalled();
   });
 });
 
@@ -242,7 +242,7 @@ describe("POST /chat/message — game offer", () => {
   it("still honours an explicit [[GAME]] marker from the model", async () => {
     // Even for a short, non-topic message, an explicit marker surfaces the
     // offer — and the marker text itself never leaks to the student.
-    mocks.chatCreate.mockResolvedValueOnce(makeStream(["Great work! ", "[[GAME]]"]));
+    mocks.generateContentStream.mockResolvedValueOnce(makeStream(["Great work! ", "[[GAME]]"]));
 
     const res = await request(app)
       .post(url)

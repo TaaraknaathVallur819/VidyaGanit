@@ -50,7 +50,7 @@ import {
 import { buildPastConversationDigest } from "../lib/chatMemory";
 import { streamChat, normalizeChatModel, type ChatImage } from "../lib/aiChat";
 import { generateImageDataUrl, normalizeImageModel } from "../lib/aiImage";
-import { speechToText, ensureCompatibleFormat } from "@workspace/integrations-openai-ai-server/audio";
+import { speechToText, ensureCompatibleFormat } from "../lib/audio";
 import { requireAuth, requireSelf } from "../middlewares/auth";
 import { rateLimit } from "../middlewares/rateLimit";
 

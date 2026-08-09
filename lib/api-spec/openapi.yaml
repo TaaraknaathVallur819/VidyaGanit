@@ -2630,24 +2630,12 @@ components:
           type: string
           enum:
             [
-              gpt-5.4,
-              gpt-5-mini,
-              gpt-5-nano,
-              claude-opus-4-8,
-              claude-sonnet-4-6,
-              claude-haiku-4-5,
-              gemini-3-pro,
-              gemini-3-flash,
               gemini-2.5-flash,
-              perplexity-sonar,
-              perplexity-sonar-pro,
-              perplexity-sonar-reasoning,
-              deepseek-chat-v3,
-              deepseek-r1,
+              gemini-2.5-pro,
             ]
         imageModel:
           type: string
-          enum: [openai, openai-hd, gemini-nano-banana, gemini-nano-banana-pro]
+          enum: [gemini-nano-banana, gemini-nano-banana-pro]
 
     ChatAttachment:
       type: object
@@ -3013,24 +3001,12 @@ components:
           type: string
           enum:
             [
-              gpt-5.4,
-              gpt-5-mini,
-              gpt-5-nano,
-              claude-opus-4-8,
-              claude-sonnet-4-6,
-              claude-haiku-4-5,
-              gemini-3-pro,
-              gemini-3-flash,
               gemini-2.5-flash,
-              perplexity-sonar,
-              perplexity-sonar-pro,
-              perplexity-sonar-reasoning,
-              deepseek-chat-v3,
-              deepseek-r1,
+              gemini-2.5-pro,
             ]
         imageModel:
           type: string
-          enum: [openai, openai-hd, gemini-nano-banana, gemini-nano-banana-pro]
+          enum: [gemini-nano-banana, gemini-nano-banana-pro]
 
     GameScoreInput:
       type: object

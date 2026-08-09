@@ -2,15 +2,11 @@ import { ImageIcon } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 
 export type ImageModel =
-  | "openai"
-  | "openai-hd"
   | "gemini-nano-banana"
   | "gemini-nano-banana-pro";
 
 // Brand/model names are intentionally hardcoded (not translated).
 const IMAGE_MODELS: { value: ImageModel; label: string }[] = [
-  { value: "openai", label: "gpt-image-1 (Fast)" },
-  { value: "openai-hd", label: "gpt-image-1 (HD)" },
   { value: "gemini-nano-banana", label: "Nano Banana" },
   { value: "gemini-nano-banana-pro", label: "Nano Banana Pro" },
 ];

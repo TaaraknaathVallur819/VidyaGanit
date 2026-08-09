@@ -421,28 +421,14 @@ export type ChatMessageInputChatModel = typeof ChatMessageInputChatModel[keyof t
 
 
 export const ChatMessageInputChatModel = {
-  'gpt-54': 'gpt-5.4',
-  'gpt-5-mini': 'gpt-5-mini',
-  'gpt-5-nano': 'gpt-5-nano',
-  'claude-opus-4-8': 'claude-opus-4-8',
-  'claude-sonnet-4-6': 'claude-sonnet-4-6',
-  'claude-haiku-4-5': 'claude-haiku-4-5',
-  'gemini-3-pro': 'gemini-3-pro',
-  'gemini-3-flash': 'gemini-3-flash',
   'gemini-25-flash': 'gemini-2.5-flash',
-  'perplexity-sonar': 'perplexity-sonar',
-  'perplexity-sonar-pro': 'perplexity-sonar-pro',
-  'perplexity-sonar-reasoning': 'perplexity-sonar-reasoning',
-  'deepseek-chat-v3': 'deepseek-chat-v3',
-  'deepseek-r1': 'deepseek-r1',
+  'gemini-25-pro': 'gemini-2.5-pro',
 } as const;
 
 export type ChatMessageInputImageModel = typeof ChatMessageInputImageModel[keyof typeof ChatMessageInputImageModel];
 
 
 export const ChatMessageInputImageModel = {
-  openai: 'openai',
-  'openai-hd': 'openai-hd',
   'gemini-nano-banana': 'gemini-nano-banana',
   'gemini-nano-banana-pro': 'gemini-nano-banana-pro',
 } as const;
@@ -765,28 +751,14 @@ export type ConsultantMessageInputChatModel = typeof ConsultantMessageInputChatM
 
 
 export const ConsultantMessageInputChatModel = {
-  'gpt-54': 'gpt-5.4',
-  'gpt-5-mini': 'gpt-5-mini',
-  'gpt-5-nano': 'gpt-5-nano',
-  'claude-opus-4-8': 'claude-opus-4-8',
-  'claude-sonnet-4-6': 'claude-sonnet-4-6',
-  'claude-haiku-4-5': 'claude-haiku-4-5',
-  'gemini-3-pro': 'gemini-3-pro',
-  'gemini-3-flash': 'gemini-3-flash',
   'gemini-25-flash': 'gemini-2.5-flash',
-  'perplexity-sonar': 'perplexity-sonar',
-  'perplexity-sonar-pro': 'perplexity-sonar-pro',
-  'perplexity-sonar-reasoning': 'perplexity-sonar-reasoning',
-  'deepseek-chat-v3': 'deepseek-chat-v3',
-  'deepseek-r1': 'deepseek-r1',
+  'gemini-25-pro': 'gemini-2.5-pro',
 } as const;
 
 export type ConsultantMessageInputImageModel = typeof ConsultantMessageInputImageModel[keyof typeof ConsultantMessageInputImageModel];
 
 
 export const ConsultantMessageInputImageModel = {
-  openai: 'openai',
-  'openai-hd': 'openai-hd',
   'gemini-nano-banana': 'gemini-nano-banana',
   'gemini-nano-banana-pro': 'gemini-nano-banana-pro',
 } as const;
