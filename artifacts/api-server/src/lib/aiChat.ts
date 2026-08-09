@@ -8,8 +8,7 @@ export type ChatProvider = "gemini";
 
 /** Stable key sent by the client (kept in sync with the OpenAPI `chatModel` enum). */
 export type ChatModelKey =
-  | "gemini-2.5-flash"
-  | "gemini-2.5-pro";
+  | "gemini-flash-lite-latest";
 
 export interface ChatModelDef {
   /** Client-facing key (matches the OpenAPI enum). */
@@ -25,20 +24,37 @@ export interface ChatModelDef {
  * the server resolves it to a provider/model pair for the shared stream path.
  */
 export const CHAT_MODELS: readonly ChatModelDef[] = [
-  { key: "gemini-2.5-flash", provider: "gemini", model: "gemini-2.5-flash" },
-  { key: "gemini-2.5-pro", provider: "gemini", model: "gemini-2.5-pro" },
+  {
+    key: "gemini-flash-lite-latest",
+    provider: "gemini",
+    model: "gemini-flash-lite-latest",
+  },
 ];
 
 /** Default model — the existing client key now routes to direct Gemini. */
 const DEFAULT_CHAT_MODEL: ChatModelDef = CHAT_MODELS[0];
 
-/** Coerce an untrusted value into a known chat model, defaulting to Gemini Flash. */
+/**
+ * Coerce an untrusted value into a known chat model.
+ *
+ * Old clients may still send the previously exposed 2.5 model keys. They are
+ * intentionally mapped to the working model instead of being passed through to
+ * Gemini, so a remembered selection cannot make chat fail.
+ */
 export function normalizeChatModel(value: unknown): ChatModelDef {
   if (typeof value === "string") {
     const found = CHAT_MODELS.find((m) => m.key === value);
     if (found) return found;
   }
   return DEFAULT_CHAT_MODEL;
+}
+
+/** Normalize model values before request-schema validation for stale clients. */
+export function normalizeChatModelInput(value: unknown): unknown {
+  if (value === "gemini-2.5-flash" || value === "gemini-2.5-pro") {
+    return DEFAULT_CHAT_MODEL.key;
+  }
+  return value;
 }
 
 export interface UnifiedTurn {
@@ -107,7 +123,6 @@ export async function* streamChat(
     config: {
       maxOutputTokens: MAX_OUTPUT_TOKENS,
       systemInstruction: system,
-      thinkingConfig: { thinkingBudget: 0 },
     },
   });
   for await (const part of stream) {

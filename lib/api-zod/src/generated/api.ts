@@ -367,7 +367,7 @@ export const SendChatMessageBody = zod.object({
   "mimeType": zod.string(),
   "dataUrl": zod.string().describe('Base64 data URL of the attached file (data:<mime>;base64,...)')
 }).optional(),
-  "chatModel": zod.enum(['gemini-2.5-flash', 'gemini-2.5-pro']).optional(),
+  "chatModel": zod.enum(['gemini-flash-lite-latest']).optional(),
   "imageModel": zod.enum(['gemini-nano-banana', 'gemini-nano-banana-pro']).optional()
 })
 
@@ -572,7 +572,7 @@ export const SendConsultantMessageBody = zod.object({
   "mimeType": zod.string(),
   "dataUrl": zod.string().describe('Base64 data URL of the attached file (data:<mime>;base64,...)')
 }).optional(),
-  "chatModel": zod.enum(['gemini-2.5-flash', 'gemini-2.5-pro']).optional(),
+  "chatModel": zod.enum(['gemini-flash-lite-latest']).optional(),
   "imageModel": zod.enum(['gemini-nano-banana', 'gemini-nano-banana-pro']).optional()
 })
 

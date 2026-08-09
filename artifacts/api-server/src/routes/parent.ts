@@ -48,7 +48,12 @@ import {
   type CounselorTopicSummary,
 } from "../lib/counselor";
 import { buildPastConversationDigest } from "../lib/chatMemory";
-import { streamChat, normalizeChatModel, type ChatImage } from "../lib/aiChat";
+import {
+  streamChat,
+  normalizeChatModel,
+  normalizeChatModelInput,
+  type ChatImage,
+} from "../lib/aiChat";
 import { generateImageDataUrl, normalizeImageModel } from "../lib/aiImage";
 import { speechToText, ensureCompatibleFormat } from "../lib/audio";
 import { requireAuth, requireSelf } from "../middlewares/auth";
@@ -596,7 +601,14 @@ router.post(
       res.status(400).json({ error: params.error.message });
       return;
     }
-    const parsed = SendConsultantMessageBody.safeParse(req.body);
+    const requestBody =
+      req.body && typeof req.body === "object"
+        ? {
+            ...req.body,
+            chatModel: normalizeChatModelInput(req.body.chatModel),
+          }
+        : req.body;
+    const parsed = SendConsultantMessageBody.safeParse(requestBody);
     if (!parsed.success) {
       res.status(400).json({ error: parsed.error.message });
       return;

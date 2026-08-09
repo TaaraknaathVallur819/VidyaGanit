@@ -2630,8 +2630,7 @@ components:
           type: string
           enum:
             [
-              gemini-2.5-flash,
-              gemini-2.5-pro,
+              gemini-flash-lite-latest,
             ]
         imageModel:
           type: string
@@ -3001,8 +3000,7 @@ components:
           type: string
           enum:
             [
-              gemini-2.5-flash,
-              gemini-2.5-pro,
+              gemini-flash-lite-latest,
             ]
         imageModel:
           type: string

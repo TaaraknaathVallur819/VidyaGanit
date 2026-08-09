@@ -4,8 +4,7 @@ import { useLanguage } from "@/lib/i18n";
 // Stable keys sent to the API (kept in sync with the OpenAPI `chatModel` enum
 // and the server-side CHAT_MODELS catalog).
 export type ChatModelKey =
-  | "gemini-2.5-flash"
-  | "gemini-2.5-pro";
+  | "gemini-flash-lite-latest";
 
 // Brand/model names are intentionally hardcoded (not translated).
 const CHAT_MODEL_GROUPS: {
@@ -15,8 +14,7 @@ const CHAT_MODEL_GROUPS: {
   {
     provider: "Gemini",
     models: [
-      { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
-      { value: "gemini-2.5-pro", label: "Gemini 2.5 Pro" },
+      { value: "gemini-flash-lite-latest", label: "Gemini Flash Lite" },
     ],
   },
 ];

@@ -51,7 +51,7 @@ export async function ensureCompatibleFormat(
 export async function speechToText(audioBuffer: Buffer, format: "wav" | "mp3"): Promise<string> {
   const mimeType = format === "mp3" ? "audio/mpeg" : "audio/wav";
   const response = await gemini.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: "gemini-flash-lite-latest",
     contents: [{
       role: "user",
       parts: [

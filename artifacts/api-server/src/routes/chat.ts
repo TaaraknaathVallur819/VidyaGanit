@@ -24,7 +24,12 @@ import { computeStudentAnalytics } from "../lib/analytics";
 import { buildPastConversationDigest } from "../lib/chatMemory";
 import { computeXpAndBadges } from "../lib/xp";
 import { computeStreakOnActivity } from "../lib/streak";
-import { streamChat, normalizeChatModel, type ChatImage } from "../lib/aiChat";
+import {
+  streamChat,
+  normalizeChatModel,
+  normalizeChatModelInput,
+  type ChatImage,
+} from "../lib/aiChat";
 import { generateImageDataUrl, normalizeImageModel } from "../lib/aiImage";
 import { requireAuth, requireSelf } from "../middlewares/auth";
 import { rateLimit } from "../middlewares/rateLimit";
@@ -102,7 +107,14 @@ router.post(
     message: "You've done a lot of learning today! 🌟 Please take a break and come back in a little while.",
   }),
   async (req, res): Promise<void> => {
-    const parsed = SendChatMessageBody.safeParse(req.body);
+    const requestBody =
+      req.body && typeof req.body === "object"
+        ? {
+            ...req.body,
+            chatModel: normalizeChatModelInput(req.body.chatModel),
+          }
+        : req.body;
+    const parsed = SendChatMessageBody.safeParse(requestBody);
     if (!parsed.success) {
       res.status(400).json({ error: parsed.error.message });
       return;

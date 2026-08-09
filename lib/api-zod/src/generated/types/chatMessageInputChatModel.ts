@@ -10,6 +10,5 @@ export type ChatMessageInputChatModel = typeof ChatMessageInputChatModel[keyof t
 
 
 export const ChatMessageInputChatModel = {
-  'gemini-25-flash': 'gemini-2.5-flash',
-  'gemini-25-pro': 'gemini-2.5-pro',
+  'gemini-flash-lite-latest': 'gemini-flash-lite-latest',
 } as const;
