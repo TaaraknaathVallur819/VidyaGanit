@@ -112,6 +112,15 @@ export default function TutorDashboard() {
   const students = linkedData?.students ?? [];
 
   const [batchFilter, setBatchFilter] = useState<string>("all");
+  const [linkBatch, setLinkBatch] = useState("");
+
+  const displayed = profile ?? user;
+  const tutorBatches =
+    displayed?.batches && displayed.batches.length > 0
+      ? displayed.batches
+      : displayed?.batch
+        ? [displayed.batch]
+        : [];
 
   const filteredStudents =
     batchFilter === "all"
@@ -151,6 +160,14 @@ export default function TutorDashboard() {
   const linkMutation = useLinkStudent();
   const unlinkMutation = useUnlinkStudent();
 
+  const linkBatchValue =
+    linkBatch ||
+    (batchFilter !== "all" && batchFilter !== UNASSIGNED_BATCH
+      ? batchFilter
+      : tutorBatches.length === 1
+        ? tutorBatches[0]
+        : "");
+
   const handleLinkStudent = (e: React.FormEvent) => {
     e.preventDefault();
     setLinkError("");
@@ -158,11 +175,19 @@ export default function TutorDashboard() {
     const trimmed = linkInput.trim().toUpperCase();
     if (!trimmed) return;
     linkMutation.mutate(
-      { vidyaId, data: { studentVidyaId: trimmed } },
+      {
+        vidyaId,
+        data: {
+          studentVidyaId: trimmed,
+          batch: linkBatchValue || null,
+        },
+      },
       {
         onSuccess: (student) => {
           setLinkSuccess(`${student.name} linked successfully!`);
           setLinkInput("");
+          setLinkBatch("");
+          setSelectedStudentId(student.vidyaId);
           refetchLinked();
         },
         onError: (err) => {
@@ -189,8 +214,6 @@ export default function TutorDashboard() {
       },
     );
   };
-
-  const displayed = profile ?? user;
 
   // Edit Profile dialog
   const [editOpen, setEditOpen] = useState(false);
@@ -281,12 +304,6 @@ export default function TutorDashboard() {
 
   // Batches the tutor teaches (new multi-batch field, falling back to the legacy
   // single batch), plus any batch already assigned on a linked student.
-  const tutorBatches =
-    displayed.batches && displayed.batches.length > 0
-      ? displayed.batches
-      : displayed.batch
-        ? [displayed.batch]
-        : [];
   const batchValues = Array.from(
     new Set([
       ...tutorBatches,
@@ -323,7 +340,8 @@ export default function TutorDashboard() {
   const tabTriggerClass =
     "px-0 pb-3 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none bg-transparent font-semibold gap-1.5";
 
-  const needsStudent = activeTab === "progress" || activeTab === "history";
+  const needsStudent =
+    activeTab === "progress" || activeTab === "history" || activeTab === "coach";
 
   return (
     <div className="flex-1 bg-gray-50/50 min-h-full">
@@ -556,6 +574,28 @@ export default function TutorDashboard() {
                       placeholder={t("profile.linkPlaceholder")}
                       className="h-10 flex-1 font-mono text-sm"
                     />
+                    {tutorBatches.length > 0 && (
+                      <Select
+                        value={linkBatchValue || "__none__"}
+                        onValueChange={(value) => setLinkBatch(value === "__none__" ? "" : value)}
+                      >
+                        <SelectTrigger
+                          className="h-10 w-[9.5rem] rounded-xl"
+                          aria-label={t("tutor.batch")}
+                          data-testid="select-link-batch"
+                        >
+                          <SelectValue placeholder={t("tutor.batch")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__none__">{t("bulk.batchNone")}</SelectItem>
+                          {tutorBatches.map((batch) => (
+                            <SelectItem key={batch} value={batch}>
+                              {batch}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                     <Button
                       type="submit"
                       size="sm"

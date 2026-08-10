@@ -178,6 +178,51 @@ describe("student linking is restricted to parents/tutors (requireParentOrTutor)
       .send({ studentVidyaId: STUDENT_B, batch: "Morning Batch" });
     expect(res.status).toBe(200);
     expect(res.body.vidyaId).toBe(STUDENT_B);
+    expect(res.body.batch).toBe("Morning Batch");
+
+    const linked = await request(app)
+      .get(`/api/profile/${TUTOR_A}/linked-students`)
+      .set("Cookie", cookieFor(TUTOR_A));
+    expect(linked.status).toBe(200);
+    expect(linked.body.students).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          vidyaId: STUDENT_B,
+          batch: "Morning Batch",
+        }),
+      ]),
+    );
+  });
+
+  it("repairs an older unassigned tutor link when bulk linking with a batch", async () => {
+    const initial = await request(app)
+      .post(singleUrl(TUTOR_A))
+      .set("Cookie", cookieFor(TUTOR_A))
+      .send({ studentVidyaId: STUDENT_A });
+    expect(initial.status).toBe(200);
+    expect(initial.body.batch).toBeNull();
+
+    const repaired = await request(app)
+      .post(bulkUrl(TUTOR_A))
+      .set("Cookie", cookieFor(TUTOR_A))
+      .send({ studentVidyaIds: [STUDENT_A], batch: "Evening Batch" });
+    expect(repaired.status).toBe(200);
+    expect(repaired.body.results[0]).toMatchObject({
+      vidyaId: STUDENT_A,
+      status: "linked",
+    });
+
+    const linked = await request(app)
+      .get(`/api/profile/${TUTOR_A}/linked-students`)
+      .set("Cookie", cookieFor(TUTOR_A));
+    expect(linked.body.students).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          vidyaId: STUDENT_A,
+          batch: "Evening Batch",
+        }),
+      ]),
+    );
   });
 
   it("forbids a student from unlinking, but lets a parent unlink (requireParentOrTutor)", async () => {

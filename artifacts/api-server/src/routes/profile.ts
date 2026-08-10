@@ -367,15 +367,40 @@ router.post(
     return;
   }
 
-  try {
-    await db.insert(parentStudentLinksTable).values({
-      parentVidyaId: params.data.vidyaId,
-      studentVidyaId,
-      batch: batch?.trim() || null,
-    });
-  } catch {
-    res.status(400).json({ error: "This student is already linked to your account." });
-    return;
+  const normalizedBatch = batch?.trim() || null;
+  const [existingLink] = await db
+    .select()
+    .from(parentStudentLinksTable)
+    .where(
+      and(
+        eq(parentStudentLinksTable.parentVidyaId, params.data.vidyaId),
+        eq(parentStudentLinksTable.studentVidyaId, studentVidyaId),
+      ),
+    );
+
+  // Older tutor links could be created without a batch by the single-link form.
+  // Let a tutor repair that link by submitting the student again with a batch.
+  if (existingLink) {
+    if (!existingLink.batch && normalizedBatch) {
+      await db
+        .update(parentStudentLinksTable)
+        .set({ batch: normalizedBatch })
+        .where(eq(parentStudentLinksTable.id, existingLink.id));
+    } else {
+      res.status(400).json({ error: "This student is already linked to your account." });
+      return;
+    }
+  } else {
+    try {
+      await db.insert(parentStudentLinksTable).values({
+        parentVidyaId: params.data.vidyaId,
+        studentVidyaId,
+        batch: normalizedBatch,
+      });
+    } catch {
+      res.status(400).json({ error: "This student is already linked to your account." });
+      return;
+    }
   }
 
   req.log.info({ parentVidyaId: params.data.vidyaId, studentVidyaId }, "Student linked");
@@ -386,6 +411,7 @@ router.post(
       gender: student.gender,
       studentClass: student.studentClass ?? null,
       board: student.board ?? null,
+      batch: normalizedBatch ?? existingLink?.batch ?? null,
     }),
   );
 });
@@ -442,6 +468,32 @@ router.post(
       }
       if (user.role !== "student") {
         results.push({ vidyaId: studentVidyaId, status: "not_a_student", name: user.name });
+        continue;
+      }
+
+      const [existingLink] = await db
+        .select({
+          id: parentStudentLinksTable.id,
+          batch: parentStudentLinksTable.batch,
+        })
+        .from(parentStudentLinksTable)
+        .where(
+          and(
+            eq(parentStudentLinksTable.parentVidyaId, parentVidyaId),
+            eq(parentStudentLinksTable.studentVidyaId, studentVidyaId),
+          ),
+        );
+
+      if (existingLink) {
+        if (!existingLink.batch && batch) {
+          await db
+            .update(parentStudentLinksTable)
+            .set({ batch })
+            .where(eq(parentStudentLinksTable.id, existingLink.id));
+          results.push({ vidyaId: studentVidyaId, status: "linked", name: user.name });
+        } else {
+          results.push({ vidyaId: studentVidyaId, status: "already_linked", name: user.name });
+        }
         continue;
       }
 
