@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  type ReactNode,
+} from "react";
 import bn from "./locales/bn";
 import mr from "./locales/mr";
 import gu from "./locales/gu";
@@ -248,13 +254,17 @@ const en: Dict = {
   "tour.back": "Back",
   "tour.done": "Got it!",
   "tour.step.welcome.title": "Welcome to VidyaGanit!",
-  "tour.step.welcome.body": "Your friendly math coach is here to guide you step by step — never just handing over answers.",
+  "tour.step.welcome.body":
+    "Your friendly math coach is here to guide you step by step — never just handing over answers.",
   "tour.step.workspace.title": "Ask your Math Coach",
-  "tour.step.workspace.body": "Type any maths doubt in the Workspace. The coach gives playful hints, one step at a time.",
+  "tour.step.workspace.body":
+    "Type any maths doubt in the Workspace. The coach gives playful hints, one step at a time.",
   "tour.step.progress.title": "Track your progress",
-  "tour.step.progress.body": "Earn XP, unlock badges, keep your daily streak alive and climb the leaderboard.",
+  "tour.step.progress.body":
+    "Earn XP, unlock badges, keep your daily streak alive and climb the leaderboard.",
   "tour.step.shop.title": "Spend your coins",
-  "tour.step.shop.body": "Every bit of practice earns coins. Visit the Shop to unlock fun avatars and themes.",
+  "tour.step.shop.body":
+    "Every bit of practice earns coins. Visit the Shop to unlock fun avatars and themes.",
   // Brain games & AI model
   "games.title": "Brain Games",
   "games.subtitle": "Quick maths games to warm up your brain!",
@@ -329,11 +339,13 @@ const en: Dict = {
   "test.pointsLabel": "points",
   "test.correct": "Correct",
   "test.incorrect": "To practise",
-  "test.noNegative": "No marks are ever taken away — wrong answers simply score zero.",
+  "test.noNegative":
+    "No marks are ever taken away — wrong answers simply score zero.",
   "test.correctAnswer": "Correct answer",
   "test.done": "Done",
   "test.takeTitle": "Take a Test",
-  "test.takeSubtitle": "Pick a topic and earn points — no marks are ever deducted!",
+  "test.takeSubtitle":
+    "Pick a topic and earn points — no marks are ever deducted!",
   "test.offer": "Ready for a quick topic test? 📝",
   "test.offerYes": "Yes, test me! 📝",
   "test.offerNo": "Not now",
@@ -366,7 +378,8 @@ const en: Dict = {
   "report.loading": "Loading scores…",
   "report.empty.title": "No tests taken yet",
   "report.empty.kid": "No tests yet — take one above! 🚀",
-  "report.empty.hint": "Test scores will appear here once a topic test is completed.",
+  "report.empty.hint":
+    "Test scores will appear here once a topic test is completed.",
   "report.testsTaken": "Tests taken",
   "report.totalPoints": "Total points",
   "report.average": "Average",
@@ -383,7 +396,8 @@ const en: Dict = {
   "auth.academyNamePlaceholder": "e.g. Sharma Math Academy",
   "auth.optional": "(optional)",
   "auth.loginAs": "I am logging in as",
-  "auth.roleMismatch": "This ID isn't registered for that role. Please pick the correct one.",
+  "auth.roleMismatch":
+    "This ID isn't registered for that role. Please pick the correct one.",
   "tutor.title": "Tutor Dashboard",
   "tutor.batch": "Batch",
   "auth.batchAdd": "Add another batch",
@@ -444,12 +458,14 @@ const en: Dict = {
   "profile.female": "Female",
   "profile.connectedStudents": "Connected Students",
   "profile.linked": "linked",
-  "profile.linkPlaceholder": "Enter student's VidyaGanit ID (e.g. VG-STU-12345)",
+  "profile.linkPlaceholder":
+    "Enter student's VidyaGanit ID (e.g. VG-STU-12345)",
   "profile.link": "Link",
   "profile.noStudentsTitle": "No linked students yet",
   "profile.searchStudents": "Search by name or ID",
   "profile.noSearchResults": "No students match your search",
-  "profile.noStudentsHint": "Enter your child's VidyaGanit ID above to connect their account.",
+  "profile.noStudentsHint":
+    "Enter your child's VidyaGanit ID above to connect their account.",
   "profile.class": "Class",
   "profile.removeStudent": "Remove student",
 
@@ -457,35 +473,42 @@ const en: Dict = {
   "picker.label": "Viewing",
   "picker.placeholder": "Select a child",
   "picker.empty.title": "No children connected yet",
-  "picker.empty.hint": "Go to My Profile and link your child's VidyaGanit ID to see their progress here.",
+  "picker.empty.hint":
+    "Go to My Profile and link your child's VidyaGanit ID to see their progress here.",
 
   // Progress
   "progress.title": "Progress Analytics",
-  "progress.subtitle": "How your child is engaging with each topic on VidyaGanit.",
+  "progress.subtitle":
+    "How your child is engaging with each topic on VidyaGanit.",
   "progress.mastery": "Mastery",
   "progress.questions": "Questions practised",
   "progress.sessions": "Sessions",
   "progress.totalSessions": "Total sessions",
   "progress.totalMessages": "Total questions asked",
-  "progress.note": "Mastery is an activity-based estimate from practice on VidyaGanit, not a formal test score.",
+  "progress.note":
+    "Mastery is an activity-based estimate from practice on VidyaGanit, not a formal test score.",
   "progress.empty.title": "No practice yet",
-  "progress.empty.hint": "Once your child starts asking maths questions, their topic progress will appear here.",
+  "progress.empty.hint":
+    "Once your child starts asking maths questions, their topic progress will appear here.",
   "progress.loading": "Loading progress…",
 
   // History
   "history.title": "Saved Socratic History",
-  "history.subtitle": "Full transcripts of your child's tutoring conversations.",
+  "history.subtitle":
+    "Full transcripts of your students' tutoring conversations.",
   "history.session": "Session",
   "history.messages": "messages",
   "history.student": "Student",
   "history.tutor": "Tutor",
   "history.empty.title": "No conversations yet",
-  "history.empty.hint": "Your child's saved tutoring chats will show up here once they start learning.",
+  "history.empty.hint":
+    "Your child's saved tutoring chats will show up here once they start learning.",
   "history.loading": "Loading history…",
 
   // Strategy AI
   "strategy.title": "Ask Strategy AI",
-  "strategy.subtitle": "Your personal counsellor for supporting your child's maths learning.",
+  "strategy.subtitle":
+    "Your personal counsellor for supporting your child's maths learning.",
   "strategy.placeholder": "Ask how to help your child…",
   "strategy.send": "Send",
   "strategy.about": "Advising about",
@@ -494,7 +517,8 @@ const en: Dict = {
   "strategy.listening": "Listening…",
   "strategy.transcribing": "Transcribing…",
   "strategy.recording": "Recording… tap to stop",
-  "strategy.micUnsupported": "Voice input isn't available in this browser. Please type your question.",
+  "strategy.micUnsupported":
+    "Voice input isn't available in this browser. Please type your question.",
   "strategy.attach": "Attach a file",
   "strategy.camera": "Take a photo",
   "strategy.welcome":
@@ -588,7 +612,8 @@ const en: Dict = {
   "student.streak.dailyGoal": "Daily goal",
   "student.streak.goalReached": "Goal reached! 🎉",
   "student.notebook.title": "Mistake Notebook",
-  "student.notebook.subtitle": "Review the questions you missed and learn from them.",
+  "student.notebook.subtitle":
+    "Review the questions you missed and learn from them.",
   "student.notebook.empty": "No mistakes yet — keep up the great work! 🎉",
   "student.notebook.yourAnswer": "Your answer",
   "student.notebook.correctAnswer": "Correct answer",
@@ -711,7 +736,8 @@ const en: Dict = {
   "tutor.fees.deleteConfirm": "Delete this payment record?",
   "tutor.fees.remind": "Send reminder",
   "tutor.fees.remindAll": "Remind all unpaid",
-  "tutor.fees.reminderMessage": "Your child's tuition fee payment is pending. Please clear it at your earliest convenience.",
+  "tutor.fees.reminderMessage":
+    "Your child's tuition fee payment is pending. Please clear it at your earliest convenience.",
   "tutor.fees.reminderSent": "Reminder sent",
   "tutor.fees.reminderNone": "No parents to remind",
   "tutor.fees.reminding": "Sending…",
@@ -755,7 +781,8 @@ const en: Dict = {
   "worksheet.student": "Student",
   "worksheet.selectStudent": "Select a student",
   "worksheet.noStudents": "No linked students yet. Add a student first.",
-  "worksheet.tailoredNote": "Questions are tailored to {name}'s class and board.",
+  "worksheet.tailoredNote":
+    "Questions are tailored to {name}'s class and board.",
   "worksheet.pdf.student": "Student: {name}",
   "worksheet.pdf.board": "Board: {board}",
   "worksheet.pdf.heading": "{topic} Worksheet",
@@ -767,7 +794,8 @@ const en: Dict = {
   "worksheet.pdf.answerKey": "Answer Key",
   "bookmarks.title": "My Bookmarks",
   "bookmarks.subtitle": "Saved concepts and questions to revisit",
-  "bookmarks.empty": "No bookmarks yet. Tap the bookmark icon on a concept to save it.",
+  "bookmarks.empty":
+    "No bookmarks yet. Tap the bookmark icon on a concept to save it.",
   "bookmarks.loading": "Loading…",
   "bookmarks.remove": "Remove bookmark",
   "bookmarks.kindConcept": "Concept",
@@ -781,7 +809,7 @@ const en: Dict = {
   "flashcards.prev": "Previous",
   "flashcards.shuffle": "Shuffle",
   "messages.title": "Messages",
-  "messages.subtitle": "Chat with your child's tutor and parents",
+  "messages.subtitle": "Chat with your students' parents",
   "messages.empty": "No conversations yet.",
   "messages.emptyHint": "Threads appear once you share a student.",
   "messages.threadEmpty": "No messages yet — say hello!",
@@ -803,13 +831,16 @@ const en: Dict = {
   "recommend.reason.needs_practice": "Needs more practice",
   "recommend.reason.low_score": "Recent test score was low",
   "recommend.reason.next_up": "Ready for the next challenge",
-  "recommend.allMastered": "Brilliant! Every topic this year is looking strong.",
-  "recommend.empty": "Once practice begins, a tailored next lesson will appear here.",
+  "recommend.allMastered":
+    "Brilliant! Every topic this year is looking strong.",
+  "recommend.empty":
+    "Once practice begins, a tailored next lesson will appear here.",
 
   // Curriculum planner (tutor)
   "tab.curriculum": "Curriculum",
   "curriculum.title": "Curriculum Planner",
-  "curriculum.subtitle": "Browse the maths syllabus class by class to plan your lessons.",
+  "curriculum.subtitle":
+    "Browse the maths syllabus class by class to plan your lessons.",
   "curriculum.class": "Class",
   "curriculum.lessonsLabel": "Lessons",
   "curriculum.loading": "Loading curriculum…",
@@ -846,7 +877,8 @@ const en: Dict = {
   "assign.existing": "Existing Assignments",
   "assign.progress": "{completed} of {total} completed",
   "assign.empty": "No assignments yet. Create one above to get started.",
-  "assign.noBatches": "Add a batch to your profile before creating assignments.",
+  "assign.noBatches":
+    "Add a batch to your profile before creating assignments.",
   "assign.loading": "Loading assignments…",
   "assign.due": "Due",
   "assign.created": "Created",
@@ -861,7 +893,8 @@ const en: Dict = {
   "announce.past": "Past Announcements",
   "announce.empty": "No announcements yet. Send one above.",
   "announce.loading": "Loading announcements…",
-  "announce.noBatches": "Add a batch to your profile before sending announcements.",
+  "announce.noBatches":
+    "Add a batch to your profile before sending announcements.",
   "heatmap.title": "Class Heatmap",
   "heatmap.subtitle": "Per-topic mastery across your students.",
   "heatmap.loading": "Loading heatmap…",
@@ -896,7 +929,8 @@ const en: Dict = {
   "digest.loading": "Loading digest…",
   "digest.noData": "No activity recorded this week yet.",
   "digest.empty.title": "No children connected yet",
-  "digest.empty.hint": "Link your child's VidyaGanit ID in My Profile to see their weekly digest.",
+  "digest.empty.hint":
+    "Link your child's VidyaGanit ID in My Profile to see their weekly digest.",
 
   // Alerts (parent)
   "alerts.title": "Alerts & Notifications",
@@ -1027,8 +1061,10 @@ const ta: Dict = {
   "meeting.cancelled": "Cancelled",
   "meeting.pending": "Pending",
   "leaderboard.title": "தரவரிசை பட்டியல்",
-  "leaderboard.subtitle": "உங்கள் சகாக்களில் நீங்கள் எங்கே இருக்கிறீர்கள் என்று பாருங்கள்",
-  "leaderboard.empty": "இன்னும் தரவரிசை இல்லை — பயிற்சியைத் தொடங்கி மேலே ஏறுங்கள்!",
+  "leaderboard.subtitle":
+    "உங்கள் சகாக்களில் நீங்கள் எங்கே இருக்கிறீர்கள் என்று பாருங்கள்",
+  "leaderboard.empty":
+    "இன்னும் தரவரிசை இல்லை — பயிற்சியைத் தொடங்கி மேலே ஏறுங்கள்!",
   "leaderboard.level": "நிலை",
   "leaderboard.you": "நீங்கள்",
   "leaderboard.loading": "தரவரிசை ஏற்றப்படுகிறது…",
@@ -1088,13 +1124,17 @@ const ta: Dict = {
   "tour.back": "பின்",
   "tour.done": "புரிந்தது!",
   "tour.step.welcome.title": "வித்யாகணித்துக்கு வரவேற்கிறோம்!",
-  "tour.step.welcome.body": "உங்கள் நட்பான கணித பயிற்சியாளர் ஒவ்வொரு படியாக உங்களை வழிநடத்த இங்கே இருக்கிறார் — நேரடியாக விடைகளைத் தராமல்.",
+  "tour.step.welcome.body":
+    "உங்கள் நட்பான கணித பயிற்சியாளர் ஒவ்வொரு படியாக உங்களை வழிநடத்த இங்கே இருக்கிறார் — நேரடியாக விடைகளைத் தராமல்.",
   "tour.step.workspace.title": "உங்கள் கணித பயிற்சியாளரிடம் கேளுங்கள்",
-  "tour.step.workspace.body": "பணியிடத்தில் எந்த கணித சந்தேகத்தையும் தட்டச்சு செய்யுங்கள். பயிற்சியாளர் ஒவ்வொரு படியாக விளையாட்டுத்தனமான குறிப்புகளைத் தருகிறார்.",
+  "tour.step.workspace.body":
+    "பணியிடத்தில் எந்த கணித சந்தேகத்தையும் தட்டச்சு செய்யுங்கள். பயிற்சியாளர் ஒவ்வொரு படியாக விளையாட்டுத்தனமான குறிப்புகளைத் தருகிறார்.",
   "tour.step.progress.title": "உங்கள் முன்னேற்றத்தைக் கண்காணியுங்கள்",
-  "tour.step.progress.body": "XP சம்பாதியுங்கள், பேட்ஜ்களைத் திறங்கள், தினசரி தொடரைப் பேணுங்கள், லீடர்போர்டில் ஏறுங்கள்.",
+  "tour.step.progress.body":
+    "XP சம்பாதியுங்கள், பேட்ஜ்களைத் திறங்கள், தினசரி தொடரைப் பேணுங்கள், லீடர்போர்டில் ஏறுங்கள்.",
   "tour.step.shop.title": "உங்கள் நாணயங்களைச் செலவழியுங்கள்",
-  "tour.step.shop.body": "ஒவ்வொரு பயிற்சியும் நாணயங்களைப் பெற்றுத் தரும். வேடிக்கையான அவதாரங்களையும் தீம்களையும் திறக்க கடைக்குச் செல்லுங்கள்.",
+  "tour.step.shop.body":
+    "ஒவ்வொரு பயிற்சியும் நாணயங்களைப் பெற்றுத் தரும். வேடிக்கையான அவதாரங்களையும் தீம்களையும் திறக்க கடைக்குச் செல்லுங்கள்.",
   // Brain games & AI model
   "games.title": "மூளை விளையாட்டுகள்",
   "games.subtitle": "மூளையைத் தூண்டும் விரைவு கணித விளையாட்டுகள்!",
@@ -1169,11 +1209,13 @@ const ta: Dict = {
   "test.pointsLabel": "புள்ளிகள்",
   "test.correct": "சரி",
   "test.incorrect": "பயிற்சிக்கு",
-  "test.noNegative": "எந்த மதிப்பெண்ணும் குறைக்கப்படாது — தவறான பதில்களுக்கு பூஜ்ஜியம் மட்டுமே.",
+  "test.noNegative":
+    "எந்த மதிப்பெண்ணும் குறைக்கப்படாது — தவறான பதில்களுக்கு பூஜ்ஜியம் மட்டுமே.",
   "test.correctAnswer": "சரியான பதில்",
   "test.done": "முடிந்தது",
   "test.takeTitle": "தேர்வு எழுது",
-  "test.takeSubtitle": "ஒரு தலைப்பைத் தேர்ந்தெடுத்து புள்ளிகள் பெறு — மதிப்பெண் குறைக்கப்படாது!",
+  "test.takeSubtitle":
+    "ஒரு தலைப்பைத் தேர்ந்தெடுத்து புள்ளிகள் பெறு — மதிப்பெண் குறைக்கப்படாது!",
   "test.offer": "ஒரு விரைவு தலைப்புத் தேர்வுக்கு தயாரா? 📝",
   "test.offerYes": "ஆம், என்னைச் சோதி! 📝",
   "test.offerNo": "இப்போது வேண்டாம்",
@@ -1187,7 +1229,8 @@ const ta: Dict = {
   // Voice settings (read-aloud)
   "voice.unsupported": "இந்த சாதனத்தின் உலாவியில் வாசித்தல் ஆதரிக்கப்படவில்லை.",
   "voice.title": "குரல் அமைப்புகள்",
-  "voice.subtitle": "வாசிக்கும் குரல் எப்படி ஒலிக்க வேண்டும் என்பதைத் தேர்ந்தெடுக்கவும்.",
+  "voice.subtitle":
+    "வாசிக்கும் குரல் எப்படி ஒலிக்க வேண்டும் என்பதைத் தேர்ந்தெடுக்கவும்.",
   "voice.voice": "குரல்",
   "voice.systemDefault": "கணினி இயல்புநிலை",
   "voice.noVoices": "இந்த மொழிக்கு குரல்கள் எதுவும் கிடைக்கவில்லை.",
@@ -1206,7 +1249,8 @@ const ta: Dict = {
   "report.loading": "மதிப்பெண்கள் ஏற்றப்படுகின்றன…",
   "report.empty.title": "இன்னும் தேர்வுகள் எடுக்கப்படவில்லை",
   "report.empty.kid": "இன்னும் தேர்வு இல்லை — மேலே ஒன்றை எடு! 🚀",
-  "report.empty.hint": "ஒரு தலைப்புத் தேர்வு முடிந்ததும் மதிப்பெண்கள் இங்கே தோன்றும்.",
+  "report.empty.hint":
+    "ஒரு தலைப்புத் தேர்வு முடிந்ததும் மதிப்பெண்கள் இங்கே தோன்றும்.",
   "report.testsTaken": "எடுத்த தேர்வுகள்",
   "report.totalPoints": "மொத்த புள்ளிகள்",
   "report.average": "சராசரி",
@@ -1223,7 +1267,8 @@ const ta: Dict = {
   "auth.academyNamePlaceholder": "எ.கா. சர்மா கணித அகாடமி",
   "auth.optional": "(விருப்பம்)",
   "auth.loginAs": "நான் உள்நுழைவது",
-  "auth.roleMismatch": "இந்த ஐடி அந்தப் பாத்திரத்திற்குப் பதிவு செய்யப்படவில்லை. சரியான ஒன்றைத் தேர்ந்தெடுக்கவும்.",
+  "auth.roleMismatch":
+    "இந்த ஐடி அந்தப் பாத்திரத்திற்குப் பதிவு செய்யப்படவில்லை. சரியான ஒன்றைத் தேர்ந்தெடுக்கவும்.",
   "tutor.title": "ஆசிரியர் டாஷ்போர்டு",
   "tutor.batch": "தொகுதி",
   "auth.batchAdd": "மற்றொரு தொகுதியைச் சேர்க்கவும்",
@@ -1234,7 +1279,8 @@ const ta: Dict = {
   "tutor.noBatchStudents": "இந்த தொகுதியில் இன்னும் மாணவர்கள் இல்லை.",
   "bulk.add": "மொத்தமாக சேர்",
   "bulk.title": "பல மாணவர்களைச் சேர்க்கவும்",
-  "bulk.desc": "மாணவர் ஐடிகளை இடைவெளி, காற்புள்ளி அல்லது புதிய வரிகளால் பிரித்து ஒட்டவும்.",
+  "bulk.desc":
+    "மாணவர் ஐடிகளை இடைவெளி, காற்புள்ளி அல்லது புதிய வரிகளால் பிரித்து ஒட்டவும்.",
   "bulk.batchLabel": "தொகுதிக்கு ஒதுக்கு",
   "bulk.batchNone": "தொகுதி இல்லை",
   "bulk.submit": "மாணவர்களைச் சேர்",
@@ -1253,7 +1299,7 @@ const ta: Dict = {
   "report.student": "மாணவர்",
   "report.summaryHeading": "சுருக்கம்",
   "report.topicHeading": "தலைப்பு தேர்ச்சி",
-  "report.totalXp": "மொத்த XP",
+  "report.totalXp": "ம ࿽�த்த XP",
   "report.level": "நிலை",
   "report.badges": "பதக்கங்கள்",
   "report.col.topic": "தலைப்பு",
@@ -1283,30 +1329,36 @@ const ta: Dict = {
   "profile.female": "பெண்",
   "profile.connectedStudents": "இணைக்கப்பட்ட மாணவர்கள்",
   "profile.linked": "இணைக்கப்பட்டது",
-  "profile.linkPlaceholder": "மாணவரின் VidyaGanit ID ஐ உள்ளிடவும் (எ.கா. VG-STU-12345)",
+  "profile.linkPlaceholder":
+    "மாணவரின் VidyaGanit ID ஐ உள்ளிடவும் (எ.கா. VG-STU-12345)",
   "profile.link": "இணை",
   "profile.noStudentsTitle": "இன்னும் மாணவர்கள் இணைக்கப்படவில்லை",
   "profile.searchStudents": "பெயர் அல்லது ஐடி மூலம் தேடுங்கள்",
   "profile.noSearchResults": "உங்கள் தேடலுக்குப் பொருந்தும் மாணவர்கள் இல்லை",
-  "profile.noStudentsHint": "உங்கள் குழந்தையின் VidyaGanit ID ஐ மேலே உள்ளிட்டு கணக்கை இணைக்கவும்.",
+  "profile.noStudentsHint":
+    "உங்கள் குழந்தையின் VidyaGanit ID ஐ மேலே உள்ளிட்டு கணக்கை இணைக்கவும்.",
   "profile.class": "வகுப்பு",
   "profile.removeStudent": "மாணவரை அகற்று",
 
   "picker.label": "பார்க்கிறீர்கள்",
   "picker.placeholder": "ஒரு குழந்தையைத் தேர்ந்தெடுக்கவும்",
   "picker.empty.title": "இன்னும் குழந்தைகள் இணைக்கப்படவில்லை",
-  "picker.empty.hint": "என் சுயவிவரத்திற்குச் சென்று உங்கள் குழந்தையின் VidyaGanit ID ஐ இணைக்கவும்.",
+  "picker.empty.hint":
+    "என் சுயவிவரத்திற்குச் சென்று உங்கள் குழந்தையின் VidyaGanit ID ஐ இணைக்கவும்.",
 
   "progress.title": "முன்னேற்ற பகுப்பாய்வு",
-  "progress.subtitle": "ஒவ்வொரு தலைப்பிலும் உங்கள் குழந்தை எவ்வாறு ஈடுபடுகிறது.",
+  "progress.subtitle":
+    "ஒவ்வொரு தலைப்பிலும் உங்கள் குழந்தை எவ்வாறு ஈடுபடுகிறது.",
   "progress.mastery": "தேர்ச்சி",
   "progress.questions": "பயிற்சி செய்த கேள்விகள்",
   "progress.sessions": "அமர்வுகள்",
   "progress.totalSessions": "மொத்த அமர்வுகள்",
   "progress.totalMessages": "கேட்ட மொத்த கேள்விகள்",
-  "progress.note": "தேர்ச்சி என்பது VidyaGanit பயிற்சியின் அடிப்படையிலான மதிப்பீடு, தேர்வு மதிப்பெண் அல்ல.",
+  "progress.note":
+    "தேர்ச்சி என்பது VidyaGanit பயிற்சியின் அடிப்படையிலான மதிப்பீடு, தேர்வு மதிப்பெண் அல்ல.",
   "progress.empty.title": "இன்னும் பயிற்சி இல்லை",
-  "progress.empty.hint": "உங்கள் குழந்தை கணக்குக் கேள்விகளைக் கேட்கத் தொடங்கியதும் முன்னேற்றம் இங்கே தோன்றும்.",
+  "progress.empty.hint":
+    "உங்கள் குழந்தை கணக்குக் கேள்விகளைக் கேட்கத் தொடங்கியதும் முன்னேற்றம் இங்கே தோன்றும்.",
   "progress.loading": "முன்னேற்றம் ஏற்றப்படுகிறது…",
 
   "history.title": "சேமித்த சாக்ரடிக் வரலாறு",
@@ -1316,11 +1368,13 @@ const ta: Dict = {
   "history.student": "மாணவர்",
   "history.tutor": "ஆசிரியர்",
   "history.empty.title": "இன்னும் உரையாடல்கள் இல்லை",
-  "history.empty.hint": "உங்கள் குழந்தை கற்கத் தொடங்கியதும் சேமித்த அரட்டைகள் இங்கே தோன்றும்.",
+  "history.empty.hint":
+    "உங்கள் குழந்தை கற்கத் தொடங்கியதும் சேமித்த அரட்டைகள் இங்கே தோன்றும்.",
   "history.loading": "வரலாறு ஏற்றப்படுகிறது…",
 
   "strategy.title": "உத்தி AI ஐக் கேளுங்கள்",
-  "strategy.subtitle": "உங்கள் குழந்தையின் கணிதக் கற்றலுக்கு உதவும் தனிப்பட்ட ஆலோசகர்.",
+  "strategy.subtitle":
+    "உங்கள் குழந்தையின் கணிதக் கற்றலுக்கு உதவும் தனிப்பட்ட ஆலோசகர்.",
   "strategy.placeholder": "உங்கள் குழந்தைக்கு எப்படி உதவுவது என்று கேளுங்கள்…",
   "strategy.send": "அனுப்பு",
   "strategy.about": "ஆலோசனை குறித்து",
@@ -1329,13 +1383,16 @@ const ta: Dict = {
   "strategy.listening": "கேட்கிறது…",
   "strategy.transcribing": "எழுத்தாக்கப்படுகிறது…",
   "strategy.recording": "பதிவு செய்கிறது… நிறுத்த தட்டவும்",
-  "strategy.micUnsupported": "இந்த உலாவியில் குரல் உள்ளீடு கிடைக்கவில்லை. தயவுசெய்து தட்டச்சு செய்யவும்.",
+  "strategy.micUnsupported":
+    "இந்த உலாவியில் குரல் உள்ளீடு கிடைக்கவில்லை. தயவுசெய்து தட்டச்சு செய்யவும்.",
   "strategy.attach": "கோப்பை இணைக்கவும்",
   "strategy.camera": "புகைப்படம் எடுக்கவும்",
   "strategy.welcome":
     "வணக்கம்! நான் உங்கள் உத்தி AI ஆலோசகர். உங்கள் குழந்தையின் கணிதக் கற்றலுக்கு உதவுவது குறித்து எதையும் கேளுங்கள் — தினசரி வழக்கங்கள், நம்பிக்கையை வளர்ப்பது, அல்லது கடினமான தலைப்புகள். மேலே ஒரு குழந்தையைத் தேர்ந்தெடுத்தால் அவர்களின் முன்னேற்றத்திற்கு ஏற்ப ஆலோசனை வழங்குவேன்.",
-  "strategy.error": "மன்னிக்கவும், இணைப்பதில் சிக்கல். மீண்டும் முயற்சிக்கவும்.",
-  "strategy.fileTooBig": "அந்தக் கோப்பு மிகப் பெரியது! 8 MB க்கு குறைவாக ஒன்றைத் தேர்ந்தெடுக்கவும்.",
+  "strategy.error":
+    "மன்னிக்கவும், இணைப்பதில் சிக்கல். மீண்டும் முயற்சிக்கவும்.",
+  "strategy.fileTooBig":
+    "அந்தக் கோப்பு மிகப் பெரியது! 8 MB க்கு குறைவாக ஒன்றைத் தேர்ந்தெடுக்கவும்.",
   "strategy.history": "முந்தைய உரையாடல்கள்",
   "strategy.newChat": "புதிய உரையாடல்",
   "strategy.noSessions": "இன்னும் முந்தைய உரையாடல்கள் இல்லை.",
@@ -1418,8 +1475,10 @@ const ta: Dict = {
   "student.streak.dailyGoal": "தினசரி இலக்கு",
   "student.streak.goalReached": "இலக்கை எட்டிவிட்டீர்கள்! 🎉",
   "student.notebook.title": "தவறுகள் குறிப்பேடு",
-  "student.notebook.subtitle": "தவறிய கேள்விகளை மீண்டும் பார்த்து கற்றுக்கொள்ளுங்கள்.",
-  "student.notebook.empty": "இதுவரை தவறுகள் இல்லை — அருமையாகச் செய்கிறீர்கள்! 🎉",
+  "student.notebook.subtitle":
+    "தவறிய கேள்விகளை மீண்டும் பார்த்து கற்றுக்கொள்ளுங்கள்.",
+  "student.notebook.empty":
+    "இதுவரை தவறுகள் இல்லை — அருமையாகச் செய்கிறீர்கள்! 🎉",
   "student.notebook.yourAnswer": "உங்கள் பதில்",
   "student.notebook.correctAnswer": "சரியான பதில்",
   "student.notebook.blank": "காலியாக விடப்பட்டது",
@@ -1482,7 +1541,8 @@ const ta: Dict = {
     "ம்ம், அது விசைப்பலகை அசைவு போல் தெரிகிறது! 😅 உங்கள் கணித கேள்வியை தெளிவான வார்த்தைகள் அல்லது எண்களில் தட்டச்சு செய்யவும்.",
   "chat.err.jumbled":
     "அது சற்று குழப்பமாக உள்ளது! 😄 உங்கள் கணித கேள்வியை தெளிவான வார்த்தைகள் அல்லது எண்களில் கேட்க முடியுமா?",
-  "chat.err.fileTooBig": "அந்த கோப்பு மிகப் பெரியது! 😅 8 MB க்கு குறைவாக ஒன்றைத் தேர்ந்தெடுக்கவும்.",
+  "chat.err.fileTooBig":
+    "அந்த கோப்பு மிகப் பெரியது! 😅 8 MB க்கு குறைவாக ஒன்றைத் தேர்ந்தெடுக்கவும்.",
   "chat.err.fileUnreadable":
     "ம்ம், அந்தக் கோப்பை என்னால் படிக்க முடியவில்லை. வேறு ஒன்றை முயற்சிக்கவும்!",
   "chat.err.voiceUnsupported":
@@ -1491,7 +1551,8 @@ const ta: Dict = {
     "மைக்ரோஃபோனைப் பயன்படுத்த எனக்கு அனுமதி தேவை. 🎤 அனுமதித்து மீண்டும் முயற்சிக்கவும்!",
   "chat.err.noSpeech":
     "அது எனக்குக் கேட்கவில்லை. 🎤 உங்கள் கணித கேள்வியை மீண்டும் பேசுங்கள்!",
-  "chat.err.micStart": "மைக்ரோஃபோனைத் தொடங்க முடியவில்லை. 🎤 மீண்டும் முயற்சிக்கவும்!",
+  "chat.err.micStart":
+    "மைக்ரோஃபோனைத் தொடங்க முடியவில்லை. 🎤 மீண்டும் முயற்சிக்கவும்!",
   "chat.err.loginAgain":
     "ம்ம், கற்றலைத் தொடர முன் நீங்கள் மீண்டும் உள்நுழைய வேண்டும். 🔑 மீண்டும் ஒருமுறை உள்நுழையவும்!",
   "chat.err.rateLimit":
@@ -1540,7 +1601,8 @@ const ta: Dict = {
   "tutor.fees.deleteConfirm": "இந்தப் பணப் பதிவை நீக்கவா?",
   "tutor.fees.remind": "நினைவூட்டு",
   "tutor.fees.remindAll": "நிலுவை உள்ள அனைவருக்கும் நினைவூட்டு",
-  "tutor.fees.reminderMessage": "உங்கள் குழந்தையின் கல்விக் கட்டணம் செலுத்தப்படவில்லை. தயவுசெய்து விரைவில் செலுத்தவும்.",
+  "tutor.fees.reminderMessage":
+    "உங்கள் குழந்தையின் கல்விக் கட்டணம் செலுத்தப்படவில்லை. தயவுசெய்து விரைவில் செலுத்தவும்.",
   "tutor.fees.reminderSent": "நினைவூட்டல் அனுப்பப்பட்டது",
   "tutor.fees.reminderNone": "நினைவூட்ட பெற்றோர் யாரும் இல்லை",
   "tutor.fees.reminding": "அனுப்புகிறது…",
@@ -1565,12 +1627,14 @@ const ta: Dict = {
   "weeklyGoal.target": "வாராந்திர இலக்கு",
   "weeklyGoal.save": "இலக்கைச் சேமி",
   "weeklyGoal.saving": "சேமிக்கிறது…",
-  "weeklyGoal.hint": "XP அரட்டை, தேர்வு, விளையாட்டு மற்றும் சவால்களில் இருந்து வரும்.",
+  "weeklyGoal.hint":
+    "XP அரட்டை, தேர்வு, விளையாட்டு மற்றும் சவால்களில் இருந்து வரும்.",
   "weeklyGoal.parentTitle": "{name} இன் வாராந்திர இலக்கு",
   "weeklyGoal.parentSubtitle": "இந்த வாரம் உங்கள் குழந்தையின் முன்னேற்றம்",
   "weeklyGoal.parentNone": "{name} இன்னும் வாராந்திர இலக்கை அமைக்கவில்லை.",
   "worksheet.title": "பணித்தாள் உருவாக்கி",
-  "worksheet.subtitle": "விடைக் குறிப்புடன் அச்சிடக்கூடிய பயிற்சித் தாளை உருவாக்கவும்",
+  "worksheet.subtitle":
+    "விடைக் குறிப்புடன் அச்சிடக்கூடிய பயிற்சித் தாளை உருவாக்கவும்",
   "worksheet.topic": "தலைப்பு",
   "worksheet.count": "வினாக்கள்",
   "worksheet.klass": "வகுப்பு",
@@ -1583,8 +1647,10 @@ const ta: Dict = {
   "test.topic.algebra": "இயற்கணிதம்",
   "worksheet.student": "மாணவர்",
   "worksheet.selectStudent": "ஒரு மாணவரைத் தேர்ந்தெடுக்கவும்",
-  "worksheet.noStudents": "இன்னும் இணைக்கப்பட்ட மாணவர்கள் இல்லை. முதலில் ஒரு மாணவரைச் சேர்க்கவும்.",
-  "worksheet.tailoredNote": "{name} இன் வகுப்பு மற்றும் வாரியத்திற்கு ஏற்ப வினாக்கள் வடிவமைக்கப்படுகின்றன.",
+  "worksheet.noStudents":
+    "இன்னும் இணைக்கப்பட்ட மாணவர்கள் இல்லை. முதலில் ஒரு மாணவரைச் சேர்க்கவும்.",
+  "worksheet.tailoredNote":
+    "{name} இன் வகுப்பு மற்றும் வாரியத்திற்கு ஏற்ப வினாக்கள் வடிவமைக்கப்படுகின்றன.",
   "worksheet.pdf.student": "மாணவர்: {name}",
   "worksheet.pdf.board": "வாரியம்: {board}",
   "worksheet.pdf.heading": "{topic} பணித்தாள்",
@@ -1596,7 +1662,8 @@ const ta: Dict = {
   "worksheet.pdf.answerKey": "விடைக் குறிப்பு",
   "bookmarks.title": "எனது புத்தகக்குறிகள்",
   "bookmarks.subtitle": "மீண்டும் பார்க்க சேமித்த கருத்துகள் மற்றும் வினாக்கள்",
-  "bookmarks.empty": "இன்னும் புத்தகக்குறிகள் இல்லை. சேமிக்க ஒரு கருத்தின் மீது புத்தகக்குறி ஐகானைத் தட்டவும்.",
+  "bookmarks.empty":
+    "இன்னும் புத்தகக்குறிகள் இல்லை. சேமிக்க ஒரு கருத்தின் மீது புத்தகக்குறி ஐகானைத் தட்டவும்.",
   "bookmarks.loading": "ஏற்றுகிறது…",
   "bookmarks.remove": "புத்தகக்குறியை அகற்று",
   "bookmarks.kindConcept": "கருத்து",
@@ -1610,7 +1677,8 @@ const ta: Dict = {
   "flashcards.prev": "முந்தைய",
   "flashcards.shuffle": "கலைக்க",
   "messages.title": "செய்திகள்",
-  "messages.subtitle": "உங்கள் குழந்தையின் ஆசிரியர் மற்றும் பெற்றோருடன் அரட்டையடிக்கவும்",
+  "messages.subtitle":
+    "உங்கள் குழந்தையின் ஆசிரியர் மற்றும் பெற்றோருடன் அரட்டையடிக்கவும்",
   "messages.empty": "இன்னும் உரையாடல்கள் இல்லை.",
   "messages.emptyHint": "ஒரு மாணவரைப் பகிர்ந்தவுடன் உரையாடல்கள் தோன்றும்.",
   "messages.threadEmpty": "இன்னும் செய்திகள் இல்லை — வணக்கம் சொல்லுங்கள்!",
@@ -1626,19 +1694,22 @@ const ta: Dict = {
 
   // Recommended next lesson
   "recommend.title": "பரிந்துரைக்கப்பட்ட அடுத்த பாடம்",
-  "recommend.subtitle": "பயிற்சி மற்றும் தேர்வுகளின் அடிப்படையில் அடுத்து எங்கே கவனம் செலுத்த வேண்டும்.",
+  "recommend.subtitle":
+    "பயிற்சி மற்றும் தேர்வுகளின் அடிப்படையில் அடுத்து எங்கே கவனம் செலுத்த வேண்டும்.",
   "recommend.focus": "பரிந்துரைக்கப்பட்ட பாடம்",
   "recommend.reason.not_started": "இன்னும் தொடங்கவில்லை",
   "recommend.reason.needs_practice": "மேலும் பயிற்சி தேவை",
   "recommend.reason.low_score": "சமீபத்திய தேர்வு மதிப்பெண் குறைவாக இருந்தது",
   "recommend.reason.next_up": "அடுத்த சவாலுக்குத் தயார்",
-  "recommend.allMastered": "அருமை! இந்த ஆண்டின் அனைத்து தலைப்புகளும் வலுவாக உள்ளன.",
+  "recommend.allMastered":
+    "அருமை! இந்த ஆண்டின் அனைத்து தலைப்புகளும் வலுவாக உள்ளன.",
   "recommend.empty": "பயிற்சி தொடங்கியதும், ஏற்ற அடுத்த பாடம் இங்கே தோன்றும்.",
 
   // Curriculum planner (tutor)
   "tab.curriculum": "பாடத்திட்டம்",
   "curriculum.title": "பாடத்திட்ட திட்டமிடல்",
-  "curriculum.subtitle": "உங்கள் பாடங்களைத் திட்டமிட வகுப்பு வாரியாக கணிதப் பாடத்திட்டத்தைப் பாருங்கள்.",
+  "curriculum.subtitle":
+    "உங்கள் பாடங்களைத் திட்டமிட வகுப்பு வாரியாக கணிதப் பாடத்திட்டத்தைப் பாருங்கள்.",
   "curriculum.class": "வகுப்பு",
   "curriculum.lessonsLabel": "பாடங்கள்",
   "curriculum.loading": "பாடத்திட்டம் ஏற்றப்படுகிறது…",
@@ -1655,7 +1726,8 @@ const ta: Dict = {
   "tab.announcements": "அறிவிப்புகள்",
   "tab.heatmap": "வகுப்பு வெப்ப வரைபடம்",
   "assign.title": "பணிகள்",
-  "assign.subtitle": "உங்கள் தொகுதிகளுக்கு வேலையை அமைத்து யார் முடித்தார்கள் என்பதைக் கண்காணியுங்கள்.",
+  "assign.subtitle":
+    "உங்கள் தொகுதிகளுக்கு வேலையை அமைத்து யார் முடித்தார்கள் என்பதைக் கண்காணியுங்கள்.",
   "assign.create": "பணியை உருவாக்கு",
   "assign.batch": "தொகுதி",
   "assign.selectBatch": "ஒரு தொகுதியைத் தேர்ந்தெடுக்கவும்",
@@ -1675,7 +1747,8 @@ const ta: Dict = {
   "assign.existing": "தற்போதைய பணிகள்",
   "assign.progress": "{total} இல் {completed} முடிந்தது",
   "assign.empty": "இன்னும் பணிகள் இல்லை. தொடங்க மேலே ஒன்றை உருவாக்குங்கள்.",
-  "assign.noBatches": "பணிகளை உருவாக்கும் முன் உங்கள் சுயவிவரத்தில் ஒரு தொகுதியைச் சேர்க்கவும்.",
+  "assign.noBatches":
+    "பணிகளை உருவாக்கும் முன் உங்கள் சுயவிவரத்தில் ஒரு தொகுதியைச் சேர்க்கவும்.",
   "assign.loading": "பணிகள் ஏற்றப்படுகின்றன…",
   "assign.due": "கடைசி",
   "assign.created": "உருவாக்கப்பட்டது",
@@ -1690,11 +1763,13 @@ const ta: Dict = {
   "announce.past": "கடந்த அறிவிப்புகள்",
   "announce.empty": "இன்னும் அறிவிப்புகள் இல்லை. மேலே ஒன்றை அனுப்புங்கள்.",
   "announce.loading": "அறிவிப்புகள் ஏற்றப்படுகின்றன…",
-  "announce.noBatches": "அறிவிப்புகளை அனுப்பும் முன் உங்கள் சுயவிவரத்தில் ஒரு தொகுதியைச் சேர்க்கவும்.",
+  "announce.noBatches":
+    "அறிவிப்புகளை அனுப்பும் முன் உங்கள் சுயவிவரத்தில் ஒரு தொகுதியைச் சேர்க்கவும்.",
   "heatmap.title": "வகுப்பு வெப்ப வரைபடம்",
   "heatmap.subtitle": "உங்கள் மாணவர்களிடையே தலைப்பு வாரியான தேர்ச்சி.",
   "heatmap.loading": "வெப்ப வரைபடம் ஏற்றப்படுகிறது…",
-  "heatmap.empty": "இன்னும் தேர்ச்சித் தரவு இல்லை. மாணவர்கள் பயிற்சி செய்யும்போது தோன்றும்.",
+  "heatmap.empty":
+    "இன்னும் தேர்ச்சித் தரவு இல்லை. மாணவர்கள் பயிற்சி செய்யும்போது தோன்றும்.",
   "heatmap.student": "மாணவர்",
   "heatmap.allBatches": "அனைத்து தொகுதிகள்",
   "heatmap.filterByBatch": "தொகுதி வாரியாக வடிகட்டு",
@@ -1725,11 +1800,13 @@ const ta: Dict = {
   "digest.loading": "சுருக்கம் ஏற்றப்படுகிறது…",
   "digest.noData": "இந்த வாரம் இன்னும் எந்த செயல்பாடும் பதிவாகவில்லை.",
   "digest.empty.title": "இன்னும் குழந்தைகள் இணைக்கப்படவில்லை",
-  "digest.empty.hint": "உங்கள் குழந்தையின் வாராந்திர சுருக்கத்தைக் காண, எனது சுயவிவரத்தில் அவர்களின் VidyaGanit ஐடியை இணைக்கவும்.",
+  "digest.empty.hint":
+    "உங்கள் குழந்தையின் வாராந்திர சுருக்கத்தைக் காண, எனது சுயவிவரத்தில் அவர்களின் VidyaGanit ஐடியை இணைக்கவும்.",
 
   // Alerts (parent)
   "alerts.title": "எச்சரிக்கைகள் & அறிவிப்புகள்",
-  "alerts.subtitle": "உங்கள் குழந்தையின் முன்னேற்றம் மற்றும் மைல்கற்களைப் பற்றி அறிந்திருங்கள்.",
+  "alerts.subtitle":
+    "உங்கள் குழந்தையின் முன்னேற்றம் மற்றும் மைல்கற்களைப் பற்றி அறிந்திருங்கள்.",
   "alerts.scanNow": "இப்போது எச்சரிக்கைகளைச் சரிபார்க்கவும்",
   "alerts.scanning": "சரிபார்க்கிறது…",
 
@@ -1917,13 +1994,17 @@ const hi: Dict = {
   "tour.back": "पीछे",
   "tour.done": "समझ गया!",
   "tour.step.welcome.title": "विद्यागणित में आपका स्वागत है!",
-  "tour.step.welcome.body": "आपका मित्रवत गणित कोच यहाँ है, जो आपको कदम-दर-कदम मार्गदर्शन देगा — सीधे उत्तर कभी नहीं देगा।",
+  "tour.step.welcome.body":
+    "आपका मित्रवत गणित कोच यहाँ है, जो आपको कदम-दर-कदम मार्गदर्शन देगा — सीधे उत्तर कभी नहीं देगा।",
   "tour.step.workspace.title": "अपने गणित कोच से पूछें",
-  "tour.step.workspace.body": "वर्कस्पेस में कोई भी गणित का सवाल लिखें। कोच एक-एक कदम में मज़ेदार संकेत देता है।",
+  "tour.step.workspace.body":
+    "वर्कस्पेस में कोई भी गणित का सवाल लिखें। कोच एक-एक कदम में मज़ेदार संकेत देता है।",
   "tour.step.progress.title": "अपनी प्रगति देखें",
-  "tour.step.progress.body": "XP कमाएँ, बैज खोलें, अपनी दैनिक लकीर बनाए रखें और लीडरबोर्ड पर चढ़ें।",
+  "tour.step.progress.body":
+    "XP कमाएँ, बैज खोलें, अपनी दैनिक लकीर बनाए रखें और लीडरबोर्ड पर चढ़ें।",
   "tour.step.shop.title": "अपने सिक्के खर्च करें",
-  "tour.step.shop.body": "हर अभ्यास से सिक्के मिलते हैं। मज़ेदार अवतार और थीम खोलने के लिए शॉप पर जाएँ।",
+  "tour.step.shop.body":
+    "हर अभ्यास से सिक्के मिलते हैं। मज़ेदार अवतार और थीम खोलने के लिए शॉप पर जाएँ।",
   // Brain games & AI model
   "games.title": "दिमागी खेल",
   "games.subtitle": "दिमाग को तेज़ करने वाले झटपट गणित खेल!",
@@ -1998,7 +2079,8 @@ const hi: Dict = {
   "test.pointsLabel": "अंक",
   "test.correct": "सही",
   "test.incorrect": "अभ्यास के लिए",
-  "test.noNegative": "कोई अंक कभी नहीं काटा जाता — गलत उत्तरों पर बस शून्य मिलता है।",
+  "test.noNegative":
+    "कोई अंक कभी नहीं काटा जाता — गलत उत्तरों पर बस शून्य मिलता है।",
   "test.correctAnswer": "सही उत्तर",
   "test.done": "हो गया",
   "test.takeTitle": "परीक्षा दें",
@@ -2052,7 +2134,8 @@ const hi: Dict = {
   "auth.academyNamePlaceholder": "जैसे शर्मा मैथ्स अकादमी",
   "auth.optional": "(वैकल्पिक)",
   "auth.loginAs": "मैं लॉग इन कर रहा हूँ",
-  "auth.roleMismatch": "यह आईडी उस भूमिका के लिए पंजीकृत नहीं है। कृपया सही भूमिका चुनें।",
+  "auth.roleMismatch":
+    "यह आईडी उस भूमिका के लिए पंजीकृत नहीं है। कृपया सही भूमिका चुनें।",
   "tutor.title": "शिक्षक डैशबोर्ड",
   "tutor.batch": "बैच",
   "auth.batchAdd": "एक और बैच जोड़ें",
@@ -2112,19 +2195,22 @@ const hi: Dict = {
   "profile.female": "महिला",
   "profile.connectedStudents": "जुड़े हुए छात्र",
   "profile.linked": "जुड़े",
-  "profile.linkPlaceholder": "छात्र का VidyaGanit ID दर्ज करें (जैसे VG-STU-12345)",
+  "profile.linkPlaceholder":
+    "छात्र का VidyaGanit ID दर्ज करें (जैसे VG-STU-12345)",
   "profile.link": "जोड़ें",
   "profile.noStudentsTitle": "अभी तक कोई छात्र नहीं जुड़ा",
   "profile.searchStudents": "नाम या आईडी से खोजें",
   "profile.noSearchResults": "आपकी खोज से मेल खाने वाला कोई छात्र नहीं",
-  "profile.noStudentsHint": "अपने बच्चे का VidyaGanit ID ऊपर दर्ज करके उनका खाता जोड़ें।",
+  "profile.noStudentsHint":
+    "अपने बच्चे का VidyaGanit ID ऊपर दर्ज करके उनका खाता जोड़ें।",
   "profile.class": "कक्षा",
   "profile.removeStudent": "छात्र हटाएँ",
 
   "picker.label": "देख रहे हैं",
   "picker.placeholder": "एक बच्चा चुनें",
   "picker.empty.title": "अभी तक कोई बच्चा नहीं जुड़ा",
-  "picker.empty.hint": "मेरी प्रोफ़ाइल पर जाएँ और अपने बच्चे का VidyaGanit ID जोड़ें ताकि उनकी प्रगति यहाँ दिखे।",
+  "picker.empty.hint":
+    "मेरी प्रोफ़ाइल पर जाएँ और अपने बच्चे का VidyaGanit ID जोड़ें ताकि उनकी प्रगति यहाँ दिखे।",
 
   "progress.title": "प्रगति विश्लेषण",
   "progress.subtitle": "आपका बच्चा हर विषय में कैसे जुड़ रहा है।",
@@ -2133,9 +2219,11 @@ const hi: Dict = {
   "progress.sessions": "सत्र",
   "progress.totalSessions": "कुल सत्र",
   "progress.totalMessages": "कुल पूछे गए प्रश्न",
-  "progress.note": "दक्षता VidyaGanit पर अभ्यास के आधार पर एक अनुमान है, कोई औपचारिक परीक्षा अंक नहीं।",
+  "progress.note":
+    "दक्षता VidyaGanit पर अभ्यास के आधार पर एक अनुमान है, कोई औपचारिक परीक्षा अंक नहीं।",
   "progress.empty.title": "अभी कोई अभ्यास नहीं",
-  "progress.empty.hint": "जब आपका बच्चा गणित के प्रश्न पूछना शुरू करेगा, उनकी प्रगति यहाँ दिखेगी।",
+  "progress.empty.hint":
+    "जब आपका बच्चा गणित के प्रश्न पूछना शुरू करेगा, उनकी प्रगति यहाँ दिखेगी।",
   "progress.loading": "प्रगति लोड हो रही है…",
 
   "history.title": "सहेजा गया सॉक्रेटिक इतिहास",
@@ -2145,11 +2233,13 @@ const hi: Dict = {
   "history.student": "छात्र",
   "history.tutor": "शिक्षक",
   "history.empty.title": "अभी तक कोई बातचीत नहीं",
-  "history.empty.hint": "आपके बच्चे की सहेजी गई ट्यूशन चैट यहाँ दिखेगी जब वे सीखना शुरू करेंगे।",
+  "history.empty.hint":
+    "आपके बच्चे की सहेजी गई ट्यूशन चैट यहाँ दिखेगी जब वे सीखना शुरू करेंगे।",
   "history.loading": "इतिहास लोड हो रहा है…",
 
   "strategy.title": "रणनीति AI से पूछें",
-  "strategy.subtitle": "आपके बच्चे की गणित सीखने में मदद के लिए आपका निजी सलाहकार।",
+  "strategy.subtitle":
+    "आपके बच्चे की गणित सीखने में मदद के लिए आपका निजी सलाहकार।",
   "strategy.placeholder": "पूछें कि अपने बच्चे की मदद कैसे करें…",
   "strategy.send": "भेजें",
   "strategy.about": "इनके बारे में सलाह",
@@ -2158,13 +2248,16 @@ const hi: Dict = {
   "strategy.listening": "सुन रहा है…",
   "strategy.transcribing": "लिखा जा रहा है…",
   "strategy.recording": "रिकॉर्ड हो रहा है… रोकने के लिए टैप करें",
-  "strategy.micUnsupported": "इस ब्राउज़र में आवाज़ इनपुट उपलब्ध नहीं है। कृपया टाइप करें।",
+  "strategy.micUnsupported":
+    "इस ब्राउज़र में आवाज़ इनपुट उपलब्ध नहीं है। कृपया टाइप करें।",
   "strategy.attach": "फ़ाइल संलग्न करें",
   "strategy.camera": "फ़ोटो लें",
   "strategy.welcome":
     "नमस्ते! मैं आपका रणनीति AI सलाहकार हूँ। अपने बच्चे की गणित सीखने में मदद के बारे में कुछ भी पूछें — दैनिक दिनचर्या, आत्मविश्वास बढ़ाना, या कठिन विषय। ऊपर एक बच्चा चुनें और मैं उनकी प्रगति के अनुसार सलाह दूँगा।",
-  "strategy.error": "क्षमा करें, कनेक्ट करने में समस्या हुई। कृपया फिर प्रयास करें।",
-  "strategy.fileTooBig": "वह फ़ाइल बहुत बड़ी है! कृपया 8 MB से छोटी फ़ाइल चुनें।",
+  "strategy.error":
+    "क्षमा करें, कनेक्ट करने में समस्या हुई। कृपया फिर प्रयास करें।",
+  "strategy.fileTooBig":
+    "वह फ़ाइल बहुत बड़ी है! कृपया 8 MB से छोटी फ़ाइल चुनें।",
   "strategy.history": "पिछली बातचीत",
   "strategy.newChat": "नई बातचीत",
   "strategy.noSessions": "अभी तक कोई पिछली बातचीत नहीं।",
@@ -2247,7 +2340,8 @@ const hi: Dict = {
   "student.streak.dailyGoal": "दैनिक लक्ष्य",
   "student.streak.goalReached": "लक्ष्य पूरा हुआ! 🎉",
   "student.notebook.title": "गलती नोटबुक",
-  "student.notebook.subtitle": "जिन सवालों में गलती हुई उन्हें दोहराएँ और उनसे सीखें।",
+  "student.notebook.subtitle":
+    "जिन सवालों में गलती हुई उन्हें दोहराएँ और उनसे सीखें।",
   "student.notebook.empty": "अभी तक कोई गलती नहीं — बढ़िया काम जारी रखें! 🎉",
   "student.notebook.yourAnswer": "आपका उत्तर",
   "student.notebook.correctAnswer": "सही उत्तर",
@@ -2311,7 +2405,8 @@ const hi: Dict = {
     "हम्म, यह कीबोर्ड हिलाने जैसा लगता है! 😅 अपना गणित प्रश्न स्पष्ट शब्दों या संख्याओं में टाइप करें।",
   "chat.err.jumbled":
     "यह थोड़ा गड़बड़ लग रहा है! 😄 क्या आप अपना गणित प्रश्न स्पष्ट शब्दों या संख्याओं में पूछ सकते हैं?",
-  "chat.err.fileTooBig": "यह फ़ाइल बहुत बड़ी है! 😅 कृपया 8 MB से छोटी फ़ाइल चुनें।",
+  "chat.err.fileTooBig":
+    "यह फ़ाइल बहुत बड़ी है! 😅 कृपया 8 MB से छोटी फ़ाइल चुनें।",
   "chat.err.fileUnreadable":
     "हम्म, मैं वह फ़ाइल नहीं पढ़ सका। कृपया कोई और आज़माएँ!",
   "chat.err.voiceUnsupported":
@@ -2320,12 +2415,14 @@ const hi: Dict = {
     "मुझे माइक्रोफ़ोन उपयोग करने की अनुमति चाहिए। 🎤 कृपया अनुमति दें और फिर प्रयास करें!",
   "chat.err.noSpeech":
     "मुझे वह सुनाई नहीं दिया। 🎤 अपना गणित प्रश्न फिर से बोलें!",
-  "chat.err.micStart": "माइक्रोफ़ोन शुरू नहीं हो सका। 🎤 कृपया फिर प्रयास करें!",
+  "chat.err.micStart":
+    "माइक्रोफ़ोन शुरू नहीं हो सका। 🎤 कृपया फिर प्रयास करें!",
   "chat.err.loginAgain":
     "हम्म, सीखना जारी रखने से पहले आपको फिर से लॉग इन करना होगा। 🔑 कृपया एक बार और साइन इन करें!",
   "chat.err.rateLimit":
     "अरे, थोड़ा धीरे! 😅 थोड़ी साँस लें और कुछ देर में फिर प्रयास करें।",
-  "chat.err.connect": "ओह! कनेक्ट करने में समस्या हुई। 😅 कृपया फिर प्रयास करें!",
+  "chat.err.connect":
+    "ओह! कनेक्ट करने में समस्या हुई। 😅 कृपया फिर प्रयास करें!",
   "chat.badgeUnlocked": "🎉 बैज अनलॉक हुआ!",
 
   // AI Coach (tutor) + read-aloud
@@ -2369,7 +2466,8 @@ const hi: Dict = {
   "tutor.fees.deleteConfirm": "इस भुगतान रिकॉर्ड को हटाएं?",
   "tutor.fees.remind": "याद दिलाएं",
   "tutor.fees.remindAll": "सभी बकाया वालों को याद दिलाएं",
-  "tutor.fees.reminderMessage": "आपके बच्चे की ट्यूशन फीस का भुगतान बाकी है। कृपया इसे जल्द से जल्द चुका दें।",
+  "tutor.fees.reminderMessage":
+    "आपके बच्चे की ट्यूशन फीस का भुगतान बाकी है। कृपया इसे जल्द से जल्द चुका दें।",
   "tutor.fees.reminderSent": "याद दिलावा भेजा गया",
   "tutor.fees.reminderNone": "याद दिलाने के लिए कोई अभिभावक नहीं",
   "tutor.fees.reminding": "भेजा जा रहा है…",
@@ -2413,7 +2511,8 @@ const hi: Dict = {
   "worksheet.student": "छात्र",
   "worksheet.selectStudent": "एक छात्र चुनें",
   "worksheet.noStudents": "अभी तक कोई जुड़ा छात्र नहीं। पहले एक छात्र जोड़ें।",
-  "worksheet.tailoredNote": "{name} की कक्षा और बोर्ड के अनुसार प्रश्न तैयार किए जाते हैं।",
+  "worksheet.tailoredNote":
+    "{name} की कक्षा और बोर्ड के अनुसार प्रश्न तैयार किए जाते हैं।",
   "worksheet.pdf.student": "छात्र: {name}",
   "worksheet.pdf.board": "बोर्ड: {board}",
   "worksheet.pdf.heading": "{topic} वर्कशीट",
@@ -2425,7 +2524,8 @@ const hi: Dict = {
   "worksheet.pdf.answerKey": "उत्तर कुंजी",
   "bookmarks.title": "मेरे बुकमार्क",
   "bookmarks.subtitle": "फिर से देखने के लिए सहेजे गए विषय और प्रश्न",
-  "bookmarks.empty": "अभी कोई बुकमार्क नहीं। सहेजने के लिए किसी विषय पर बुकमार्क आइकन दबाएं।",
+  "bookmarks.empty":
+    "अभी कोई बुकमार्क नहीं। सहेजने के लिए किसी विषय पर बुकमार्क आइकन दबाएं।",
   "bookmarks.loading": "लोड हो रहा है…",
   "bookmarks.remove": "बुकमार्क हटाएं",
   "bookmarks.kindConcept": "विषय",
@@ -2467,12 +2567,13 @@ const hi: Dict = {
   // Curriculum planner (tutor)
   "tab.curriculum": "पाठ्यक्रम",
   "curriculum.title": "पाठ्यक्रम योजनाकार",
-  "curriculum.subtitle": "अपने पाठ की योजना के लिए कक्षा-दर-कक्षा गणित पाठ्यक्रम देखें।",
+  "curriculum.subtitle":
+    "अपने पाठ की योजना के लिए कक्षा-दर-कक्षा गणित पाठ्यक्रम देखें।",
   "curriculum.class": "कक्षा",
   "curriculum.lessonsLabel": "पाठ",
   "curriculum.loading": "पाठ्यक्रम लोड हो रहा है…",
   "coach.title": "अपने कोच से पूछें",
-  "coach.placeholder": "पढ़ाने के तरीके पूछें…",
+  "coach.placeholder": "���ढ़ाने के तरीके पूछें…",
   "coach.welcome":
     "नमस्ते {name}! मैं आपका टीचिंग कोच हूँ। कठिन विषयों को समझाने, पाठ की योजना बनाने, या किसी छात्र की गणित यात्रा में मदद के लिए मुझसे सुझाव पूछें। ऊपर एक छात्र चुनें और मैं उनकी प्रगति के अनुसार सलाह दूँगा।",
   "profile.aboutMe": "मेरे बारे में",
@@ -2484,7 +2585,8 @@ const hi: Dict = {
   "tab.announcements": "घोषणाएँ",
   "tab.heatmap": "कक्षा हीटमैप",
   "assign.title": "असाइनमेंट",
-  "assign.subtitle": "अपने बैचों के लिए काम तय करें और देखें कि किसने पूरा किया।",
+  "assign.subtitle":
+    "अपने बैचों के लिए काम तय करें और देखें कि किसने पूरा किया।",
   "assign.create": "असाइनमेंट बनाएँ",
   "assign.batch": "बैच",
   "assign.selectBatch": "एक बैच चुनें",
@@ -2504,7 +2606,8 @@ const hi: Dict = {
   "assign.existing": "मौजूदा असाइनमेंट",
   "assign.progress": "{total} में से {completed} पूर्ण",
   "assign.empty": "अभी तक कोई असाइनमेंट नहीं। शुरू करने के लिए ऊपर एक बनाएँ।",
-  "assign.noBatches": "असाइनमेंट बनाने से पहले अपनी प्रोफ़ाइल में एक बैच जोड़ें।",
+  "assign.noBatches":
+    "असाइनमेंट बनाने से पहले अपनी प्रोफ़ाइल में एक बैच जोड़ें।",
   "assign.loading": "असाइनमेंट लोड हो रहे हैं…",
   "assign.due": "नियत",
   "assign.created": "बनाया गया",
@@ -2519,11 +2622,13 @@ const hi: Dict = {
   "announce.past": "पिछली घोषणाएँ",
   "announce.empty": "अभी तक कोई घोषणा नहीं। ऊपर एक भेजें।",
   "announce.loading": "घोषणाएँ लोड हो रही हैं…",
-  "announce.noBatches": "घोषणाएँ भेजने से पहले अपनी प्रोफ़ाइल में एक बैच जोड़ें।",
+  "announce.noBatches":
+    "घोषणाएँ भेजने से पहले अपनी प्रोफ़ाइल में एक बैच जोड़ें।",
   "heatmap.title": "कक्षा हीटमैप",
   "heatmap.subtitle": "आपके छात्रों में विषय-वार महारत।",
   "heatmap.loading": "हीटमैप लोड हो रहा है…",
-  "heatmap.empty": "अभी तक कोई महारत डेटा नहीं। छात्रों के अभ्यास करने पर दिखेगा।",
+  "heatmap.empty":
+    "अभी तक कोई महारत डेटा नहीं। छात्रों के अभ्यास करने पर दिखेगा।",
   "heatmap.student": "छात्र",
   "heatmap.allBatches": "सभी बैच",
   "heatmap.filterByBatch": "बैच के अनुसार छाँटें",
@@ -2554,7 +2659,8 @@ const hi: Dict = {
   "digest.loading": "सारांश लोड हो रहा है…",
   "digest.noData": "इस सप्ताह अभी तक कोई गतिविधि दर्ज नहीं हुई है।",
   "digest.empty.title": "अभी तक कोई बच्चा जुड़ा नहीं है",
-  "digest.empty.hint": "अपने बच्चे का साप्ताहिक सारांश देखने के लिए मेरी प्रोफ़ाइल में उनका VidyaGanit ID जोड़ें।",
+  "digest.empty.hint":
+    "अपने बच्चे का साप्ताहिक सारांश देखने के लिए मेरी प्रोफ़ाइल में उनका VidyaGanit ID जोड़ें।",
 
   // Alerts (parent)
   "alerts.title": "अलर्ट और सूचनाएँ",
@@ -2686,7 +2792,8 @@ const te: Dict = {
   "meeting.pending": "Pending",
   "leaderboard.title": "లీడర్‌బోర్డ్",
   "leaderboard.subtitle": "మీ సహచరులలో మీ స్థానం ఎక్కడ ఉందో చూడండి",
-  "leaderboard.empty": "ఇంకా ర్యాంకింగ్‌లు లేవు — సాధన ప్రారంభించి పైకి ఎక్కండి!",
+  "leaderboard.empty":
+    "ఇంకా ర్యాంకింగ్‌లు లేవు — సాధన ప్రారంభించి పైకి ఎక్కండి!",
   "leaderboard.level": "స్థాయి",
   "leaderboard.you": "మీరు",
   "leaderboard.loading": "ర్యాంకింగ్‌లు లోడ్ అవుతున్నాయి…",
@@ -2746,13 +2853,17 @@ const te: Dict = {
   "tour.back": "వెనుకకు",
   "tour.done": "అర్థమైంది!",
   "tour.step.welcome.title": "విద్యాగణిత్‌కు స్వాగతం!",
-  "tour.step.welcome.body": "మీ స్నేహపూర్వక గణిత కోచ్ మిమ్మల్ని అడుగడుగునా నడిపించడానికి ఇక్కడ ఉన్నారు — నేరుగా సమాధానాలు ఇవ్వకుండా.",
+  "tour.step.welcome.body":
+    "మీ స్నేహపూర్వక గణిత కోచ్ మిమ్మల్ని అడుగడుగునా నడిపించడానికి ఇక్కడ ఉన్నారు — నేరుగా సమాధానాలు ఇవ్వకుండా.",
   "tour.step.workspace.title": "మీ గణిత కోచ్‌ను అడగండి",
-  "tour.step.workspace.body": "వర్క్‌స్పేస్‌లో ఏదైనా గణిత సందేహాన్ని టైప్ చేయండి. కోచ్ ఒక్కో అడుగులో సరదా సూచనలు ఇస్తారు.",
+  "tour.step.workspace.body":
+    "వర్క్‌స్పేస్‌లో ఏదైనా గణిత సందేహాన్ని టైప్ చేయండి. కోచ్ ఒక్కో అడుగులో సరదా సూచనలు ఇస్తారు.",
   "tour.step.progress.title": "మీ పురోగతిని గమనించండి",
-  "tour.step.progress.body": "XP సంపాదించండి, బ్యాడ్జ్‌లను తెరవండి, మీ రోజువారీ స్ట్రీక్‌ను కొనసాగించండి, లీడర్‌బోర్డ్‌లో ఎదగండి.",
+  "tour.step.progress.body":
+    "XP సంపాదించండి, బ్యాడ్జ్‌లను తెరవండి, మీ రోజువారీ స్ట్రీక్‌ను కొనసాగించండి, లీడర్‌బోర్డ్‌లో ఎదగండి.",
   "tour.step.shop.title": "మీ నాణేలను ఖర్చు చేయండి",
-  "tour.step.shop.body": "ప్రతి అభ్యాసం నాణేలను సంపాదిస్తుంది. సరదా అవతారాలు, థీమ్‌లను తెరవడానికి షాప్‌కు వెళ్లండి.",
+  "tour.step.shop.body":
+    "ప్రతి అభ్యాసం నాణేలను సంపాదిస్తుంది. సరదా అవతారాలు, థీమ్‌లను తెరవడానికి షాప్‌కు వెళ్లండి.",
   // Brain games & AI model
   "games.title": "మెదడు ఆటలు",
   "games.subtitle": "మెదడును చురుకుగా చేసే వేగవంతమైన గణిత ఆటలు!",
@@ -2827,11 +2938,13 @@ const te: Dict = {
   "test.pointsLabel": "పాయింట్లు",
   "test.correct": "సరైనది",
   "test.incorrect": "సాధన కోసం",
-  "test.noNegative": "ఎప్పుడూ మార్కులు తీసివేయబడవు — తప్పు సమాధానాలకు సున్నా మాత్రమే.",
+  "test.noNegative":
+    "ఎప్పుడూ మార్కులు తీసివేయబడవు — తప్పు సమాధానాలకు సున్నా మాత్రమే.",
   "test.correctAnswer": "సరైన సమాధానం",
   "test.done": "పూర్తయింది",
   "test.takeTitle": "పరీక్ష రాయి",
-  "test.takeSubtitle": "ఒక విషయాన్ని ఎంచుకొని పాయింట్లు సంపాదించు — మార్కులు తీసివేయబడవు!",
+  "test.takeSubtitle":
+    "ఒక విషయాన్ని ఎంచుకొని పాయింట్లు సంపాదించు — మార్కులు తీసివేయబడవు!",
   "test.offer": "ఒక శీఘ్ర విషయ పరీక్షకు సిద్ధమా? 📝",
   "test.offerYes": "అవును, నన్ను పరీక్షించు! 📝",
   "test.offerNo": "ఇప్పుడు వద్దు",
@@ -2881,7 +2994,8 @@ const te: Dict = {
   "auth.academyNamePlaceholder": "ఉదా. శర్మ మ్యాథ్స్ అకాడమీ",
   "auth.optional": "(ఐచ్ఛికం)",
   "auth.loginAs": "నేను లాగిన్ అవుతున్నాను",
-  "auth.roleMismatch": "ఈ ఐడీ ఆ పాత్రకు నమోదు కాలేదు. దయచేసి సరైనదాన్ని ఎంచుకోండి.",
+  "auth.roleMismatch":
+    "ఈ ఐడీ ఆ పాత్రకు నమోదు కాలేదు. దయచేసి సరైనదాన్ని ఎంచుకోండి.",
   "tutor.title": "ఉపాధ్యాయ డాష్‌బోర్డ్",
   "tutor.batch": "బ్యాచ్",
   "auth.batchAdd": "మరో బ్యాచ్‌ను జోడించండి",
@@ -2892,7 +3006,8 @@ const te: Dict = {
   "tutor.noBatchStudents": "ఈ బ్యాచ్‌లో ఇంకా విద్యార్థులు లేరు.",
   "bulk.add": "సామూహికంగా జోడించు",
   "bulk.title": "అనేక విద్యార్థులను జోడించండి",
-  "bulk.desc": "విద్యార్థి ఐడీలను ఖాళీలు, కామాలు లేదా కొత్త పంక్తులతో వేరు చేసి పేస్ట్ చేయండి.",
+  "bulk.desc":
+    "విద్యార్థి ఐడీలను ఖాళీలు, కామాలు లేదా కొత్త పంక్తులతో వేరు చేసి పేస్ట్ చేయండి.",
   "bulk.batchLabel": "బ్యాచ్‌కు కేటాయించు",
   "bulk.batchNone": "బ్యాచ్ లేదు",
   "bulk.submit": "విద్యార్థులను జోడించు",
@@ -2934,26 +3049,29 @@ const te: Dict = {
   "profile.relationship": "సంబంధం",
   "profile.gender": "లింగం",
   "profile.contact": "సంప్రదింపు",
-  "profile.notProvided": "ఇవ్వలేదు",
+  "profile.notProvided": "ఇ. �్వలేదు",
   "profile.father": "తండ్రి",
   "profile.mother": "తల్లి",
   "profile.male": "పురుషుడు",
   "profile.female": "స్త్రీ",
   "profile.connectedStudents": "అనుసంధానించిన విద్యార్థులు",
   "profile.linked": "అనుసంధానం",
-  "profile.linkPlaceholder": "విద్యార్థి VidyaGanit ID నమోదు చేయండి (ఉదా. VG-STU-12345)",
+  "profile.linkPlaceholder":
+    "విద్యార్థి VidyaGanit ID నమోదు చేయండి (ఉదా. VG-STU-12345)",
   "profile.link": "అనుసంధానించు",
   "profile.noStudentsTitle": "ఇంకా విద్యార్థులు అనుసంధానం కాలేదు",
   "profile.searchStudents": "పేరు లేదా ఐడీ ద్వారా వెతకండి",
   "profile.noSearchResults": "మీ శోధనకు సరిపోయే విద్యార్థులు లేరు",
-  "profile.noStudentsHint": "మీ పిల్లల VidyaGanit ID ను పైన నమోదు చేసి ఖాతాను అనుసంధానించండి.",
+  "profile.noStudentsHint":
+    "మీ పిల్లల VidyaGanit ID ను పైన నమోదు చేసి ఖాతాను అనుసంధానించండి.",
   "profile.class": "తరగతి",
   "profile.removeStudent": "విద్యార్థిని తొలగించు",
 
   "picker.label": "చూస్తున్నారు",
   "picker.placeholder": "ఒక పిల్లవాడిని ఎంచుకోండి",
   "picker.empty.title": "ఇంకా పిల్లలు అనుసంధానం కాలేదు",
-  "picker.empty.hint": "నా ప్రొఫైల్‌కు వెళ్లి మీ పిల్లల VidyaGanit ID ను అనుసంధానించండి.",
+  "picker.empty.hint":
+    "నా ప్రొఫైల్‌కు వెళ్లి మీ పిల్లల VidyaGanit ID ను అనుసంధానించండి.",
 
   "progress.title": "పురోగతి విశ్లేషణ",
   "progress.subtitle": "మీ పిల్లవాడు ప్రతి అంశంతో ఎలా నిమగ్నమవుతున్నాడో.",
@@ -2962,9 +3080,11 @@ const te: Dict = {
   "progress.sessions": "సెషన్లు",
   "progress.totalSessions": "మొత్తం సెషన్లు",
   "progress.totalMessages": "అడిగిన మొత్తం ప్రశ్నలు",
-  "progress.note": "ప్రావీణ్యం VidyaGanit సాధన ఆధారంగా ఒక అంచనా, అధికారిక పరీక్ష స్కోరు కాదు.",
+  "progress.note":
+    "ప్రావీణ్యం VidyaGanit సాధన ఆధారంగా ఒక అంచనా, అధికారిక పరీక్ష స్కోరు కాదు.",
   "progress.empty.title": "ఇంకా సాధన లేదు",
-  "progress.empty.hint": "మీ పిల్లవాడు గణిత ప్రశ్నలు అడగడం మొదలుపెట్టాక పురోగతి ఇక్కడ కనిపిస్తుంది.",
+  "progress.empty.hint":
+    "మీ పిల్లవాడు గణిత ప్రశ్నలు అడగడం మొదలుపెట్టాక పురోగతి ఇక్కడ కనిపిస్తుంది.",
   "progress.loading": "పురోగతి లోడ్ అవుతోంది…",
 
   "history.title": "సేవ్ చేసిన సోక్రటిక్ చరిత్ర",
@@ -2974,11 +3094,13 @@ const te: Dict = {
   "history.student": "విద్యార్థి",
   "history.tutor": "ఉపాధ్యాయుడు",
   "history.empty.title": "ఇంకా సంభాషణలు లేవు",
-  "history.empty.hint": "మీ పిల్లవాడు నేర్చుకోవడం మొదలుపెట్టాక సేవ్ చేసిన చాట్‌లు ఇక్కడ కనిపిస్తాయి.",
+  "history.empty.hint":
+    "మీ పిల్లవాడు నేర్చుకోవడం మొదలుపెట్టాక సేవ్ చేసిన చాట్‌లు ఇక్కడ కనిపిస్తాయి.",
   "history.loading": "చరిత్ర లోడ్ అవుతోంది…",
 
   "strategy.title": "వ్యూహ AI ను అడగండి",
-  "strategy.subtitle": "మీ పిల్లల గణిత అభ్యాసానికి మద్దతు ఇచ్చే మీ వ్యక్తిగత సలహాదారు.",
+  "strategy.subtitle":
+    "మీ పిల్లల గణిత అభ్యాసానికి మద్దతు ఇచ్చే మీ వ్యక్తిగత సలహాదారు.",
   "strategy.placeholder": "మీ పిల్లవాడికి ఎలా సహాయం చేయాలో అడగండి…",
   "strategy.send": "పంపు",
   "strategy.about": "వీరి గురించి సలహా",
@@ -2987,13 +3109,16 @@ const te: Dict = {
   "strategy.listening": "వింటోంది…",
   "strategy.transcribing": "లిప్యంతరీకరణ…",
   "strategy.recording": "రికార్డ్ అవుతోంది… ఆపడానికి నొక్కండి",
-  "strategy.micUnsupported": "ఈ బ్రౌజర్‌లో వాయిస్ ఇన్‌పుట్ అందుబాటులో లేదు. దయచేసి టైప్ చేయండి.",
+  "strategy.micUnsupported":
+    "ఈ బ్రౌజర్‌లో వాయిస్ ఇన్‌పుట్ అందుబాటులో లేదు. దయచేసి టైప్ చేయండి.",
   "strategy.attach": "ఫైల్ జతచేయి",
   "strategy.camera": "ఫోటో తీయి",
   "strategy.welcome":
     "నమస్తే! నేను మీ వ్యూహ AI సలహాదారుని. మీ పిల్లల గణిత అభ్యాసానికి మద్దతు గురించి ఏదైనా అడగండి — రోజువారీ అలవాట్లు, ఆత్మవిశ్వాసం పెంచడం, లేదా కష్టమైన అంశాలు. పైన ఒక పిల్లవాడిని ఎంచుకోండి, వారి పురోగతికి తగ్గట్టు సలహా ఇస్తాను.",
-  "strategy.error": "క్షమించండి, కనెక్ట్ చేయడంలో సమస్య. దయచేసి మళ్లీ ప్రయత్నించండి.",
-  "strategy.fileTooBig": "ఆ ఫైల్ చాలా పెద్దది! దయచేసి 8 MB కంటే తక్కువ ఫైల్ ఎంచుకోండి.",
+  "strategy.error":
+    "క్షమించండి, కనెక్ట్ చేయడంలో సమస్య. దయచేసి మళ్లీ ప్రయత్నించండి.",
+  "strategy.fileTooBig":
+    "ఆ ఫైల్ చాలా పెద్దది! దయచేసి 8 MB కంటే తక్కువ ఫైల్ ఎంచుకోండి.",
   "strategy.history": "గత సంభాషణలు",
   "strategy.newChat": "కొత్త సంభాషణ",
   "strategy.noSessions": "ఇంకా గత సంభాషణలు లేవు.",
@@ -3025,7 +3150,8 @@ const te: Dict = {
   "auth.login": "లాగిన్",
   "auth.createAccount": "ఖాతా సృష్టించు",
   "auth.welcomeBack": "తిరిగి స్వాగతం",
-  "auth.welcomeBackSub": "నేర్చుకోవడం కొనసాగించడానికి మీ VidyaGanit ID నమోదు చేయండి.",
+  "auth.welcomeBackSub":
+    "నేర్చుకోవడం కొనసాగించడానికి మీ VidyaGanit ID నమోదు చేయండి.",
   "auth.uniqueId": "ప్రత్యేక VidyaGanit ID",
   "auth.password": "పాస్‌వర్డ్",
   "auth.forgotPassword": "పాస్‌వర్డ్ మర్చిపోయారా?",
@@ -3076,7 +3202,8 @@ const te: Dict = {
   "student.streak.dailyGoal": "రోజువారీ లక్ష్యం",
   "student.streak.goalReached": "లక్ష్యం చేరుకున్నారు! 🎉",
   "student.notebook.title": "తప్పుల నోట్‌బుక్",
-  "student.notebook.subtitle": "మీరు తప్పిన ప్రశ్నలను సమీక్షించి వాటి నుండి నేర్చుకోండి.",
+  "student.notebook.subtitle":
+    "మీరు తప్పిన ప్రశ్నలను సమీక్షించి వాటి నుండి నేర్చుకోండి.",
   "student.notebook.empty": "ఇంకా తప్పులు లేవు — చక్కగా చేస్తున్నారు! 🎉",
   "student.notebook.yourAnswer": "మీ సమాధానం",
   "student.notebook.correctAnswer": "సరైన సమాధానం",
@@ -3140,7 +3267,8 @@ const te: Dict = {
     "హ్మ్, అది కీబోర్డ్ కదలికలా ఉంది! 😅 మీ గణిత ప్రశ్నను స్పష్టమైన పదాలు లేదా సంఖ్యలతో టైప్ చేయండి.",
   "chat.err.jumbled":
     "అది కొంచెం గందరగోళంగా ఉంది! 😄 మీ గణిత ప్రశ్నను స్పష్టమైన పదాలు లేదా సంఖ్యలతో అడగగలరా?",
-  "chat.err.fileTooBig": "ఆ ఫైల్ చాలా పెద్దది! 😅 దయచేసి 8 MB కంటే తక్కువ ఫైల్‌ను ఎంచుకోండి.",
+  "chat.err.fileTooBig":
+    "ఆ ఫైల్ చాలా పెద్దది! 😅 దయచేసి 8 MB కంటే తక్కువ ఫైల్‌ను ఎంచుకోండి.",
   "chat.err.fileUnreadable":
     "హ్మ్, ఆ ఫైల్‌ను నేను చదవలేకపోయాను. దయచేసి మరొకటి ప్రయత్నించండి!",
   "chat.err.voiceUnsupported":
@@ -3149,12 +3277,14 @@ const te: Dict = {
     "మైక్రోఫోన్ ఉపయోగించడానికి నాకు అనుమతి అవసరం. 🎤 దయచేసి అనుమతించి మళ్లీ ప్రయత్నించండి!",
   "chat.err.noSpeech":
     "అది నాకు వినిపించలేదు. 🎤 మీ గణిత ప్రశ్నను మళ్లీ మాట్లాడండి!",
-  "chat.err.micStart": "మైక్రోఫోన్‌ను ప్రారంభించలేకపోయాను. 🎤 దయచేసి మళ్లీ ప్రయత్నించండి!",
+  "chat.err.micStart":
+    "మైక్రోఫోన్‌ను ప్రారంభించలేకపోయాను. 🎤 దయచేసి మళ్లీ ప్రయత్నించండి!",
   "chat.err.loginAgain":
     "హ్మ్, నేర్చుకోవడం కొనసాగించే ముందు మీరు మళ్లీ లాగిన్ కావాలి. 🔑 దయచేసి మరోసారి సైన్ ఇన్ చేయండి!",
   "chat.err.rateLimit":
     "ఓ, కొంచెం నెమ్మదిగా! 😅 కొద్దిసేపు విశ్రాంతి తీసుకుని కొద్దిసేపటిలో మళ్లీ ప్రయత్నించండి.",
-  "chat.err.connect": "అయ్యో! కనెక్ట్ చేయడంలో సమస్య. 😅 దయచేసి మళ్లీ ప్రయత్నించండి!",
+  "chat.err.connect":
+    "అయ్యో! కనెక్ట్ చేయడంలో సమస్య. 😅 దయచేసి మళ్లీ ప్రయత్నించండి!",
   "chat.badgeUnlocked": "🎉 బ్యాడ్జ్ అన్‌లాక్ అయింది!",
 
   // AI Coach (tutor) + read-aloud
@@ -3198,7 +3328,8 @@ const te: Dict = {
   "tutor.fees.deleteConfirm": "ఈ చెల్లింపు రికార్డును తొలగించాలా?",
   "tutor.fees.remind": "గుర్తు చేయండి",
   "tutor.fees.remindAll": "బకాయి ఉన్నవారందరికీ గుర్తు చేయండి",
-  "tutor.fees.reminderMessage": "మీ పిల్లల ట్యూషన్ ఫీజు చెల్లింపు పెండింగ్‌లో ఉంది. దయచేసి వీలైనంత త్వరగా చెల్లించగలరు.",
+  "tutor.fees.reminderMessage":
+    "మీ పిల్లల ట్యూషన్ ఫీజు చెల్లింపు పెండింగ్‌లో ఉంది. దయచేసి వీలైనంత త్వరగా చెల్లించగలరు.",
   "tutor.fees.reminderSent": "గుర్తు పంపబడింది",
   "tutor.fees.reminderNone": "గుర్తు చేయడానికి తల్లిదండ్రులు ఎవరూ లేరు",
   "tutor.fees.reminding": "పంపుతోంది…",
@@ -3228,21 +3359,25 @@ const te: Dict = {
   "weeklyGoal.parentSubtitle": "ఈ వారం మీ పిల్లల పురోగతి",
   "weeklyGoal.parentNone": "{name} ఇంకా వారపు లక్ష్యాన్ని నిర్ణయించలేదు.",
   "worksheet.title": "వర్క్‌షీట్ జనరేటర్",
-  "worksheet.subtitle": "సమాధాన కీతో ముద్రించదగిన ప్రాక్టీస్ షీట్‌ను సృష్టించండి",
+  "worksheet.subtitle":
+    "సమాధాన కీతో ముద్రించదగిన ప్రాక్టీస్ షీట్‌ను సృష్టించండి",
   "worksheet.topic": "అంశం",
   "worksheet.count": "ప్రశ్నలు",
   "worksheet.klass": "తరగతి",
   "worksheet.anyClass": "ఏ తరగతి అయినా",
   "worksheet.generate": "PDF సృష్టించు",
   "worksheet.generating": "సృష్టిస్తోంది…",
-  "worksheet.error": "వర్క్‌షీట్‌ను సృష్టించలేకపోయాం. దయచేసి మళ్లీ ప్రయత్నించండి.",
+  "worksheet.error":
+    "వర్క్‌షీట్‌ను సృష్టించలేకపోయాం. దయచేసి మళ్లీ ప్రయత్నించండి.",
   "test.topic.add_subtract": "కూడిక & తీసివేత",
   "test.topic.ratio": "నిష్పత్తి",
   "test.topic.algebra": "బీజగణితం",
   "worksheet.student": "విద్యార్థి",
   "worksheet.selectStudent": "ఒక విద్యార్థిని ఎంచుకోండి",
-  "worksheet.noStudents": "ఇంకా లింక్ చేసిన విద్యార్థులు లేరు. ముందుగా విద్యార్థిని జోడించండి.",
-  "worksheet.tailoredNote": "{name} యొక్క తరగతి మరియు బోర్డ్‌కు అనుగుణంగా ప్రశ్నలు రూపొందించబడతాయి.",
+  "worksheet.noStudents":
+    "ఇంకా లింక్ చేసిన విద్యార్థులు లేరు. ముందుగా విద్యార్థిని జోడించండి.",
+  "worksheet.tailoredNote":
+    "{name} యొక్క తరగతి మరియు బోర్డ్‌కు అనుగుణంగా ప్రశ్నలు రూపొందించబడతాయి.",
   "worksheet.pdf.student": "విద్యార్థి: {name}",
   "worksheet.pdf.board": "బోర్డు: {board}",
   "worksheet.pdf.heading": "{topic} వర్క్‌షీట్",
@@ -3254,7 +3389,8 @@ const te: Dict = {
   "worksheet.pdf.answerKey": "సమాధాన కీ",
   "bookmarks.title": "నా బుక్‌మార్క్‌లు",
   "bookmarks.subtitle": "మళ్లీ చూడటానికి సేవ్ చేసిన భావనలు మరియు ప్రశ్నలు",
-  "bookmarks.empty": "ఇంకా బుక్‌మార్క్‌లు లేవు. సేవ్ చేయడానికి భావనపై బుక్‌మార్క్ ఐకాన్‌ను నొక్కండి.",
+  "bookmarks.empty":
+    "ఇంకా బుక్‌మార్క్‌లు లేవు. సేవ్ చేయడానికి భావనపై బుక్‌మార్క్ ఐకాన్‌ను నొక్కండి.",
   "bookmarks.loading": "లోడ్ అవుతోంది…",
   "bookmarks.remove": "బుక్‌మార్క్ తొలగించు",
   "bookmarks.kindConcept": "భావన",
@@ -3284,19 +3420,23 @@ const te: Dict = {
 
   // Recommended next lesson
   "recommend.title": "సిఫార్సు చేయబడిన తదుపరి పాఠం",
-  "recommend.subtitle": "అభ్యాసం మరియు పరీక్షల ఆధారంగా తదుపరి ఎక్కడ దృష్టి పెట్టాలి.",
+  "recommend.subtitle":
+    "అభ్యాసం మరియు పరీక్షల ఆధారంగా తదుపరి ఎక్కడ దృష్టి పెట్టాలి.",
   "recommend.focus": "సూచించిన పాఠం",
   "recommend.reason.not_started": "ఇంకా ప్రారంభించలేదు",
   "recommend.reason.needs_practice": "మరింత అభ్యాసం అవసరం",
   "recommend.reason.low_score": "ఇటీవలి పరీక్ష స్కోరు తక్కువగా ఉంది",
   "recommend.reason.next_up": "తదుపరి సవాలుకు సిద్ధం",
-  "recommend.allMastered": "అద్భుతం! ఈ సంవత్సరం అన్ని అంశాలు బలంగా కనిపిస్తున్నాయి.",
-  "recommend.empty": "అభ్యాసం ప్రారంభమైన తర్వాత, తగిన తదుపరి పాఠం ఇక్కడ కనిపిస్తుంది.",
+  "recommend.allMastered":
+    "అద్భుతం! ఈ సంవత్సరం అన్ని అంశాలు బలంగా కనిపిస్తున్నాయి.",
+  "recommend.empty":
+    "అభ్యాసం ప్రారంభమైన తర్వాత, తగిన తదుపరి పాఠం ఇక్కడ కనిపిస్తుంది.",
 
   // Curriculum planner (tutor)
   "tab.curriculum": "పాఠ్యప్రణాళిక",
   "curriculum.title": "పాఠ్యప్రణాళిక ప్లానర్",
-  "curriculum.subtitle": "మీ పాఠాలను ప్లాన్ చేయడానికి తరగతి వారీగా గణిత సిలబస్‌ను చూడండి.",
+  "curriculum.subtitle":
+    "మీ పాఠాలను ప్లాన్ చేయడానికి తరగతి వారీగా గణిత సిలబస్‌ను చూడండి.",
   "curriculum.class": "తరగతి",
   "curriculum.lessonsLabel": "పాఠాలు",
   "curriculum.loading": "పాఠ్యప్రణాళిక లోడ్ అవుతోంది…",
@@ -3313,7 +3453,8 @@ const te: Dict = {
   "tab.announcements": "ప్రకటనలు",
   "tab.heatmap": "తరగతి హీట్‌మ్యాప్",
   "assign.title": "అసైన్‌మెంట్‌లు",
-  "assign.subtitle": "మీ బ్యాచ్‌లకు పని కేటాయించి ఎవరు పూర్తి చేశారో తెలుసుకోండి.",
+  "assign.subtitle":
+    "మీ బ్యాచ్‌లకు పని కేటాయించి ఎవరు పూర్తి చేశారో తెలుసుకోండి.",
   "assign.create": "అసైన్‌మెంట్ సృష్టించండి",
   "assign.batch": "బ్యాచ్",
   "assign.selectBatch": "ఒక బ్యాచ్‌ను ఎంచుకోండి",
@@ -3332,8 +3473,10 @@ const te: Dict = {
   "assign.optional": "(ఐచ్ఛికం)",
   "assign.existing": "ప్రస్తుత అసైన్‌మెంట్‌లు",
   "assign.progress": "{total}లో {completed} పూర్తయింది",
-  "assign.empty": "ఇంకా అసైన్‌మెంట్‌లు లేవు. ప్రారంభించడానికి పైన ఒకటి సృష్టించండి.",
-  "assign.noBatches": "అసైన్‌మెంట్‌లు సృష్టించే ముందు మీ ప్రొఫైల్‌కు ఒక బ్యాచ్‌ను జోడించండి.",
+  "assign.empty":
+    "ఇంకా అసైన్‌మెంట్‌లు లేవు. ప్రారంభించడానికి పైన ఒకటి సృష్టించండి.",
+  "assign.noBatches":
+    "అసైన్‌మెంట్‌లు సృష్టించే ముందు మీ ప్రొఫైల్‌కు ఒక బ్యాచ్‌ను జోడించండి.",
   "assign.loading": "అసైన్‌మెంట్‌లు లోడ్ అవుతున్నాయి…",
   "assign.due": "గడువు",
   "assign.created": "సృష్టించబడింది",
@@ -3348,11 +3491,13 @@ const te: Dict = {
   "announce.past": "గత ప్రకటనలు",
   "announce.empty": "ఇంకా ప్రకటనలు లేవు. పైన ఒకటి పంపండి.",
   "announce.loading": "ప్రకటనలు లోడ్ అవుతున్నాయి…",
-  "announce.noBatches": "ప్రకటనలు పంపే ముందు మీ ప్రొఫైల్‌కు ఒక బ్యాచ్‌ను జోడించండి.",
+  "announce.noBatches":
+    "ప్రకటనలు పంపే ముందు మీ ప్రొఫైల్‌కు ఒక బ్యాచ్‌ను జోడించండి.",
   "heatmap.title": "తరగతి హీట్‌మ్యాప్",
   "heatmap.subtitle": "మీ విద్యార్థులలో అంశాల వారీగా నైపుణ్యం.",
   "heatmap.loading": "హీట్‌మ్యాప్ లోడ్ అవుతోంది…",
-  "heatmap.empty": "ఇంకా నైపుణ్య డేటా లేదు. విద్యార్థులు అభ్యసించినప్పుడు కనిపిస్తుంది.",
+  "heatmap.empty":
+    "ఇంకా నైపుణ్య డేటా లేదు. విద్యార్థులు అభ్యసించినప్పుడు కనిపిస్తుంది.",
   "heatmap.student": "విద్యార్థి",
   "heatmap.allBatches": "అన్ని బ్యాచ్‌లు",
   "heatmap.filterByBatch": "బ్యాచ్ ద్వారా వడపోత",
@@ -3383,11 +3528,13 @@ const te: Dict = {
   "digest.loading": "సారాంశం లోడ్ అవుతోంది…",
   "digest.noData": "ఈ వారం ఇంకా ఎటువంటి కార్యకలాపం నమోదు కాలేదు.",
   "digest.empty.title": "ఇంకా పిల్లలు ఎవరూ అనుసంధానించబడలేదు",
-  "digest.empty.hint": "మీ పిల్లల వారపు సారాంశాన్ని చూడటానికి నా ప్రొఫైల్‌లో వారి VidyaGanit IDని అనుసంధానించండి.",
+  "digest.empty.hint":
+    "మీ పిల్లల వారపు సారాంశాన్ని చూడటానికి నా ప్రొఫైల్‌లో వారి VidyaGanit IDని అనుసంధానించండి.",
 
   // Alerts (parent)
   "alerts.title": "హెచ్చరికలు & నోటిఫికేషన్‌లు",
-  "alerts.subtitle": "మీ పిల్లల పురోగతి మరియు మైలురాళ్ల గురించి తెలుసుకుంటూ ఉండండి.",
+  "alerts.subtitle":
+    "మీ పిల్లల పురోగతి మరియు మైలురాళ్ల గురించి తెలుసుకుంటూ ఉండండి.",
   "alerts.scanNow": "ఇప్పుడు హెచ్చరికలను తనిఖీ చేయండి",
   "alerts.scanning": "తనిఖీ చేస్తోంది…",
 
@@ -3438,8 +3585,7 @@ const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 function isLanguage(value: unknown): value is Language {
   return (
-    typeof value === "string" &&
-    LANGUAGES.some((entry) => entry.code === value)
+    typeof value === "string" && LANGUAGES.some((entry) => entry.code === value)
   );
 }
 
@@ -3486,6 +3632,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
 export function useLanguage(): LanguageContextValue {
   const ctx = useContext(LanguageContext);
-  if (!ctx) throw new Error("useLanguage must be used within a LanguageProvider");
+  if (!ctx)
+    throw new Error("useLanguage must be used within a LanguageProvider");
   return ctx;
 }
