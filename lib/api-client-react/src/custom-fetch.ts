@@ -15,10 +15,15 @@ const DEFAULT_JSON_ACCEPT = "application/json, application/problem+json";
 // Module-level configuration
 // ---------------------------------------------------------------------------
 
-let _baseUrl: string | null = 
-  typeof import.meta !== "undefined" && (import.meta.env as any)?.VITE_API_URL 
-    ? (import.meta.env as any).VITE_API_URL.replace(/\/+$/, "") 
-    : null;
+let _baseUrl: string | null = null;
+try {
+  const meta = import.meta as Record<string, any>;
+  if (meta?.env?.VITE_API_URL) {
+    _baseUrl = meta.env.VITE_API_URL.replace(/\/+$/, "");
+  }
+} catch {
+  // Fallback for runtimes where import.meta is unavailable
+}
 
 let _authTokenGetter: AuthTokenGetter | null = null;
 
