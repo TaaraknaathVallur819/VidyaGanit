@@ -79,7 +79,7 @@ function RequestResetForm() {
             data-testid="input-fp-vidya-id"
             value={vidyaId}
             onChange={(e) => setVidyaId(e.target.value)}
-            placeholder="e.g. VG-PAR-48291"
+            placeholder="e.g. VG-XXX-12345"
             className="h-12 text-lg px-4 bg-gray-50 border-gray-200"
             required
           />
