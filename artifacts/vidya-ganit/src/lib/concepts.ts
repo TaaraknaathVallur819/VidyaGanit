@@ -1,4 +1,4 @@
-// Shared catalog of math concepts/formulae for Classes 4–7. Used by the Concept
+// Shared catalog of maths concepts/formulae for Classes 4–7. Used by the Concept
 // Library, the Formula Flashcards, and bookmark labels. Names/descriptions are
 // i18n keys; the formula and example are symbolic so they read the same in every
 // language.

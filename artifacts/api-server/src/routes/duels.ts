@@ -173,7 +173,7 @@ router.post(
     await createNotification({
       recipientVidyaId: opp.vidyaId,
       type: "duel",
-      title: `${user.name} challenged you to a Math Duel! ⚔️`,
+      title: `${user.name} challenged you to a Maths Duel! ⚔️`,
       body: "Tap to accept and play.",
       linkTab: "duels",
     });
@@ -324,8 +324,8 @@ router.post(
       recipientVidyaId: otherId,
       type: "duel",
       title: finished
-        ? `Your Math Duel with ${meUser?.name ?? "a classmate"} is complete! ⚔️`
-        : `${meUser?.name ?? "A classmate"} played your Math Duel ⚔️`,
+        ? `Your Maths Duel with ${meUser?.name ?? "a classmate"} is complete! ⚔️`
+        : `${meUser?.name ?? "A classmate"} played your Maths Duel ⚔️`,
       body: finished ? "Tap to see who won." : "Your turn — tap to play.",
       linkTab: "duels",
     });

@@ -69,7 +69,7 @@ export async function requireTutor(
 
 /**
  * Must run after `requireAuth`. Rejects authenticated users whose account role
- * is not `student`, so student-only surfaces (e.g. peer math duels, mock exams)
+ * is not `student`, so student-only surfaces (e.g. peer maths duels, mock exams)
  * cannot be reached by parents or tutors even if they call the API directly.
  */
 export async function requireStudent(

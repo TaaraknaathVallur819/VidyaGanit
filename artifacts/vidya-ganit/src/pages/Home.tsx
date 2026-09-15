@@ -5,7 +5,7 @@ import { useLanguage } from "@/lib/i18n";
 import { Sparkles, Rocket, Trophy, Target, Star, Smile, Lightbulb, Hexagon } from "lucide-react";
 import { useRef } from "react";
 
-// Floating decorative math symbols
+// Floating decorative maths symbols
 const FloatingSymbol = ({ 
   symbol, 
   delay, 
@@ -43,7 +43,7 @@ const FloatingSymbol = ({
 };
 
 // Floating kid-friendly emoji that gently bobs and sways — adds playful life to
-// the page alongside the math symbols (stars, rocket, pencil, balloon, etc.).
+// the page alongside the maths symbols (stars, rocket, pencil, balloon, etc.).
 const FloatingEmoji = ({
   emoji,
   delay,
