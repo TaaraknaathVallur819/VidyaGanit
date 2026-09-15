@@ -162,4 +162,13 @@ $bmp.Save($OutFile, $codec, $ep)
 $g.Dispose(); $bmp.Dispose()
 
 "Wrote {0} ({1}x{2}, {3:N0} bytes) using {4}." -f $OutFile, $W, $H, (Get-Item $OutFile).Length, $sans
-"If the headline changed, update index.html's og:image:alt to match."
+
+# Only nag when the copy on the card actually differs from the defaults,
+# otherwise the reminder fires on every routine rebuild and gets ignored.
+# Note this cannot see a change made by editing the defaults above rather than
+# by passing a parameter; if you do that, update the alt text as well.
+$copyParams = @('Badge', 'HeadlineTop', 'HeadlineBottom', 'Strapline')
+$changed = $copyParams | Where-Object { $PSBoundParameters.ContainsKey($_) }
+if ($changed) {
+  Write-Warning ("Card copy changed ({0}). Update og:image:alt and twitter:image:alt in index.html to match." -f ($changed -join ', '))
+}
