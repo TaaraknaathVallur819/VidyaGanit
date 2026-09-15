@@ -28,6 +28,14 @@ type Gender = "male" | "female";
 type ParentType = "father" | "mother";
 type StudentClass = "4" | "5" | "6" | "7";
 
+// Mirrors the prefixes generateVidyaId() assigns on the API side, so the
+// example ID matches the role the person is logging in as.
+const LOGIN_ID_PLACEHOLDER: Record<Role, string> = {
+  student: "e.g. VG-STU-12345",
+  parent: "e.g. VG-PAR-12345",
+  tutor: "e.g. VG-TUT-12345",
+};
+
 function TileButton({
   selected,
   onClick,
@@ -248,7 +256,7 @@ export default function Auth() {
                       data-testid="input-login-id"
                       value={loginId}
                       onChange={(e) => setLoginId(e.target.value)}
-                      placeholder="e.g. VG-STU-12345"
+                      placeholder={LOGIN_ID_PLACEHOLDER[loginRole]}
                       className="h-12 text-lg px-4 bg-gray-50 border-gray-200 focus-visible:ring-primary"
                       required
                     />
