@@ -312,6 +312,8 @@ router.post(
       history: chatHistory,
       userText,
       image,
+      onRetry: (attempt, status) =>
+        req.log.warn({ attempt, status }, "retrying tutor completion"),
     });
 
     for await (const delta of stream) {

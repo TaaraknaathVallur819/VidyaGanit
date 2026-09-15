@@ -828,6 +828,8 @@ router.post(
         history,
         userText,
         image,
+        onRetry: (attempt, status) =>
+          req.log.warn({ attempt, status }, "retrying consultant completion"),
       });
       for await (const delta of stream) {
         full += delta;
