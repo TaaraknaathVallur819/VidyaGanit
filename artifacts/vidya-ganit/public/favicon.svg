@@ -1,3 +1,10 @@
-<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="180" height="180" rx="36" fill="#FF3C00"/>
+<!-- Mirrors the header logo in src/components/layout/Header.tsx: a --primary
+     (hsl(246 45% 35%)) rounded square with a white bold serif "V". The 12/64
+     corner radius and 40/64 glyph size reproduce that logo's rounded-md and
+     text-xl at its 32px box, so the tab icon and the in-page mark match. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="VidyaGanit">
+  <rect width="64" height="64" rx="12" fill="#393181"/>
+  <text x="32" y="33" text-anchor="middle" dominant-baseline="central"
+        font-family="Georgia, 'Times New Roman', Times, serif" font-weight="700"
+        font-size="40" fill="#ffffff">V</text>
 </svg>
