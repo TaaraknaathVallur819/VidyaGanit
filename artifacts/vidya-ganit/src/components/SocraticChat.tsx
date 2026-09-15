@@ -24,6 +24,7 @@ import {
   getChatSession,
   setChatMessageFeedback,
 } from "@workspace/api-client-react";
+import MarkdownMessage, { plainTextFromMarkdown } from "@/components/MarkdownMessage";
 import { BADGE_CATALOG } from "@/lib/badges";
 import { gameForTopicOrDefault } from "@/lib/syllabus";
 import { type GameId } from "@/lib/games";
@@ -152,7 +153,7 @@ function TutorBubble({
       </div>
       <div className="bg-gradient-to-br from-indigo-600 to-violet-600 text-white rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed shadow-md max-w-full">
         {content ? (
-          <span className="whitespace-pre-wrap break-words">{content}</span>
+          <MarkdownMessage content={content} />
         ) : (
           isStreaming && !isDrawing && <TypingDots />
         )}
@@ -174,7 +175,7 @@ function TutorBubble({
         )}
         {!isStreaming && !isDrawing && content && (
           <div className="mt-1.5 -mb-1 -ml-1">
-            <SpeakButton text={content} tone="light" />
+            <SpeakButton text={plainTextFromMarkdown(content)} tone="light" />
           </div>
         )}
       </div>

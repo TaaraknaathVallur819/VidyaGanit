@@ -28,6 +28,7 @@ import { useLiveSpeech } from "@/hooks/useLiveSpeech";
 import AiModelSelect, { type ChatModelKey } from "@/components/AiModelSelect";
 import ImageModelSelect, { type ImageModel } from "@/components/ImageModelSelect";
 import SpeakButton from "@/components/SpeakButton";
+import MarkdownMessage, { plainTextFromMarkdown } from "@/components/MarkdownMessage";
 
 const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 MB
 
@@ -643,7 +644,7 @@ export default function ParentConsultantChat({
                   </div>
                   <div className="bg-white border border-emerald-100 text-foreground rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed shadow-sm max-w-full">
                     {msg.content ? (
-                      <span className="whitespace-pre-wrap break-words">{msg.content}</span>
+                      <MarkdownMessage content={msg.content} />
                     ) : (
                       msg.isStreaming && (
                         <span className="inline-flex items-center gap-1 py-0.5">
@@ -675,7 +676,7 @@ export default function ParentConsultantChat({
                     )}
                     {!msg.isStreaming && !msg.isDrawing && msg.content && (
                       <div className="mt-1.5 -mb-1 -ml-1 flex items-center gap-1">
-                        <SpeakButton text={msg.content} tone="dark" />
+                        <SpeakButton text={plainTextFromMarkdown(msg.content)} tone="dark" />
                         {msg.dbId != null && (
                           <>
                             <button
