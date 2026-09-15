@@ -10,5 +10,8 @@ export default defineConfig({
   dialect: "postgresql",
   dbCredentials: {
     url: process.env.DATABASE_URL,
+    // Render Postgres requires SSL on external connections; without this
+    // drizzle-kit dies at "Pulling schema from database..." with no message.
+    ssl: { rejectUnauthorized: false },
   },
 });
