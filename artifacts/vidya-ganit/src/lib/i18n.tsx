@@ -24,6 +24,7 @@ import ne from "./locales/ne";
 import sa from "./locales/sa";
 import sat from "./locales/sat";
 import sd from "./locales/sd";
+import { conceptTranslations } from "./conceptTranslations";
 
 export type Language =
   | "en"
@@ -3573,6 +3574,15 @@ export const DICTS: Record<Language, Dict> = {
   sat,
   sd,
 };
+
+// Fill missing concept labels with English rather than exposing internal keys.
+for (const code of Object.keys(DICTS) as Language[]) {
+  Object.assign(
+    DICTS[code],
+    conceptTranslations.en,
+    conceptTranslations[code] ?? {},
+  );
+}
 
 type LanguageContextValue = {
   lang: Language;

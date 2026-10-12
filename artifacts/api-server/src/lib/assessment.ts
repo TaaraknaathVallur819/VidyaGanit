@@ -100,7 +100,11 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 /** Build a 4-option MCQ from a correct numeric answer plus near distractors. */
-function numberQuestion(prompt: string, correct: number, spread: number): AssessmentQuestion {
+function numberQuestion(
+  prompt: string,
+  correct: number,
+  spread: number,
+): AssessmentQuestion {
   const set = new Set<number>([correct]);
   let guard = 0;
   while (set.size < 4 && guard < 80) {
@@ -119,7 +123,11 @@ function numberQuestion(prompt: string, correct: number, spread: number): Assess
 }
 
 /** Build a 4-option MCQ from a correct string answer plus given distractors. */
-function stringQuestion(prompt: string, correct: string, distractors: string[]): AssessmentQuestion {
+function stringQuestion(
+  prompt: string,
+  correct: string,
+  distractors: string[],
+): AssessmentQuestion {
   const picks: string[] = [];
   for (const d of distractors) {
     if (d !== correct && !picks.includes(d)) picks.push(d);
@@ -217,11 +225,14 @@ function fractionGen(klass: number): AssessmentQuestion {
   const den = randInt(2, 6);
   const num = randInt(1, den - 1);
   const k = randInt(2, klass >= 6 ? 5 : 3);
-  const correct = `${num}/${den}`;
+  const divisor = gcd(num, den);
+  const reducedNum = num / divisor;
+  const reducedDen = den / divisor;
+  const correct = `${reducedNum}/${reducedDen}`;
   return stringQuestion(
     `Simplify the fraction ${num * k}/${den * k} to its lowest terms.`,
     correct,
-    fractionDistractors(num, den),
+    fractionDistractors(reducedNum, reducedDen),
   );
 }
 
@@ -233,8 +244,17 @@ function ratioGen(klass: number): AssessmentQuestion {
   y = y / g;
   const k = randInt(2, klass >= 6 ? 6 : 4);
   const correct = `${x}:${y}`;
-  const distractors = [`${x * k}:${y}`, `${x}:${y * k}`, `${y}:${x}`, `${x + 1}:${y + 1}`];
-  return stringQuestion(`Simplify the ratio ${x * k} : ${y * k}.`, correct, distractors);
+  const distractors = [
+    `${x * k}:${y}`,
+    `${x}:${y * k}`,
+    `${y}:${x}`,
+    `${x + 1}:${y + 1}`,
+  ];
+  return stringQuestion(
+    `Simplify the ratio ${x * k} : ${y * k}.`,
+    correct,
+    distractors,
+  );
 }
 
 function algebraGen(klass: number): AssessmentQuestion {
@@ -310,7 +330,10 @@ const MOCK_TOPICS_JUNIOR: Topic[] = [
  * carries its source `topic` so results can be broken down per topic. Returns
  * `count` distinct (by prompt) questions.
  */
-export function generateMockExam(klass: string | null, count: number): MockQuestion[] {
+export function generateMockExam(
+  klass: string | null,
+  count: number,
+): MockQuestion[] {
   const level = classLevel(klass);
   const pool = level >= 6 ? MOCK_TOPICS : MOCK_TOPICS_JUNIOR;
   const out: MockQuestion[] = [];
@@ -334,17 +357,23 @@ export function generateMockExam(klass: string | null, count: number): MockQuest
  * Generate a fresh worksheet for the topic, scaled to the student's class.
  * Always returns `QUESTIONS_PER_TEST` distinct (by prompt) questions.
  */
-export function generateAssessment(topic: string, klass: string | null): AssessmentQuestion[] {
+export function generateAssessment(
+  topic: string,
+  klass: string | null,
+): AssessmentQuestion[] {
   const level = classLevel(klass);
   const baseGen = (GENERATORS as Record<string, Gen>)[topic] ?? addSubGen;
-  const isMixed = topic === "general" || topic === "greeting" || topic === "giveup";
+  const isMixed =
+    topic === "general" || topic === "greeting" || topic === "giveup";
 
   const questions: AssessmentQuestion[] = [];
   const seen = new Set<string>();
   let guard = 0;
   while (questions.length < QUESTIONS_PER_TEST && guard < 200) {
     guard++;
-    const gen = isMixed ? MIXED_POOL[questions.length % MIXED_POOL.length] : baseGen;
+    const gen = isMixed
+      ? MIXED_POOL[questions.length % MIXED_POOL.length]
+      : baseGen;
     const q = gen(level);
     if (seen.has(q.prompt)) continue;
     seen.add(q.prompt);

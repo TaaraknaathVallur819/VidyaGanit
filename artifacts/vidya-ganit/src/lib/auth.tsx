@@ -6,13 +6,13 @@ const STORAGE_KEY = "vidyaganit_user";
 interface AuthContextValue {
   user: UserProfile | null;
   setUser: (user: UserProfile | null) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
   setUser: () => {},
-  logout: () => {},
+  logout: async () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -34,7 +34,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const logout = () => setUser(null);
+  const logout = async () => {
+    const response = await fetch("/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error("Logout failed");
+    setUser(null);
+  };
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);

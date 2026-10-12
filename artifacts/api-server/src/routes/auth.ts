@@ -10,16 +10,32 @@ import {
   ResetPasswordBody,
   LoginUserResponse,
 } from "@workspace/api-zod";
-import { signSession, SESSION_COOKIE, SESSION_MAX_AGE_MS } from "../lib/session";
+import {
+  signSession,
+  SESSION_COOKIE,
+  SESSION_MAX_AGE_MS,
+} from "../lib/session";
 import { sendPasswordResetEmail } from "../lib/email";
 
 const router: IRouter = Router();
+
+// Match the login cookie's scope and attributes so the browser removes it.
+router.post("/auth/logout", (_req, res): void => {
+  res.clearCookie(SESSION_COOKIE, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  });
+  res.status(204).end();
+});
 
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 function generateVidyaId(role: "student" | "parent" | "tutor"): string {
   const digits = Math.floor(10000 + Math.random() * 90000).toString();
-  const prefix = role === "student" ? "VG-STU-" : role === "parent" ? "VG-PAR-" : "VG-TUT-";
+  const prefix =
+    role === "student" ? "VG-STU-" : role === "parent" ? "VG-PAR-" : "VG-TUT-";
   return `${prefix}${digits}`;
 }
 
@@ -73,8 +89,20 @@ router.post("/auth/register", async (req, res): Promise<void> => {
     return;
   }
 
-  const { name, password, role, gender, studentClass, board, parentType, contact, batch, batches, academyName, branch } =
-    parsed.data;
+  const {
+    name,
+    password,
+    role,
+    gender,
+    studentClass,
+    board,
+    parentType,
+    contact,
+    batch,
+    batches,
+    academyName,
+    branch,
+  } = parsed.data;
 
   // Tutors can teach several batches. Normalise the list (trim, drop blanks,
   // de-dupe) and keep the legacy single `batch` column in sync with the first.
@@ -91,7 +119,9 @@ router.post("/auth/register", async (req, res): Promise<void> => {
     .where(eq(usersTable.name, name));
 
   if (existing) {
-    res.status(409).json({ error: "Username is taken already, please try a different one" });
+    res
+      .status(409)
+      .json({ error: "Username is taken already, please try a different one" });
     return;
   }
 
@@ -113,7 +143,7 @@ router.post("/auth/register", async (req, res): Promise<void> => {
       batch: legacyBatch,
       batches: batchesValue,
       academyName: academyName ?? null,
-      branch: role === "tutor" ? branch ?? null : null,
+      branch: role === "tutor" ? (branch ?? null) : null,
     })
     .returning();
 
@@ -138,13 +168,23 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     .where(eq(usersTable.vidyaId, vidyaId));
 
   if (!user) {
-    res.status(401).json({ error: "Oops! That ID or password doesn't match our records. Please check and try again." });
+    res
+      .status(401)
+      .json({
+        error:
+          "Oops! That ID or password doesn't match our records. Please check and try again.",
+      });
     return;
   }
 
   const passwordMatch = await bcrypt.compare(password, user.passwordHash);
   if (!passwordMatch) {
-    res.status(401).json({ error: "Oops! That ID or password doesn't match our records. Please check and try again." });
+    res
+      .status(401)
+      .json({
+        error:
+          "Oops! That ID or password doesn't match our records. Please check and try again.",
+      });
     return;
   }
 
@@ -206,7 +246,11 @@ router.post("/auth/forgot-password", async (req, res): Promise<void> => {
   const link = `${publicOrigin(req)}/forgot-password?token=${token}`;
 
   try {
-    await sendPasswordResetEmail({ to: user.contact.trim(), link, log: req.log });
+    await sendPasswordResetEmail({
+      to: user.contact.trim(),
+      link,
+      log: req.log,
+    });
   } catch (err) {
     req.log.error({ err, vidyaId }, "failed to send password reset email");
   }
@@ -236,7 +280,8 @@ router.post("/auth/reset-password", async (req, res): Promise<void> => {
 
   if (!user) {
     res.status(400).json({
-      error: "This reset link is invalid or has expired. Please request a new one.",
+      error:
+        "This reset link is invalid or has expired. Please request a new one.",
     });
     return;
   }
@@ -250,7 +295,10 @@ router.post("/auth/reset-password", async (req, res): Promise<void> => {
 
   req.log.info({ vidyaId: user.vidyaId }, "Password reset via token");
 
-  res.json({ message: "Your password has been reset! You can now log in with your new password." });
+  res.json({
+    message:
+      "Your password has been reset! You can now log in with your new password.",
+  });
 });
 
 export default router;
