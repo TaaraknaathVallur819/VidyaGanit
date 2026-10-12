@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { UserCircle, Users, GraduationCap, Plus, X } from "lucide-react";
@@ -272,6 +273,9 @@ export default function Auth() {
                     <Input
                       id="login-id"
                       data-testid="input-login-id"
+                      autoComplete="username"
+                      autoCapitalize="none"
+                      spellCheck={false}
                       value={loginId}
                       onChange={(e) => setLoginId(e.target.value)}
                       placeholder={LOGIN_ID_PLACEHOLDER[loginRole]}
@@ -281,10 +285,12 @@ export default function Auth() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="login-password" className="text-foreground font-medium">{t("auth.password")}</Label>
-                    <Input
+                    <PasswordInput
                       id="login-password"
                       data-testid="input-login-password"
-                      type="password"
+                      autoComplete="current-password"
+                      showLabel={t("auth.showPassword")}
+                      hideLabel={t("auth.hidePassword")}
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
                       placeholder="Enter your password"
@@ -578,10 +584,12 @@ export default function Auth() {
                 {/* Password */}
                 <div className="space-y-2">
                   <Label htmlFor="reg-password" className="text-foreground font-medium">{t("auth.createPassword")}</Label>
-                  <Input
+                  <PasswordInput
                     id="reg-password"
                     data-testid="input-register-password"
-                    type="password"
+                    autoComplete="new-password"
+                    showLabel={t("auth.showPassword")}
+                    hideLabel={t("auth.hidePassword")}
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
                     placeholder={t("auth.passwordHint")}

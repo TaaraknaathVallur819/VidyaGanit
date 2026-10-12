@@ -3582,8 +3582,18 @@ const firstVisitWait: Partial<Record<Language, string>> = {
   ta: "தயாராகிறது. முதல் வருகையில் சிறிது கூடுதல் நேரம் ஆகலாம். இந்தப் பக்கத்தைத் திறந்தே வைத்திருக்கவும்.",
 };
 
+const passwordVisibility: Partial<Record<Language, [string, string]>> = {
+  en: ["Show password", "Hide password"],
+  hi: ["पासवर्ड दिखाएँ", "पासवर्ड छिपाएँ"],
+  te: ["పాస్‌వర్డ్ చూపించు", "పాస్‌వర్డ్ దాచు"],
+  ta: ["கடவுச்சொல்லைக் காட்டு", "கடவுச்சொல்லை மறை"],
+};
+
 // Fill missing labels with English rather than exposing internal keys.
 for (const code of Object.keys(DICTS) as Language[]) {
+  const [show, hide] = passwordVisibility[code] ?? passwordVisibility.en!;
+  DICTS[code]["auth.showPassword"] = show;
+  DICTS[code]["auth.hidePassword"] = hide;
   DICTS[code]["auth.firstVisitWait"] = firstVisitWait[code] ?? en["auth.firstVisitWait"];
   Object.assign(
     DICTS[code],
