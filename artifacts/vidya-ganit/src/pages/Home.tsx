@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useLanguage } from "@/lib/i18n";
 import { Sparkles, Rocket, Trophy, Target, Star, Smile, Lightbulb, Hexagon } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
+import { prepareApi } from "@/lib/prepareApi";
 
 // Floating decorative maths symbols
 const FloatingSymbol = ({ 
@@ -118,6 +119,9 @@ const TwinkleStar = ({
 };
 
 export default function Home() {
+  useEffect(() => {
+    void prepareApi();
+  }, []);
   const { t } = useLanguage();
   const containerRef = useRef<HTMLDivElement>(null);
   

@@ -588,6 +588,7 @@ const en: Dict = {
   "auth.passwordTooWeak":
     "Password too weak! Use at least 8 characters with a mix of letters and numbers (e.g. Rohan2025).",
   "auth.creatingAccount": "Creating account...",
+  "auth.firstVisitWait": "Getting things ready. This first visit may take a little longer. Please keep this page open.",
   "auth.loginFailed":
     "Oops! That ID or password doesn't match our records. Please check and try again.",
   "auth.genericError": "Something went wrong. Please try again.",
@@ -3575,8 +3576,15 @@ export const DICTS: Record<Language, Dict> = {
   sd,
 };
 
-// Fill missing concept labels with English rather than exposing internal keys.
+const firstVisitWait: Partial<Record<Language, string>> = {
+  hi: "तैयारी हो रही है। पहली बार थोड़ा अधिक समय लग सकता है। कृपया यह पृष्ठ खुला रखें।",
+  te: "సిద్ధం చేస్తున్నాము. మొదటి సందర్శనలో కొంచెం ఎక్కువ సమయం పట్టవచ్చు. దయచేసి ఈ పేజీని తెరిచి ఉంచండి.",
+  ta: "தயாராகிறது. முதல் வருகையில் சிறிது கூடுதல் நேரம் ஆகலாம். இந்தப் பக்கத்தைத் திறந்தே வைத்திருக்கவும்.",
+};
+
+// Fill missing labels with English rather than exposing internal keys.
 for (const code of Object.keys(DICTS) as Language[]) {
+  DICTS[code]["auth.firstVisitWait"] = firstVisitWait[code] ?? en["auth.firstVisitWait"];
   Object.assign(
     DICTS[code],
     conceptTranslations.en,

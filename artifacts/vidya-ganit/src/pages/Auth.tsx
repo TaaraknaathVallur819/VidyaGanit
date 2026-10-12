@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { boardsByCategory } from "@workspace/india-boards";
+import { prepareApi } from "@/lib/prepareApi";
 
 const BOARD_GROUPS = boardsByCategory();
 
@@ -95,6 +96,18 @@ export default function Auth() {
 
   const registerMutation = useRegisterUser();
   const loginMutation = useLoginUser();
+  const [longWait, setLongWait] = useState(false);
+  const submitting = registerMutation.isPending || loginMutation.isPending;
+
+  useEffect(() => {
+    void prepareApi();
+  }, []);
+  useEffect(() => {
+    setLongWait(false);
+    if (!submitting) return;
+    const timer = window.setTimeout(() => setLongWait(true), 8_000);
+    return () => window.clearTimeout(timer);
+  }, [submitting]);
 
   useEffect(() => {
     setLoginError("");
@@ -223,6 +236,11 @@ export default function Auth() {
         </div>
 
         <CardContent className="p-8">
+          {longWait && (
+            <p role="status" className="mb-4 text-sm text-muted-foreground">
+              {t("auth.firstVisitWait")}
+            </p>
+          )}
           <AnimatePresence mode="wait">
             {mode === "login" ? (
               <motion.form
