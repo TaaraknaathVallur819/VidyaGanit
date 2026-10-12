@@ -15,41 +15,8 @@ export async function generateImageDataUrl(
     contents: prompt,
     config: {
       responseMimeType: "application/json",
-      responseJsonSchema: {
-        type: "object",
-        required: ["title", "shapes"],
-        properties: {
-          title: { type: "string" },
-          shapes: {
-            type: "array",
-            minItems: 1,
-            maxItems: 80,
-            items: {
-              type: "object",
-              required: ["kind", "x", "y"],
-              properties: {
-                kind: {
-                  type: "string",
-                  enum: ["rect", "circle", "line", "sector", "text"],
-                },
-                x: { type: "number" },
-                y: { type: "number" },
-                x2: { type: "number" },
-                y2: { type: "number" },
-                width: { type: "number" },
-                height: { type: "number" },
-                radius: { type: "number" },
-                startAngle: { type: "number" },
-                endAngle: { type: "number" },
-                text: { type: "string" },
-                fontSize: { type: "number" },
-                fill: { type: "string" },
-                stroke: { type: "string" },
-              },
-            },
-          },
-        },
-      },
+      // This deployed model supports JSON mode but rejects the JSON Schema
+      // parameter. Validate every primitive locally before rendering instead.
       temperature: 0.1,
       maxOutputTokens: 8192,
       systemInstruction: [
