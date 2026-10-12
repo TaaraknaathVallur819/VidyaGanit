@@ -67,8 +67,13 @@ export function renderMathsDiagram(value: unknown): string {
           return `<circle cx="${x}" cy="${y}" r="${radius}" ${style}/>`;
         const start = number("startAngle", 360),
           end = number("endAngle", 720);
-        const angle = end - start;
-        if (angle <= 0 || angle > 360) throw new Error("Invalid sector");
+        // A clockwise slice can wrap through zero (e.g. 180 to 0).
+        const difference = end - start;
+        const angle = difference < 0 ? difference + 360 : difference;
+        if (angle <= 0 || angle > 360)
+          throw new Error(
+            `Invalid sector: startAngle=${start}, endAngle=${end}. Use increasing angles, e.g. 180 to 360 for the second half.`,
+          );
         if (angle === 360)
           return `<circle cx="${x}" cy="${y}" r="${radius}" ${style}/>`;
         const point = (a: number) =>

@@ -10,7 +10,7 @@ export async function generateImageDataUrl(
   _model: ImageModel,
   prompt: string,
 ): Promise<string> {
-  const response = await gemini.models.generateContent({
+  const request = {
     model: "gemini-flash-lite-latest",
     contents: prompt,
     config: {
@@ -31,7 +31,26 @@ export async function generateImageDataUrl(
         "Do not return SVG, HTML, links, scripts, or any fields outside this format.",
       ].join("\n"),
     },
-  });
-  const svg = renderMathsDiagram(JSON.parse(response.text ?? ""));
+  };
+  let svg: string | undefined;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const response = await gemini.models.generateContent(request);
+    try {
+      svg = renderMathsDiagram(JSON.parse(response.text ?? ""));
+      break;
+    } catch (error) {
+      if (attempt === 1) throw error;
+      // Ask for one repair of invalid geometry rather than showing a broken
+      // image or weakening the renderer's safety checks.
+      request.contents = [
+        prompt,
+        "Correct your previous diagram JSON:",
+        response.text?.slice(0, 24000) ?? "",
+        `Validation error: ${error instanceof Error ? error.message : "Invalid diagram"}`,
+        "Return corrected JSON only. Every sector must have positive extent; use 0 to 180 and 180 to 360 for two halves.",
+      ].join("\n");
+    }
+  }
+  if (!svg) throw new Error("No valid diagram");
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 }

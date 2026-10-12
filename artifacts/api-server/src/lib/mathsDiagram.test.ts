@@ -56,4 +56,33 @@ describe("safe maths diagrams", () => {
       }),
     ).toThrow();
   });
+  it("supports clockwise sectors that wrap through zero", () => {
+    const svg = renderMathsDiagram({
+      shapes: [
+        {
+          kind: "sector",
+          x: 320,
+          y: 200,
+          radius: 100,
+          startAngle: 180,
+          endAngle: 0,
+        },
+      ],
+    });
+    expect(svg).toContain("<path");
+    expect(() =>
+      renderMathsDiagram({
+        shapes: [
+          {
+            kind: "sector",
+            x: 320,
+            y: 200,
+            radius: 100,
+            startAngle: 180,
+            endAngle: 180,
+          },
+        ],
+      }),
+    ).toThrow("Invalid sector");
+  });
 });
