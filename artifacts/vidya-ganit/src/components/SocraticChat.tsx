@@ -315,6 +315,8 @@ export default function SocraticChat({
             content: m.content,
             dbId: m.id,
             feedback: m.feedback ?? null,
+            imageUrl: m.imageUrl ?? undefined,
+            imageAlt: m.imageAlt ?? undefined,
           })),
         );
         setHistory(

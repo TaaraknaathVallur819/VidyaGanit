@@ -11,7 +11,7 @@ if (!process.env.DATABASE_URL) {
 const databaseUrl = process.env.DATABASE_URL + (process.env.DATABASE_URL.includes("?") ? "&" : "?") + "sslmode=no-verify";
 
 export default defineConfig({
-  schema: path.join(__dirname, "./src/schema/index.ts"),
+  schema: path.join(__dirname, "./src/schema/index.ts").replaceAll("\\", "/"),
   dialect: "postgresql",
   dbCredentials: {
     url: databaseUrl,

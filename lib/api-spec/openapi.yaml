@@ -2935,6 +2935,10 @@ components:
       type: object
       required: [id, role, content, createdAt]
       properties:
+        imageUrl:
+          type: ["string", "null"]
+        imageAlt:
+          type: ["string", "null"]
         id:
           type: integer
         role:

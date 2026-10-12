@@ -16,6 +16,12 @@ import {
   SESSION_MAX_AGE_MS,
 } from "../lib/session";
 import { sendPasswordResetEmail } from "../lib/email";
+import {
+  createWithAvailableVidyaId,
+  isUsernameConflict,
+  USERNAME_TAKEN,
+  VidyaIdUnavailable,
+} from "../lib/registration";
 
 const router: IRouter = Router();
 
@@ -31,13 +37,6 @@ router.post("/auth/logout", (_req, res): void => {
 });
 
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
-
-function generateVidyaId(role: "student" | "parent" | "tutor"): string {
-  const digits = Math.floor(10000 + Math.random() * 90000).toString();
-  const prefix =
-    role === "student" ? "VG-STU-" : role === "parent" ? "VG-PAR-" : "VG-TUT-";
-  return `${prefix}${digits}`;
-}
 
 function hashResetToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
@@ -119,35 +118,52 @@ router.post("/auth/register", async (req, res): Promise<void> => {
     .where(eq(usersTable.name, name));
 
   if (existing) {
-    res
-      .status(409)
-      .json({ error: "Username is taken already, please try a different one" });
+    res.status(409).json({ error: USERNAME_TAKEN });
     return;
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const vidyaId = generateVidyaId(role);
+  let user: typeof usersTable.$inferSelect;
+  try {
+    user = await createWithAvailableVidyaId(role, async (vidyaId) => {
+      const [created] = await db
+        .insert(usersTable)
+        .values({
+          vidyaId,
+          name,
+          passwordHash,
+          role,
+          gender,
+          studentClass: studentClass ?? null,
+          board: board ?? null,
+          parentType: parentType ?? null,
+          contact: contact ?? null,
+          batch: legacyBatch,
+          batches: batchesValue,
+          academyName: academyName ?? null,
+          branch: role === "tutor" ? (branch ?? null) : null,
+        })
+        .onConflictDoNothing({ target: usersTable.vidyaId })
+        .returning();
+      return created;
+    });
+  } catch (error) {
+    if (isUsernameConflict(error)) {
+      res.status(409).json({ error: USERNAME_TAKEN });
+      return;
+    }
+    if (error instanceof VidyaIdUnavailable) {
+      res
+        .status(503)
+        .json({
+          error: "Unable to create an account right now. Please try again.",
+        });
+      return;
+    }
+    throw error;
+  }
 
-  const [user] = await db
-    .insert(usersTable)
-    .values({
-      vidyaId,
-      name,
-      passwordHash,
-      role,
-      gender,
-      studentClass: studentClass ?? null,
-      board: board ?? null,
-      parentType: parentType ?? null,
-      contact: contact ?? null,
-      batch: legacyBatch,
-      batches: batchesValue,
-      academyName: academyName ?? null,
-      branch: role === "tutor" ? (branch ?? null) : null,
-    })
-    .returning();
-
-  req.log.info({ vidyaId, role }, "New account registered");
+  req.log.info({ vidyaId: user.vidyaId, role }, "New account registered");
 
   setSessionCookie(res, user.vidyaId);
   res.status(201).json(profileResponse(user));
@@ -168,23 +184,19 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     .where(eq(usersTable.vidyaId, vidyaId));
 
   if (!user) {
-    res
-      .status(401)
-      .json({
-        error:
-          "Oops! That ID or password doesn't match our records. Please check and try again.",
-      });
+    res.status(401).json({
+      error:
+        "Oops! That ID or password doesn't match our records. Please check and try again.",
+    });
     return;
   }
 
   const passwordMatch = await bcrypt.compare(password, user.passwordHash);
   if (!passwordMatch) {
-    res
-      .status(401)
-      .json({
-        error:
-          "Oops! That ID or password doesn't match our records. Please check and try again.",
-      });
+    res.status(401).json({
+      error:
+        "Oops! That ID or password doesn't match our records. Please check and try again.",
+    });
     return;
   }
 

@@ -671,6 +671,10 @@ export const ChatSessionMessageFeedback = {
 } as const;
 
 export interface ChatSessionMessage {
+  /** @nullable */
+  imageUrl?: string | null;
+  /** @nullable */
+  imageAlt?: string | null;
   id: number;
   role: ChatSessionMessageRole;
   content: string;
