@@ -34,6 +34,7 @@ import Messages from "@/components/Messages";
 import WorksheetGenerator from "@/components/WorksheetGenerator";
 import TutorFees from "@/components/tutor/TutorFees";
 import AttendanceTracker from "@/components/AttendanceTracker";
+import SubscriptionPlanCard from "@/components/SubscriptionPlanCard";
 import ReportCard from "@/components/ReportCard";
 import MeetingScheduler from "@/components/MeetingScheduler";
 import {
@@ -517,6 +518,9 @@ export default function TutorDashboard() {
                   </div>
                 </CardContent>
               </Card>
+
+            {/* Membership Upgrade */}
+            <SubscriptionPlanCard vidyaId={vidyaId} role="tutor" userName={user?.name} />
             </motion.div>
 
             {/* Voice Settings */}
