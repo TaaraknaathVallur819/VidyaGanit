@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import paymentWebhookRouter from "./routes/paymentWebhook";
 
 const app: Express = express();
 
@@ -29,6 +30,14 @@ app.use(
 app.use(cors());
 app.use(cookieParser());
 
+// Razorpay signs the exact raw bytes. Mount this before express.json() so the
+// body cannot be transformed before HMAC verification.
+app.use(
+  "/api/payments/webhook",
+  express.raw({ type: "application/json", limit: "256kb" }),
+  paymentWebhookRouter,
+);
+
 // The chat endpoint accepts file attachments as base64 data URLs (up to ~8MB,
 // i.e. ~11.5MB encoded), so it needs a larger JSON body limit. Every other
 // route keeps the small default limit to limit abuse. The route handler still
@@ -44,5 +53,11 @@ app.use((req, res, next) => {
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
+
+  app.use((err: unknown, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+      req.log?.error({ err }, "Unhandled error");
+      if (res.headersSent) return;
+      res.status(500).json({ error: "Something went wrong. Please try again." });
+  });
 
 export default app;

@@ -20,6 +20,7 @@ import attendanceRouter from "./attendance";
 import mockExamRouter from "./mockExam";
 import duelsRouter from "./duels";
 import meetingsRouter from "./meetings";
+import paymentsRouter from "./payments";
 
 const router: IRouter = Router();
 
@@ -44,5 +45,6 @@ router.use(attendanceRouter);
 router.use(mockExamRouter);
 router.use(duelsRouter);
 router.use(meetingsRouter);
+router.use(paymentsRouter);
 
 export default router;

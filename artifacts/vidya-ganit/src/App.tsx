@@ -14,6 +14,7 @@ import StudentDashboard from "@/pages/StudentDashboard";
 import ParentDashboard from "@/pages/ParentDashboard";
 import TutorDashboard from "@/pages/TutorDashboard";
 import Header from "@/components/layout/Header";
+import RazorpayCheckoutModal from "@/components/RazorpayCheckoutModal";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ function App() {
           </ThemeProvider>
         </WouterRouter>
         <Toaster />
+        <RazorpayCheckoutModal />
       </TooltipProvider>
     </QueryClientProvider>
   );

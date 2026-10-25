@@ -34,6 +34,9 @@ import ParentWeeklyGoal from "@/components/ParentWeeklyGoal";
 import ReportCard from "@/components/ReportCard";
 import AttendanceView from "@/components/AttendanceView";
 import MeetingScheduler from "@/components/MeetingScheduler";
+import ParentFees from "@/components/parent/ParentFees";
+import SubscriptionPlanCard from "@/components/SubscriptionPlanCard";
+import { Wallet } from "lucide-react";
 import {
   useGetProfile,
   getGetProfileQueryKey,
@@ -337,6 +340,10 @@ export default function ParentDashboard() {
                 <CalendarClock className="w-4 h-4" />
                 {t("tab.meetings")}
               </TabsTrigger>
+              <TabsTrigger value="fees" className={tabTriggerClass} data-testid="tab-parent-fees">
+                <Wallet className="w-4 h-4" />
+                Tuition Fees
+              </TabsTrigger>
             </TabsList>
           </div>
         </div>
@@ -426,6 +433,9 @@ export default function ParentDashboard() {
                   </div>
                 </CardContent>
               </Card>
+
+            {/* Membership Upgrade */}
+            <SubscriptionPlanCard vidyaId={vidyaId} role="parent" userName={displayed.name} />
             </motion.div>
 
             {/* Connected Students */}
@@ -665,6 +675,13 @@ export default function ParentDashboard() {
         <TabsContent value="meetings" className="mt-0 p-6">
           <div className="max-w-3xl mx-auto">
             <MeetingScheduler vidyaId={vidyaId} role="parent" />
+          </div>
+        </TabsContent>
+
+        {/* ── Tuition Fees Tab ── */}
+        <TabsContent value="fees" className="mt-0 p-6">
+          <div className="max-w-3xl mx-auto">
+            <ParentFees vidyaId={vidyaId} parentName={displayed.name} />
           </div>
         </TabsContent>
       </Tabs>

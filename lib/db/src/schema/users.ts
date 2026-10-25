@@ -6,7 +6,7 @@ import { z } from "zod/v4";
 export const usersTable = pgTable("users", {
   id: serial("id").primaryKey(),
   vidyaId: text("vidya_id").notNull().unique(),
-  name: text("name").notNull(),
+  name: text("name").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   role: text("role").notNull(),
   gender: text("gender").notNull(),
@@ -49,6 +49,9 @@ export const usersTable = pgTable("users", {
   dailyGoal: integer("daily_goal").notNull().default(3),
   resetTokenHash: text("reset_token_hash"),
   resetTokenExpiresAt: timestamp("reset_token_expires_at", { withTimezone: true }),
+  // Razorpay Route linked-account id (acc_...). Only tutors use this. It is
+  // deliberately not a secret and is never accepted from a payment request.
+  razorpayRouteAccountId: text("razorpay_route_account_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

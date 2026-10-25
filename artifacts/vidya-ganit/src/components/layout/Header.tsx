@@ -59,11 +59,26 @@ export default function Header() {
 
   return (
     <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-border z-50 flex items-center px-6 justify-between shadow-sm">
-      <div className="flex items-center gap-2">
-        <Link href="/" className="flex items-center gap-2 text-primary font-bold text-2xl tracking-tight transition-transform hover:scale-[1.02]">
-          <span className="bg-primary text-white rounded-md w-8 h-8 flex items-center justify-center font-serif text-xl">V</span>
+      <div className="flex items-center gap-4">
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-primary font-bold text-2xl tracking-tight transition-transform hover:scale-[1.02]"
+        >
+          <span className="bg-primary text-white rounded-md w-8 h-8 flex items-center justify-center font-serif text-xl">
+            V
+          </span>
           VidyaGanit
         </Link>
+        <a
+          href="/#pricing"
+          className="hidden sm:inline-flex items-center gap-1.5 text-xs md:text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors px-3 py-1.5 rounded-full hover:bg-indigo-50 border border-slate-200/80"
+          data-testid="nav-pricing-link"
+        >
+          <span>Plans & Pricing</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full">
+            INR ₹
+          </span>
+        </a>
       </div>
 
       <div className="flex items-center gap-4">
