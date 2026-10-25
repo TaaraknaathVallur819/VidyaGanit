@@ -17,7 +17,7 @@ export const SHOP_CATALOG: ShopCatalogItem[] = [
   { id: "avatar_fox", kind: "avatar", name: "Clever Fox", emoji: "🦊", price: 50 },
   { id: "avatar_owl", kind: "avatar", name: "Wise Owl", emoji: "🦉", price: 50 },
   { id: "avatar_tiger", kind: "avatar", name: "Brave Tiger", emoji: "🐯", price: 80 },
-  { id: "avatar_robot", kind: "avatar", name: "Math Bot", emoji: "🤖", price: 120 },
+  { id: "avatar_robot", kind: "avatar", name: "Maths Bot", emoji: "🤖", price: 120 },
   { id: "avatar_unicorn", kind: "avatar", name: "Number Unicorn", emoji: "🦄", price: 200 },
   { id: "avatar_dragon", kind: "avatar", name: "Algebra Dragon", emoji: "🐲", price: 300 },
   { id: "theme_ocean", kind: "theme", name: "Ocean Blue", emoji: "🌊", price: 60 },

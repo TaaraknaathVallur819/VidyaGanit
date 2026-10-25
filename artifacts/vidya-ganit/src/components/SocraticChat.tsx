@@ -24,6 +24,9 @@ import {
   getChatSession,
   setChatMessageFeedback,
 } from "@workspace/api-client-react";
+import MarkdownMessage, {
+  plainTextFromMarkdown,
+} from "@/components/MarkdownMessage";
 import { BADGE_CATALOG } from "@/lib/badges";
 import { gameForTopicOrDefault } from "@/lib/syllabus";
 import { type GameId } from "@/lib/games";
@@ -32,7 +35,9 @@ import { useLiveSpeech } from "@/hooks/useLiveSpeech";
 import MiniGames from "@/components/MiniGames";
 import AssessmentTest from "@/components/AssessmentTest";
 import AiModelSelect, { type ChatModelKey } from "@/components/AiModelSelect";
-import ImageModelSelect, { type ImageModel } from "@/components/ImageModelSelect";
+import ImageModelSelect, {
+  type ImageModel,
+} from "@/components/ImageModelSelect";
 import SpeakButton from "@/components/SpeakButton";
 
 const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 MB
@@ -152,7 +157,7 @@ function TutorBubble({
       </div>
       <div className="bg-gradient-to-br from-indigo-600 to-violet-600 text-white rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed shadow-md max-w-full">
         {content ? (
-          <span className="whitespace-pre-wrap break-words">{content}</span>
+          <MarkdownMessage content={content} />
         ) : (
           isStreaming && !isDrawing && <TypingDots />
         )}
@@ -174,7 +179,7 @@ function TutorBubble({
         )}
         {!isStreaming && !isDrawing && content && (
           <div className="mt-1.5 -mb-1 -ml-1">
-            <SpeakButton text={content} tone="light" />
+            <SpeakButton text={plainTextFromMarkdown(content)} tone="light" />
           </div>
         )}
       </div>
@@ -255,8 +260,11 @@ export default function SocraticChat({
   const [badgeToasts, setBadgeToasts] = useState<BadgeToast[]>([]);
   const [attachment, setAttachment] = useState<Attachment | null>(null);
   const [attachError, setAttachError] = useState<string | null>(null);
-  const [chatModel, setChatModel] = useState<ChatModelKey>("gemini-flash-lite-latest");
-  const [imageModel, setImageModel] = useState<ImageModel>("gemini-nano-banana");
+  const [chatModel, setChatModel] = useState<ChatModelKey>(
+    "gemini-flash-lite-latest",
+  );
+  const [imageModel, setImageModel] =
+    useState<ImageModel>("gemini-nano-banana");
   const [gameOffered, setGameOffered] = useState(false);
   const [gameTopic, setGameTopic] = useState<string | null>(null);
   const [gamesOpen, setGamesOpen] = useState(false);
@@ -307,6 +315,8 @@ export default function SocraticChat({
             content: m.content,
             dbId: m.id,
             feedback: m.feedback ?? null,
+            imageUrl: m.imageUrl ?? undefined,
+            imageAlt: m.imageAlt ?? undefined,
           })),
         );
         setHistory(
@@ -375,7 +385,10 @@ export default function SocraticChat({
   const showXpToast = (amount: number) => {
     const id = `xp-${Date.now()}`;
     setXpToasts((prev) => [...prev, { id, amount }]);
-    setTimeout(() => setXpToasts((prev) => prev.filter((t) => t.id !== id)), 2200);
+    setTimeout(
+      () => setXpToasts((prev) => prev.filter((t) => t.id !== id)),
+      2200,
+    );
   };
 
   const showBadgeToast = (emoji: string, name: string) => {
@@ -387,7 +400,11 @@ export default function SocraticChat({
     );
   };
 
-  const { isListening, start: startListening, stop: stopListening } = useLiveSpeech({
+  const {
+    isListening,
+    start: startListening,
+    stop: stopListening,
+  } = useLiveSpeech({
     lang,
     onResult: (transcript) => {
       setInput(inputBeforeVoiceRef.current + transcript);
@@ -450,7 +467,11 @@ export default function SocraticChat({
         setMessages((prev) => [
           ...prev,
           { id: `u-${Date.now()}`, role: "user", content: msg },
-          { id: `t-${Date.now()}`, role: "tutor", content: t(validationErrorKey) },
+          {
+            id: `t-${Date.now()}`,
+            role: "tutor",
+            content: t(validationErrorKey),
+          },
         ]);
         return;
       }
@@ -588,7 +609,14 @@ export default function SocraticChat({
             if (data.imageError) {
               setMessages((prev) =>
                 prev.map((m) =>
-                  m.id === tutorMsgId ? { ...m, isDrawing: false } : m,
+                  m.id === tutorMsgId
+                    ? {
+                        ...m,
+                        isDrawing: false,
+                        content:
+                          m.content + "\n\n" + t("chat.diagramUnavailable"),
+                      }
+                    : m,
                 ),
               );
             }
@@ -687,7 +715,9 @@ export default function SocraticChat({
           🚀
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-bold text-sm text-foreground">{t("chat.tutorName")}</p>
+          <p className="font-bold text-sm text-foreground">
+            {t("chat.tutorName")}
+          </p>
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse shrink-0" />
             <p className="text-xs text-muted-foreground truncate">
@@ -697,8 +727,16 @@ export default function SocraticChat({
             </p>
           </div>
         </div>
-        <AiModelSelect value={chatModel} onChange={setChatModel} disabled={isStreaming} />
-        <ImageModelSelect value={imageModel} onChange={setImageModel} disabled={isStreaming} />
+        <AiModelSelect
+          value={chatModel}
+          onChange={setChatModel}
+          disabled={isStreaming}
+        />
+        <ImageModelSelect
+          value={imageModel}
+          onChange={setImageModel}
+          disabled={isStreaming}
+        />
         <button
           type="button"
           onClick={() => setShowHistory((v) => !v)}
@@ -1002,7 +1040,9 @@ export default function SocraticChat({
         )}
 
         {attachError && (
-          <p className="mb-2 text-[11px] font-medium text-red-500">{attachError}</p>
+          <p className="mb-2 text-[11px] font-medium text-red-500">
+            {attachError}
+          </p>
         )}
 
         <div className="flex items-end gap-2 bg-gray-50 rounded-2xl border border-gray-200 px-3 py-2 focus-within:border-indigo-300 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
@@ -1093,8 +1133,7 @@ export default function SocraticChat({
             className="absolute bottom-[88px] right-5 z-50 pointer-events-none"
           >
             <div className="flex items-center gap-1.5 bg-amber-500 text-white text-sm font-bold px-3 py-1.5 rounded-full shadow-lg">
-              <Zap className="w-3.5 h-3.5" />
-              +{toast.amount} XP
+              <Zap className="w-3.5 h-3.5" />+{toast.amount} XP
             </div>
           </motion.div>
         ))}

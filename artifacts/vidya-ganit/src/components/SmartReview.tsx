@@ -64,7 +64,10 @@ export default function SmartReview({
             {data && (
               <Badge variant="secondary" className="ml-auto font-bold">
                 {t("review.progress")
-                  .replace("{due}", String(data.dueCount))
+                  .replace(
+                    "{done}",
+                    String(Math.max(0, data.totalCount - data.dueCount)),
+                  )
                   .replace("{total}", String(data.totalCount))}
               </Badge>
             )}

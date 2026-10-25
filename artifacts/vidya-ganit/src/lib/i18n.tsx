@@ -24,6 +24,7 @@ import ne from "./locales/ne";
 import sa from "./locales/sa";
 import sat from "./locales/sat";
 import sd from "./locales/sd";
+import { conceptTranslations } from "./conceptTranslations";
 
 export type Language =
   | "en"
@@ -134,7 +135,7 @@ const en: Dict = {
   "attendance.noChild": "No linked child yet",
   "attendance.records": "History",
   "attendance.noRecords": "No records yet",
-  "duel.title": "Math Duel",
+  "duel.title": "Maths Duel",
   "duel.subtitle": "Challenge a classmate 1-on-1",
   "duel.noClassmates": "No classmates to challenge",
   "duel.challenge": "Challenge",
@@ -255,8 +256,8 @@ const en: Dict = {
   "tour.done": "Got it!",
   "tour.step.welcome.title": "Welcome to VidyaGanit!",
   "tour.step.welcome.body":
-    "Your friendly math coach is here to guide you step by step — never just handing over answers.",
-  "tour.step.workspace.title": "Ask your Math Coach",
+    "Your friendly maths coach is here to guide you step by step — never just handing over answers.",
+  "tour.step.workspace.title": "Ask your Maths Coach",
   "tour.step.workspace.body":
     "Type any maths doubt in the Workspace. The coach gives playful hints, one step at a time.",
   "tour.step.progress.title": "Track your progress",
@@ -276,7 +277,7 @@ const en: Dict = {
   "games.result": "You scored {score}!",
   "games.xpEarned": "+{xp} XP earned!",
   "games.pick": "Pick a game",
-  "games.speed.name": "Speed Math",
+  "games.speed.name": "Speed Maths",
   "games.speed.desc": "Solve as many as you can in 30 seconds!",
   "games.truefalse.name": "True or False",
   "games.truefalse.desc": "Is the equation right? Tap ✓ or ✗",
@@ -393,7 +394,7 @@ const en: Dict = {
   "auth.batch": "Batch",
   "auth.batchPlaceholder": "e.g. Class 6 – Morning",
   "auth.academyName": "Academy Name",
-  "auth.academyNamePlaceholder": "e.g. Sharma Math Academy",
+  "auth.academyNamePlaceholder": "e.g. Sharma Maths Academy",
   "auth.optional": "(optional)",
   "auth.loginAs": "I am logging in as",
   "auth.roleMismatch":
@@ -541,8 +542,8 @@ const en: Dict = {
   "logout.confirmNo": "No, stay",
 
   // Home
-  "home.badge": "The Socratic Math Companion",
-  "home.title1": "Math tutoring that",
+  "home.badge": "The Socratic Maths Companion",
+  "home.title1": "Maths tutoring that",
   "home.title2": "makes sense.",
   "home.subtitle":
     "Rigorous curriculum for parents' and tutors' peace of mind. Engaging, conversational lessons that kids actually look forward to. Classes 4–7.",
@@ -587,6 +588,7 @@ const en: Dict = {
   "auth.passwordTooWeak":
     "Password too weak! Use at least 8 characters with a mix of letters and numbers (e.g. Rohan2025).",
   "auth.creatingAccount": "Creating account...",
+  "auth.firstVisitWait": "Getting things ready. This first visit may take a little longer. Please keep this page open.",
   "auth.loginFailed":
     "Oops! That ID or password doesn't match our records. Please check and try again.",
   "auth.genericError": "Something went wrong. Please try again.",
@@ -618,7 +620,7 @@ const en: Dict = {
   "student.notebook.yourAnswer": "Your answer",
   "student.notebook.correctAnswer": "Correct answer",
   "student.notebook.blank": "Left blank",
-  "student.mathXp": "Math XP",
+  "student.mathXp": "Maths XP",
   "student.level": "Level",
   "student.maxLevel": "Max Level! 🏆",
   "student.xpToNext": "{xp} XP to Level {level}",
@@ -743,7 +745,7 @@ const en: Dict = {
   "tutor.fees.reminding": "Sending…",
   "auth.branch": "Branch",
   "auth.branchPlaceholder": "e.g. Andheri West Centre",
-  "arena.title": "Speed Math Arena",
+  "arena.title": "Speed Maths Arena",
   "arena.subtitle": "Answer as many as you can before time runs out!",
   "arena.score": "Score: {score}",
   "arena.timeLeft": "{sec}s",
@@ -1002,7 +1004,7 @@ const ta: Dict = {
   "attendance.noChild": "இணைக்கப்பட்ட குழந்தை இல்லை",
   "attendance.records": "History",
   "attendance.noRecords": "இன்னும் பதிவுகள் இல்லை",
-  "duel.title": "Math Duel",
+  "duel.title": "Maths Duel",
   "duel.subtitle": "ஒரு வகுப்பு தோழரை சவால் செய்யுங்கள்",
   "duel.noClassmates": "சவால் செய்ய வகுப்பு தோழர்கள் இல்லை",
   "duel.challenge": "Challenge",
@@ -1874,7 +1876,7 @@ const hi: Dict = {
   "attendance.noChild": "अभी कोई जुड़ा बच्चा नहीं",
   "attendance.records": "History",
   "attendance.noRecords": "अभी कोई रिकॉर्ड नहीं",
-  "duel.title": "Math Duel",
+  "duel.title": "Maths Duel",
   "duel.subtitle": "किसी सहपाठी को आमने-सामने चुनौती दें",
   "duel.noClassmates": "चुनौती देने के लिए कोई सहपाठी नहीं",
   "duel.challenge": "Challenge",
@@ -2732,7 +2734,7 @@ const te: Dict = {
   "attendance.noChild": "ఇంకా అనుసంధానించిన పిల్లలు లేరు",
   "attendance.records": "History",
   "attendance.noRecords": "ఇంకా రికార్డులు లేవు",
-  "duel.title": "Math Duel",
+  "duel.title": "Maths Duel",
   "duel.subtitle": "తోటి విద్యార్థిని సవాలు చేయండి",
   "duel.noClassmates": "సవాలు చేయడానికి తోటివారు లేరు",
   "duel.challenge": "Challenge",
@@ -3573,6 +3575,32 @@ export const DICTS: Record<Language, Dict> = {
   sat,
   sd,
 };
+
+const firstVisitWait: Partial<Record<Language, string>> = {
+  hi: "तैयारी हो रही है। पहली बार थोड़ा अधिक समय लग सकता है। कृपया यह पृष्ठ खुला रखें।",
+  te: "సిద్ధం చేస్తున్నాము. మొదటి సందర్శనలో కొంచెం ఎక్కువ సమయం పట్టవచ్చు. దయచేసి ఈ పేజీని తెరిచి ఉంచండి.",
+  ta: "தயாராகிறது. முதல் வருகையில் சிறிது கூடுதல் நேரம் ஆகலாம். இந்தப் பக்கத்தைத் திறந்தே வைத்திருக்கவும்.",
+};
+
+const passwordVisibility: Partial<Record<Language, [string, string]>> = {
+  en: ["Show password", "Hide password"],
+  hi: ["पासवर्ड दिखाएँ", "पासवर्ड छिपाएँ"],
+  te: ["పాస్‌వర్డ్ చూపించు", "పాస్‌వర్డ్ దాచు"],
+  ta: ["கடவுச்சொல்லைக் காட்டு", "கடவுச்சொல்லை மறை"],
+};
+
+// Fill missing labels with English rather than exposing internal keys.
+for (const code of Object.keys(DICTS) as Language[]) {
+  const [show, hide] = passwordVisibility[code] ?? passwordVisibility.en!;
+  DICTS[code]["auth.showPassword"] = show;
+  DICTS[code]["auth.hidePassword"] = hide;
+  DICTS[code]["auth.firstVisitWait"] = firstVisitWait[code] ?? en["auth.firstVisitWait"];
+  Object.assign(
+    DICTS[code],
+    conceptTranslations.en,
+    conceptTranslations[code] ?? {},
+  );
+}
 
 type LanguageContextValue = {
   lang: Language;

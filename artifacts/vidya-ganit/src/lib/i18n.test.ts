@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DICTS, LANGUAGES, type Language } from "./i18n";
+import { CONCEPTS, CONCEPT_CATEGORIES } from "./concepts";
 
 const LANG_CODES = LANGUAGES.map((l) => l.code);
 const BASE: Language = "en";
@@ -16,6 +17,19 @@ const NON_BASE = (Object.keys(DICTS) as Language[]).filter((c) => c !== BASE);
 const VERIFIED: Language[] = ["ta", "hi", "te"];
 
 describe("i18n dictionaries", () => {
+  it("has readable labels for every advertised concept in every language", () => {
+    for (const code of LANG_CODES) {
+      for (const key of [
+        ...CONCEPTS.flatMap((c) => [c.nameKey, c.descKey]),
+        ...CONCEPT_CATEGORIES.map((c) => c.key),
+      ]) {
+        expect(DICTS[code][key]).toBeTruthy();
+        expect(DICTS[code][key]).not.toBe(key);
+      }
+      expect(DICTS[code]["review.progress"]).toContain("{done}");
+      expect(DICTS[code]["review.progress"]).not.toContain("{due}");
+    }
+  });
   it("every advertised language has a dictionary and vice versa", () => {
     const dictCodes = Object.keys(DICTS).sort();
     expect([...LANG_CODES].sort()).toEqual(dictCodes);

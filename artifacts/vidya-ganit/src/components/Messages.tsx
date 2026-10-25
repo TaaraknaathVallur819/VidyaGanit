@@ -104,7 +104,11 @@ export default function Messages({ vidyaId }: { vidyaId: string }) {
                 {t("messages.title")}
               </h3>
               <p className="text-xs text-muted-foreground">
-                {t("messages.subtitle")}
+                {t(
+                  vidyaId.startsWith("VG-PAR-")
+                    ? "messages.parentSubtitle"
+                    : "messages.subtitle",
+                )}
               </p>
             </div>
           </div>
@@ -137,7 +141,10 @@ export default function Messages({ vidyaId }: { vidyaId: string }) {
                         <span className="font-semibold text-foreground truncate">
                           {th.otherName}
                         </span>
-                        <Badge variant="outline" className="text-[10px] shrink-0">
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] shrink-0"
+                        >
                           {roleLabel(th.otherRole, t)}
                         </Badge>
                       </div>
@@ -146,8 +153,14 @@ export default function Messages({ vidyaId }: { vidyaId: string }) {
                       </p>
                     </div>
                     {th.unread > 0 && (
-                      <Badge className="shrink-0 font-bold" data-testid={`badge-unread-${th.otherVidyaId}`}>
-                        {t("messages.unread").replace("{count}", String(th.unread))}
+                      <Badge
+                        className="shrink-0 font-bold"
+                        data-testid={`badge-unread-${th.otherVidyaId}`}
+                      >
+                        {t("messages.unread").replace(
+                          "{count}",
+                          String(th.unread),
+                        )}
                       </Badge>
                     )}
                   </button>
@@ -237,7 +250,9 @@ export default function Messages({ vidyaId }: { vidyaId: string }) {
                   className="h-11 rounded-xl gap-1.5"
                 >
                   <Send className="w-4 h-4" />
-                  {sendMutation.isPending ? t("messages.sending") : t("messages.send")}
+                  {sendMutation.isPending
+                    ? t("messages.sending")
+                    : t("messages.send")}
                 </Button>
               </div>
             </div>

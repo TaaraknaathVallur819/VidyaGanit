@@ -57,7 +57,7 @@ export default function Success() {
             
             <div className="bg-primary/5 border border-primary/20 w-full p-6 rounded-xl space-y-3">
               <p className="text-sm text-primary/80 font-medium uppercase tracking-wider">Your Permanent ID</p>
-              <p className="text-4xl font-mono font-bold tracking-widest text-primary">{id}</p>
+              <p className="select-all break-all text-2xl sm:text-4xl font-mono font-bold tracking-wide sm:tracking-widest text-primary">{id}</p>
               <Button
                 type="button"
                 variant="outline"

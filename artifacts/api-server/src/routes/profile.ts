@@ -32,6 +32,7 @@ import {
 } from "@workspace/api-zod";
 import { computeStudentAnalytics } from "../lib/analytics";
 import { countTodayQuestions, liveStreak } from "../lib/streak";
+import { isUsernameConflict, USERNAME_TAKEN } from "../lib/registration";
 
 const router: IRouter = Router();
 
@@ -236,11 +237,20 @@ router.patch("/profile/:vidyaId", requireAuth, requireSelf, async (req, res): Pr
     return;
   }
 
-  const [user] = await db
-    .update(usersTable)
-    .set(updates)
-    .where(eq(usersTable.vidyaId, params.data.vidyaId))
-    .returning();
+  let user: typeof usersTable.$inferSelect | undefined;
+  try {
+    [user] = await db
+      .update(usersTable)
+      .set(updates)
+      .where(eq(usersTable.vidyaId, params.data.vidyaId))
+      .returning();
+  } catch (error) {
+    if (isUsernameConflict(error)) {
+      res.status(409).json({ error: USERNAME_TAKEN });
+      return;
+    }
+    throw error;
+  }
 
   if (!user) {
     res.status(404).json({ error: "User not found" });

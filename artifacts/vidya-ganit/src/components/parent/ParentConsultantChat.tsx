@@ -26,8 +26,13 @@ import {
 import { useLanguage } from "@/lib/i18n";
 import { useLiveSpeech } from "@/hooks/useLiveSpeech";
 import AiModelSelect, { type ChatModelKey } from "@/components/AiModelSelect";
-import ImageModelSelect, { type ImageModel } from "@/components/ImageModelSelect";
+import ImageModelSelect, {
+  type ImageModel,
+} from "@/components/ImageModelSelect";
 import SpeakButton from "@/components/SpeakButton";
+import MarkdownMessage, {
+  plainTextFromMarkdown,
+} from "@/components/MarkdownMessage";
 
 const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 MB
 
@@ -98,8 +103,11 @@ export default function ParentConsultantChat({
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [loadingSessionId, setLoadingSessionId] = useState<string | null>(null);
   const [isContinuing, setIsContinuing] = useState(false);
-  const [chatModel, setChatModel] = useState<ChatModelKey>("gemini-flash-lite-latest");
-  const [imageModel, setImageModel] = useState<ImageModel>("gemini-nano-banana");
+  const [chatModel, setChatModel] = useState<ChatModelKey>(
+    "gemini-flash-lite-latest",
+  );
+  const [imageModel, setImageModel] =
+    useState<ImageModel>("gemini-nano-banana");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -110,16 +118,14 @@ export default function ParentConsultantChat({
   const inputBeforeVoiceRef = useRef<string>("");
 
   // List the parent's past counseling conversations.
-  const { data: sessionsData, refetch: refetchSessions } = useListConsultantSessions(
-    vidyaId,
-    {
+  const { data: sessionsData, refetch: refetchSessions } =
+    useListConsultantSessions(vidyaId, {
       query: {
         enabled: !!vidyaId,
         queryKey: getListConsultantSessionsQueryKey(vidyaId),
         staleTime: 0,
       },
-    },
-  );
+    });
 
   const sessions = sessionsData?.sessions ?? [];
 
@@ -149,7 +155,9 @@ export default function ParentConsultantChat({
             feedback: m.feedback ?? null,
           })),
         );
-        setHistory(data.messages.map((m) => ({ role: m.role, content: m.content })));
+        setHistory(
+          data.messages.map((m) => ({ role: m.role, content: m.content })),
+        );
         setIsContinuing(data.messages.length > 0);
         setInput("");
         setAttachment(null);
@@ -207,7 +215,9 @@ export default function ParentConsultantChat({
     }
   }, []);
 
-  const handleFilePicked = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+  const handleFilePicked = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ): Promise<void> => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
@@ -297,30 +307,33 @@ export default function ParentConsultantChat({
     streamAbortRef.current = controller;
 
     try {
-      const response = await fetch(`/api/parent/${vidyaId}/consultant/message`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        signal: controller.signal,
-        body: JSON.stringify({
-          message: msg,
-          sessionId: mySessionId,
-          studentVidyaId: selectedStudentId,
-          language: lang,
-          chatModel,
-          imageModel,
-          history,
-          ...(currentAttachment
-            ? {
-                attachment: {
-                  name: currentAttachment.name,
-                  mimeType: currentAttachment.mimeType,
-                  dataUrl: currentAttachment.dataUrl,
-                },
-              }
-            : {}),
-        }),
-      });
+      const response = await fetch(
+        `/api/parent/${vidyaId}/consultant/message`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          signal: controller.signal,
+          body: JSON.stringify({
+            message: msg,
+            sessionId: mySessionId,
+            studentVidyaId: selectedStudentId,
+            language: lang,
+            chatModel,
+            imageModel,
+            history,
+            ...(currentAttachment
+              ? {
+                  attachment: {
+                    name: currentAttachment.name,
+                    mimeType: currentAttachment.mimeType,
+                    dataUrl: currentAttachment.dataUrl,
+                  },
+                }
+              : {}),
+          }),
+        },
+      );
 
       if (response.status === 401) {
         throw new ChatError(t("strategy.error"));
@@ -366,12 +379,16 @@ export default function ParentConsultantChat({
             if (typeof data.chunk === "string") {
               fullContent += data.chunk;
               setMessages((prev) =>
-                prev.map((m) => (m.id === aiMsgId ? { ...m, content: fullContent } : m)),
+                prev.map((m) =>
+                  m.id === aiMsgId ? { ...m, content: fullContent } : m,
+                ),
               );
             }
             if (data.drawing) {
               setMessages((prev) =>
-                prev.map((m) => (m.id === aiMsgId ? { ...m, isDrawing: true } : m)),
+                prev.map((m) =>
+                  m.id === aiMsgId ? { ...m, isDrawing: true } : m,
+                ),
               );
             }
             if (typeof data.image === "string") {
@@ -379,13 +396,24 @@ export default function ParentConsultantChat({
               const imageAlt = data.imageAlt;
               setMessages((prev) =>
                 prev.map((m) =>
-                  m.id === aiMsgId ? { ...m, isDrawing: false, imageUrl, imageAlt } : m,
+                  m.id === aiMsgId
+                    ? { ...m, isDrawing: false, imageUrl, imageAlt }
+                    : m,
                 ),
               );
             }
             if (data.imageError) {
               setMessages((prev) =>
-                prev.map((m) => (m.id === aiMsgId ? { ...m, isDrawing: false } : m)),
+                prev.map((m) =>
+                  m.id === aiMsgId
+                    ? {
+                        ...m,
+                        isDrawing: false,
+                        content:
+                          m.content + "\n\n" + t("chat.diagramUnavailable"),
+                      }
+                    : m,
+                ),
               );
             }
             if (data.done) {
@@ -432,10 +460,13 @@ export default function ParentConsultantChat({
       // A deliberate abort (new conversation / session switch) is not an error;
       // the new flow already owns the UI state, so leave it untouched.
       if (controller.signal.aborted) return;
-      const friendly = err instanceof ChatError ? err.message : t("strategy.error");
+      const friendly =
+        err instanceof ChatError ? err.message : t("strategy.error");
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === aiMsgId ? { ...m, content: friendly, isStreaming: false } : m,
+          m.id === aiMsgId
+            ? { ...m, content: friendly, isStreaming: false }
+            : m,
         ),
       );
       setIsStreaming(false);
@@ -494,8 +525,16 @@ export default function ParentConsultantChat({
                 : t("strategy.general")}
           </p>
         </div>
-        <AiModelSelect value={chatModel} onChange={setChatModel} disabled={isStreaming} />
-        <ImageModelSelect value={imageModel} onChange={setImageModel} disabled={isStreaming} />
+        <AiModelSelect
+          value={chatModel}
+          onChange={setChatModel}
+          disabled={isStreaming}
+        />
+        <ImageModelSelect
+          value={imageModel}
+          onChange={setImageModel}
+          disabled={isStreaming}
+        />
         <button
           type="button"
           onClick={() => setShowHistory((v) => !v)}
@@ -588,7 +627,9 @@ export default function ParentConsultantChat({
               <Sparkles className="w-4 h-4" />
             </div>
             <div className="bg-white border border-emerald-100 text-foreground rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed shadow-sm">
-              <span className="whitespace-pre-wrap break-words">{welcomeText}</span>
+              <span className="whitespace-pre-wrap break-words">
+                {welcomeText}
+              </span>
               <div className="mt-1.5 -mb-1 -ml-1">
                 <SpeakButton text={welcomeText} tone="dark" />
               </div>
@@ -628,11 +669,15 @@ export default function ParentConsultantChat({
                     ) : msg.attachmentName ? (
                       <div className="mb-2 flex items-center gap-2 rounded-xl bg-indigo-50 border border-indigo-100 px-3 py-2 max-w-[240px]">
                         <FileText className="w-4 h-4 text-primary shrink-0" />
-                        <span className="text-xs font-medium truncate">{msg.attachmentName}</span>
+                        <span className="text-xs font-medium truncate">
+                          {msg.attachmentName}
+                        </span>
                       </div>
                     ) : null}
                     {msg.content && (
-                      <span className="whitespace-pre-wrap break-words">{msg.content}</span>
+                      <span className="whitespace-pre-wrap break-words">
+                        {msg.content}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -643,7 +688,7 @@ export default function ParentConsultantChat({
                   </div>
                   <div className="bg-white border border-emerald-100 text-foreground rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed shadow-sm max-w-full">
                     {msg.content ? (
-                      <span className="whitespace-pre-wrap break-words">{msg.content}</span>
+                      <MarkdownMessage content={msg.content} />
                     ) : (
                       msg.isStreaming && (
                         <span className="inline-flex items-center gap-1 py-0.5">
@@ -675,7 +720,10 @@ export default function ParentConsultantChat({
                     )}
                     {!msg.isStreaming && !msg.isDrawing && msg.content && (
                       <div className="mt-1.5 -mb-1 -ml-1 flex items-center gap-1">
-                        <SpeakButton text={msg.content} tone="dark" />
+                        <SpeakButton
+                          text={plainTextFromMarkdown(msg.content)}
+                          tone="dark"
+                        />
                         {msg.dbId != null && (
                           <>
                             <button
@@ -721,7 +769,13 @@ export default function ParentConsultantChat({
 
       {/* Input bar */}
       <div className="px-4 py-3 bg-white border-t border-indigo-100 shrink-0">
-        <input ref={fileInputRef} type="file" accept="*/*" className="hidden" onChange={handleFilePicked} />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="*/*"
+          className="hidden"
+          onChange={handleFilePicked}
+        />
         <input
           ref={cameraInputRef}
           type="file"
@@ -795,7 +849,11 @@ export default function ParentConsultantChat({
             }`}
             title="Voice"
           >
-            {isRecording ? <Square className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            {isRecording ? (
+              <Square className="w-5 h-5" />
+            ) : (
+              <Mic className="w-5 h-5" />
+            )}
           </button>
 
           <textarea

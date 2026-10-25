@@ -76,9 +76,60 @@ export interface StreamChatInput {
   history: UnifiedTurn[];
   userText: string;
   image?: ChatImage | null;
+  /** Called when a transient upstream failure is about to be retried. */
+  onRetry?: (attempt: number, status: number) => void;
 }
 
 const MAX_OUTPUT_TOKENS = 4096;
+
+/**
+ * Gemini intermittently rejects requests with 429 (rate limited) or 5xx when
+ * it is under load. These clear on their own, but without a retry the caller
+ * shows a dead-end "I had trouble answering" and the user has to re-ask.
+ */
+const RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504]);
+const STREAM_OPEN_ATTEMPTS = 3;
+const RETRY_BASE_DELAY_MS = 400;
+
+/** The upstream status if this error is worth retrying, else null. */
+function retryableStatus(err: unknown): number | null {
+  if (!err || typeof err !== "object") return null;
+  for (const key of ["status", "code"] as const) {
+    const value = (err as Record<string, unknown>)[key];
+    if (typeof value === "number" && RETRYABLE_STATUSES.has(value)) return value;
+  }
+  return null;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+type GeminiStream = Awaited<ReturnType<typeof gemini.models.generateContentStream>>;
+
+/**
+ * Open the model stream, retrying transient upstream failures.
+ *
+ * Only the call that *opens* the stream is retried. Once a chunk has been
+ * yielded the caller has already flushed it to the browser, so restarting
+ * would duplicate text — mid-stream failures are left to propagate.
+ */
+async function openStream(
+  request: Parameters<typeof gemini.models.generateContentStream>[0],
+  onRetry?: (attempt: number, status: number) => void,
+): Promise<GeminiStream> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await gemini.models.generateContentStream(request);
+    } catch (err) {
+      const status = retryableStatus(err);
+      if (status === null || attempt >= STREAM_OPEN_ATTEMPTS) throw err;
+      onRetry?.(attempt, status);
+      // Exponential backoff, jittered so a burst of users doesn't retry in lockstep.
+      await sleep(RETRY_BASE_DELAY_MS * 2 ** (attempt - 1) + Math.random() * 200);
+    }
+  }
+}
 
 function base64FromDataUrl(dataUrl: string): string {
   const idx = dataUrl.indexOf("base64,");
@@ -96,7 +147,7 @@ function fallbackText(userText: string): string {
 export async function* streamChat(
   input: StreamChatInput,
 ): AsyncGenerator<string, void, unknown> {
-  const { provider, model, system, history, userText, image } = input;
+  const { provider, model, system, history, userText, image, onRetry } = input;
 
   type GeminiPart =
     | { text: string }
@@ -117,14 +168,18 @@ export async function* streamChat(
   }
   contents.push({ role: "user", parts });
 
-  const stream = await gemini.models.generateContentStream({
-    model,
-    contents,
-    config: {
-      maxOutputTokens: MAX_OUTPUT_TOKENS,
-      systemInstruction: system,
+  const stream = await openStream(
+    {
+      model,
+      contents,
+      config: {
+        maxOutputTokens: MAX_OUTPUT_TOKENS,
+        systemInstruction: system,
+      },
     },
-  });
+    onRetry,
+  );
+
   for await (const part of stream) {
     if (part.text) yield part.text;
   }

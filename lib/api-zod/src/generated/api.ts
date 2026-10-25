@@ -624,6 +624,8 @@ export const GetChatSessionParams = zod.object({
 export const GetChatSessionResponse = zod.object({
   "sessionId": zod.string(),
   "messages": zod.array(zod.object({
+  "imageUrl": zod.string().nullish(),
+  "imageAlt": zod.string().nullish(),
   "id": zod.number(),
   "role": zod.enum(['user', 'assistant']),
   "content": zod.string(),

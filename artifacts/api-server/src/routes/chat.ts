@@ -312,6 +312,8 @@ router.post(
       history: chatHistory,
       userText,
       image,
+      onRetry: (attempt, status) =>
+        req.log.warn({ attempt, status }, "retrying tutor completion"),
     });
 
     for await (const delta of stream) {
@@ -348,6 +350,7 @@ router.post(
     }
   }
 
+  let savedImageUrl: string | null = null;
   if (imagePrompt) {
     send({ drawing: true });
     try {
@@ -367,6 +370,7 @@ router.post(
         image: dataUrl,
         imageAlt: imagePrompt,
       });
+      savedImageUrl = dataUrl;
     } catch (err) {
       req.log.error({ err }, "AI image generation failed");
       send({ imageError: true });
@@ -404,7 +408,7 @@ router.post(
       .replace(TEST_MARKER_RE, "")
       .trim() || (fallbackText ?? "");
   let assistantMessageId: number | null = null;
-  if (assistantText) {
+  if (assistantText || savedImageUrl) {
     try {
       const [inserted] = await db
         .insert(chatMessagesTable)
@@ -413,6 +417,8 @@ router.post(
           studentVidyaId: vidyaId,
           role: "assistant",
           content: assistantText,
+          imageUrl: savedImageUrl,
+          imageAlt: savedImageUrl ? imagePrompt : null,
         })
         .returning({ id: chatMessagesTable.id });
       assistantMessageId = inserted?.id ?? null;
@@ -547,6 +553,8 @@ router.get(
           content: r.content,
           createdAt: r.createdAt.toISOString(),
           feedback: r.feedback === "up" || r.feedback === "down" ? r.feedback : null,
+          imageUrl: r.imageUrl,
+          imageAlt: r.imageAlt,
         })),
       }),
     );

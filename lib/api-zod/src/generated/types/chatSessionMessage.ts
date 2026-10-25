@@ -9,6 +9,10 @@ import type { ChatSessionMessageFeedback } from './chatSessionMessageFeedback';
 import type { ChatSessionMessageRole } from './chatSessionMessageRole';
 
 export interface ChatSessionMessage {
+  /** @nullable */
+  imageUrl?: string | null;
+  /** @nullable */
+  imageAlt?: string | null;
   id: number;
   role: ChatSessionMessageRole;
   content: string;

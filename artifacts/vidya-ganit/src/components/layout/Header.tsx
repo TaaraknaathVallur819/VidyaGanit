@@ -23,6 +23,7 @@ import { useLanguage, LANGUAGES, type Language } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { useUpdateProfile } from "@workspace/api-client-react";
 import { LogOut, Languages, Moon, Sun } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Header() {
   const { user, setUser, logout } = useAuth();
@@ -31,6 +32,9 @@ export default function Header() {
   const [, setLocation] = useLocation();
   const updateProfile = useUpdateProfile();
   const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState(false);
+  const queryClient = useQueryClient();
 
   const handleLanguageChange = (next: Language) => {
     setLang(next);
@@ -51,10 +55,21 @@ export default function Header() {
     }
   };
 
-  const confirmLogout = () => {
-    setConfirmLogoutOpen(false);
-    logout();
-    setLocation("/");
+  const confirmLogout = async () => {
+    setLoggingOut(true);
+    setLogoutError(false);
+    try {
+      await logout();
+      await queryClient.cancelQueries();
+      queryClient.clear();
+      // Reset component state as well as cached account data.
+      window.location.assign("/");
+    } catch {
+      setLogoutError(true);
+      setConfirmLogoutOpen(true);
+    } finally {
+      setLoggingOut(false);
+    }
   };
 
   return (
@@ -87,7 +102,10 @@ export default function Header() {
             {t("header.hi")}, {user.name}
           </span>
         )}
-        <Select value={lang} onValueChange={(v) => handleLanguageChange(v as Language)}>
+        <Select
+          value={lang}
+          onValueChange={(v) => handleLanguageChange(v as Language)}
+        >
           <SelectTrigger
             className="w-auto gap-2 h-9 rounded-full border-border bg-gray-50"
             aria-label={t("language.label")}
@@ -98,7 +116,11 @@ export default function Header() {
           </SelectTrigger>
           <SelectContent>
             {LANGUAGES.map((l) => (
-              <SelectItem key={l.code} value={l.code} data-testid={`lang-${l.code}`}>
+              <SelectItem
+                key={l.code}
+                value={l.code}
+                data-testid={`lang-${l.code}`}
+              >
                 {l.native}
               </SelectItem>
             ))}
@@ -138,17 +160,30 @@ export default function Header() {
       </div>
 
       <AlertDialog open={confirmLogoutOpen} onOpenChange={setConfirmLogoutOpen}>
-        <AlertDialogContent className="rounded-2xl" data-testid="dialog-confirm-logout">
+        <AlertDialogContent
+          className="rounded-2xl"
+          data-testid="dialog-confirm-logout"
+        >
           <AlertDialogHeader>
             <AlertDialogTitle>{t("logout.confirmTitle")}</AlertDialogTitle>
-            <AlertDialogDescription>{t("logout.confirmBody")}</AlertDialogDescription>
+            <AlertDialogDescription>
+              {t("logout.confirmBody")}
+            </AlertDialogDescription>
+            {logoutError && <p role="alert">{t("logout.error")}</p>}
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel data-testid="button-cancel-logout" className="rounded-full">
+            <AlertDialogCancel
+              data-testid="button-cancel-logout"
+              className="rounded-full"
+            >
               {t("logout.confirmNo")}
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={confirmLogout}
+              onClick={(event) => {
+                event.preventDefault();
+                void confirmLogout();
+              }}
+              disabled={loggingOut}
               data-testid="button-confirm-logout"
               className="rounded-full"
             >

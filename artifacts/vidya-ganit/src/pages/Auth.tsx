@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { UserCircle, Users, GraduationCap, Plus, X } from "lucide-react";
@@ -19,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { boardsByCategory } from "@workspace/india-boards";
+import { prepareApi } from "@/lib/prepareApi";
 
 const BOARD_GROUPS = boardsByCategory();
 
@@ -27,6 +29,14 @@ type Role = "student" | "parent" | "tutor";
 type Gender = "male" | "female";
 type ParentType = "father" | "mother";
 type StudentClass = "4" | "5" | "6" | "7";
+
+// Mirrors the prefixes generateVidyaId() assigns on the API side, so the
+// example ID matches the role the person is logging in as.
+const LOGIN_ID_PLACEHOLDER: Record<Role, string> = {
+  student: "e.g. VG-STU-12345",
+  parent: "e.g. VG-PAR-12345",
+  tutor: "e.g. VG-TUT-12345",
+};
 
 function TileButton({
   selected,
@@ -87,6 +97,18 @@ export default function Auth() {
 
   const registerMutation = useRegisterUser();
   const loginMutation = useLoginUser();
+  const [longWait, setLongWait] = useState(false);
+  const submitting = registerMutation.isPending || loginMutation.isPending;
+
+  useEffect(() => {
+    void prepareApi();
+  }, []);
+  useEffect(() => {
+    setLongWait(false);
+    if (!submitting) return;
+    const timer = window.setTimeout(() => setLongWait(true), 8_000);
+    return () => window.clearTimeout(timer);
+  }, [submitting]);
 
   useEffect(() => {
     setLoginError("");
@@ -215,6 +237,11 @@ export default function Auth() {
         </div>
 
         <CardContent className="p-8">
+          {longWait && (
+            <p role="status" className="mb-4 text-sm text-muted-foreground">
+              {t("auth.firstVisitWait")}
+            </p>
+          )}
           <AnimatePresence mode="wait">
             {mode === "login" ? (
               <motion.form
@@ -246,19 +273,24 @@ export default function Auth() {
                     <Input
                       id="login-id"
                       data-testid="input-login-id"
+                      autoComplete="username"
+                      autoCapitalize="none"
+                      spellCheck={false}
                       value={loginId}
                       onChange={(e) => setLoginId(e.target.value)}
-                      placeholder="e.g. VG-STU-12345"
+                      placeholder={LOGIN_ID_PLACEHOLDER[loginRole]}
                       className="h-12 text-lg px-4 bg-gray-50 border-gray-200 focus-visible:ring-primary"
                       required
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="login-password" className="text-foreground font-medium">{t("auth.password")}</Label>
-                    <Input
+                    <PasswordInput
                       id="login-password"
                       data-testid="input-login-password"
-                      type="password"
+                      autoComplete="current-password"
+                      showLabel={t("auth.showPassword")}
+                      hideLabel={t("auth.hidePassword")}
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
                       placeholder="Enter your password"
@@ -552,10 +584,12 @@ export default function Auth() {
                 {/* Password */}
                 <div className="space-y-2">
                   <Label htmlFor="reg-password" className="text-foreground font-medium">{t("auth.createPassword")}</Label>
-                  <Input
+                  <PasswordInput
                     id="reg-password"
                     data-testid="input-register-password"
-                    type="password"
+                    autoComplete="new-password"
+                    showLabel={t("auth.showPassword")}
+                    hideLabel={t("auth.hidePassword")}
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
                     placeholder={t("auth.passwordHint")}

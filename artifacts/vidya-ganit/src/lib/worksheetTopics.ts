@@ -1,5 +1,5 @@
 // Client-side mirror of the api-server NCERT-aligned curriculum (curriculum.ts):
-// which math topics each class studies. Used to constrain the worksheet topic
+// which maths topics each class studies. Used to constrain the worksheet topic
 // list to the selected student's class so a Class 4 sheet never offers "ratio"
 // and a Class 7 sheet doesn't miss "algebra". The curriculum is common across
 // Indian boards, so the board affects labelling/sequencing, not the topic set.
