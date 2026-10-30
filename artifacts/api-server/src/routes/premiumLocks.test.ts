@@ -549,7 +549,7 @@ describe("demo mode: a payment you can try end to end without real money", () =>
       .set("Cookie", cookie(PARENT))
       .send({ planCode: "family_plus", billingCycle: "monthly" });
     expect(res.status).toBe(201);
-    expect(res.body).toMatchObject({ mode: "demo", keyId: "rzp_demo", amount: 24_900 });
+    expect(res.body).toMatchObject({ mode: "demo", keyId: "rzp_demo", amount: 100_000 });
     const row = f().inserts[0] as { providerPlanId: string; status: string; ownerVidyaId: string };
     expect(row).toMatchObject({
       providerPlanId: "demo_family_plus_monthly",

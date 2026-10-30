@@ -122,7 +122,7 @@ beforeAll(async () => {
     ownerVidyaId: PARENT_A,
     planCode: "family_plus",
     billingCycle: "monthly",
-    amountPaise: 24_900,
+    amountPaise: 100_000,
     status: "Success",
     providerSubscriptionId: `sub_${RUN}`,
     providerPlanId: "plan_TestRealPlanId",

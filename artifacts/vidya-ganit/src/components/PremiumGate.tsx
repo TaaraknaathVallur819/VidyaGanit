@@ -62,7 +62,7 @@ export default function PremiumGate({
       <p className="mt-4 text-sm font-bold text-indigo-700">
         {t("upgrade.startsAt")
           .replace("{plan}", plan.name)
-          .replace("{price}", String(plan.fromPrice))}
+          .replace("{price}", plan.fromPrice.toLocaleString("en-IN"))}
       </p>
       {status.paymentsEnabled ? (
         <a href="/#pricing" className="mt-5 inline-block">

@@ -7,7 +7,7 @@ export const PAYMENT_CATALOG = {
   family_plus: {
     name: "Family Plus",
     role: "parent",
-    prices: { monthly: 24_900, yearly: 249_900 },
+    prices: { monthly: 100_000, yearly: 900_000 },
     features: [
       "Strategy AI and weekly learning insights",
       "Personalised worksheets and report cards you can share on WhatsApp",
@@ -18,7 +18,7 @@ export const PAYMENT_CATALOG = {
   tutor_pro: {
     name: "Tutor Pro",
     role: "tutor",
-    prices: { monthly: 59_900, yearly: 599_900 },
+    prices: { monthly: 200_000, yearly: 1_800_000 },
     features: [
       "AI Coach and class heatmap",
       "Worksheets targeted at your class's weak spots",
