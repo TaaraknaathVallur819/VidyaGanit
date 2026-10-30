@@ -49,12 +49,13 @@ function App() {
               <AuthProvider>
                 <Router />
               </AuthProvider>
+              {/* These read the language, so they must sit inside LanguageProvider. */}
+              <PlanRequiredToast />
+              <DemoCheckoutDialog />
             </LanguageProvider>
           </ThemeProvider>
         </WouterRouter>
         <Toaster />
-        <PlanRequiredToast />
-        <DemoCheckoutDialog />
       </TooltipProvider>
     </QueryClientProvider>
   );
