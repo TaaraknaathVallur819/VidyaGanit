@@ -7,6 +7,7 @@ import { Timer, Zap, Trophy } from "lucide-react";
 import { useSubmitGameScore } from "@workspace/api-client-react";
 import { makeQuestion, type GameQuestion } from "@/lib/games";
 import { useLanguage } from "@/lib/i18n";
+import { useGameAllowance } from "@/lib/useGameAllowance";
 
 const ROUND_SECONDS = 45;
 
@@ -30,6 +31,10 @@ export default function SpeedArena({
   const [xpAwarded, setXpAwarded] = useState<number | null>(null);
 
   const submitMutation = useSubmitGameScore();
+  // Free students get a few games a day. The server enforces it; this tells them first.
+  const { allowance, blocked, refresh: refreshAllowance } = useGameAllowance(true);
+  const blockedRef = useRef(false);
+  blockedRef.current = blocked;
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const feedbackRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scoreRef = useRef(0);
@@ -62,12 +67,14 @@ export default function SpeedArena({
           if (roundRef.current !== round) return;
           setXpAwarded(res.xpAwarded);
           if (res.xpAwarded > 0) onXpAwarded?.();
+          void refreshAllowance();
         },
       },
     );
-  }, [clearTimers, vidyaId, submitMutation, onXpAwarded]);
+  }, [clearTimers, vidyaId, submitMutation, onXpAwarded, refreshAllowance]);
 
   const start = useCallback(() => {
+    if (blockedRef.current) return;
     clearTimers();
     roundRef.current += 1;
     scoreRef.current = 0;
@@ -140,10 +147,23 @@ export default function SpeedArena({
           {phase === "idle" && (
             <div className="text-center py-8 space-y-4">
               <div className="text-5xl">⚡</div>
+              {allowance && !allowance.unlimited && (
+                <p
+                  data-testid="text-games-allowance"
+                  className={`text-xs font-semibold rounded-full px-3 py-1.5 w-fit mx-auto ${
+                    blocked ? "bg-amber-50 text-amber-800 border border-amber-200" : "bg-emerald-50 text-emerald-800 border border-emerald-100"
+                  }`}
+                >
+                  {blocked
+                    ? t("games.noneLeft")
+                    : t("games.freeLeft").replace("{n}", String(allowance.remaining ?? 0))}
+                </p>
+              )}
               <Button
                 type="button"
                 data-testid="button-arena-start"
                 onClick={start}
+                disabled={blocked}
                 className="h-11 px-8 rounded-xl font-semibold"
               >
                 {t("arena.start")}
@@ -215,6 +235,7 @@ export default function SpeedArena({
                   type="button"
                   data-testid="button-arena-again"
                   onClick={start}
+                  disabled={blocked}
                   className="h-11 px-8 rounded-xl font-semibold"
                 >
                   {t("arena.playAgain")}

@@ -12,7 +12,7 @@ import {
   ShieldCheck,
   ArrowRight,
 } from "lucide-react";
-import { launchRazorpayCheckout } from "@/lib/razorpay";
+import { payTuitionFee } from "@/lib/payments";
 import { useLanguage } from "@/lib/i18n";
 
 export interface ParentFeeItem {
@@ -86,68 +86,15 @@ export default function ParentFees({
     setPaymentSuccessMessage(null);
 
     try {
-      // 1. Create Razorpay order on backend
-      const orderRes = await fetch(`/api/payments/${vidyaId}/parent-fees/${fee.id}/order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (!orderRes.ok) {
-        const errData = await orderRes.json();
-        throw new Error(errData.error || "Failed to initialize payment order.");
+      const outcome = await payTuitionFee({ vidyaId, feeId: fee.id, payerName: parentName });
+      if (outcome.status === "paid") {
+        setPaymentSuccessMessage(
+          `Payment of ₹${fee.amount} completed.${outcome.receipt ? ` Receipt: ${outcome.receipt}` : ""}`,
+        );
+        await fetchFeesAndStatus();
       }
-
-      const orderData = await orderRes.json();
-
-      // 2. Launch Razorpay Checkout overlay in INR
-      await launchRazorpayCheckout({
-        keyId: orderData.keyId,
-        amountPaise: orderData.amount, // Paise integer
-        orderId: orderData.orderId,
-        description: orderData.description || `VidyaGanit tuition fee #${fee.id}`,
-        prefill: {
-          name: parentName || "Parent",
-        },
-        onSuccess: async (response) => {
-          // 3. Verify payment signature on backend
-          const verifyRes = await fetch(
-            `/api/payments/${vidyaId}/orders/${orderData.orderId}/verify`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-              }),
-            },
-          );
-
-          if (!verifyRes.ok) {
-            const verifyErr = await verifyRes.json();
-            throw new Error(verifyErr.error || "Payment verification failed.");
-          }
-
-          setPaymentSuccessMessage(
-            `Payment of ₹${fee.amount} completed successfully! Receipt: ${orderData.receipt}`,
-          );
-          // Refresh fee list
-          await fetchFeesAndStatus();
-        },
-        onError: (err) => {
-          setErrorMessage(err.message || "Payment process could not be completed.");
-          // Inform backend of failure state
-          void fetch(`/api/payments/${vidyaId}/orders/${orderData.orderId}/fail`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ error: err.message }),
-          });
-        },
-        onDismiss: () => {
-          setPayingFeeId(null);
-        },
-      });
     } catch (err: unknown) {
-      setErrorMessage(err instanceof Error ? err.message : "Payment error");
+      setErrorMessage(err instanceof Error ? err.message : "The payment could not be completed.");
     } finally {
       setPayingFeeId(null);
     }
@@ -161,11 +108,11 @@ export default function ParentFees({
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold mb-2 backdrop-blur-sm">
               <ShieldCheck className="w-3.5 h-3.5" />
-              Razorpay India &bull; Hardcoded INR Gateway
+              Payments in INR
             </div>
             <h2 className="text-2xl font-black">Tuition Fee Payments</h2>
             <p className="text-indigo-100 text-sm mt-1 max-w-xl">
-              Pay math tuition fees directly to your verified tutors with instant receipts and 256-bit encryption.
+              Pay your tutor&apos;s maths tuition fees online, when your tutor has turned on online fee collection.
             </p>
           </div>
           <Badge className="bg-white text-indigo-700 font-bold px-4 py-1.5 text-sm rounded-full shadow-sm">

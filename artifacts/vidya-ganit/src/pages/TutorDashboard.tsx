@@ -35,6 +35,7 @@ import WorksheetGenerator from "@/components/WorksheetGenerator";
 import TutorFees from "@/components/tutor/TutorFees";
 import AttendanceTracker from "@/components/AttendanceTracker";
 import SubscriptionPlanCard from "@/components/SubscriptionPlanCard";
+import PremiumGate, { TabLock } from "@/components/PremiumGate";
 import ReportCard from "@/components/ReportCard";
 import MeetingScheduler from "@/components/MeetingScheduler";
 import {
@@ -393,6 +394,7 @@ export default function TutorDashboard() {
               <TabsTrigger value="heatmap" className={tabTriggerClass}>
                 <Grid3x3 className="w-4 h-4" />
                 {t("tab.heatmap")}
+                <TabLock vidyaId={vidyaId} role="tutor" />
               </TabsTrigger>
               <TabsTrigger value="progress" className={tabTriggerClass}>
                 <TrendingUp className="w-4 h-4" />
@@ -405,6 +407,7 @@ export default function TutorDashboard() {
               <TabsTrigger value="coach" className={tabTriggerClass}>
                 <Sparkles className="w-4 h-4" />
                 {t("tab.coach")}
+                <TabLock vidyaId={vidyaId} role="tutor" />
               </TabsTrigger>
               <TabsTrigger value="messages" className={tabTriggerClass}>
                 <MessageCircle className="w-4 h-4" />
@@ -413,6 +416,7 @@ export default function TutorDashboard() {
               <TabsTrigger value="worksheet" className={tabTriggerClass}>
                 <FileText className="w-4 h-4" />
                 {t("tab.worksheet")}
+                <TabLock vidyaId={vidyaId} role="tutor" />
               </TabsTrigger>
               <TabsTrigger value="fees" className={tabTriggerClass}>
                 <Wallet className="w-4 h-4" />
@@ -425,6 +429,7 @@ export default function TutorDashboard() {
               <TabsTrigger value="reportcard" className={tabTriggerClass}>
                 <FileText className="w-4 h-4" />
                 {t("tab.reportcard")}
+                <TabLock vidyaId={vidyaId} role="tutor" />
               </TabsTrigger>
               <TabsTrigger value="meetings" className={tabTriggerClass}>
                 <CalendarClock className="w-4 h-4" />
@@ -733,7 +738,13 @@ export default function TutorDashboard() {
         {/* ── Class Heatmap Tab ── */}
         <TabsContent value="heatmap" className="mt-0 p-6">
           <div className="max-w-3xl mx-auto">
-            <ClassHeatmap vidyaId={vidyaId} />
+            <PremiumGate
+              vidyaId={vidyaId}
+              role="tutor"
+              feature="classHeatmap"
+            >
+              <ClassHeatmap vidyaId={vidyaId} />
+            </PremiumGate>
           </div>
         </TabsContent>
 
@@ -768,13 +779,19 @@ export default function TutorDashboard() {
         {/* ── AI Coach Tab ── */}
         <TabsContent value="coach" className="mt-0 p-6">
           <div className="max-w-3xl mx-auto">
-            <ParentConsultantChat
+            <PremiumGate
               vidyaId={vidyaId}
-              parentName={displayed.name}
-              selectedStudentId={selectedStudent?.vidyaId ?? null}
-              selectedStudentName={selectedStudent?.name ?? null}
-              variant="coach"
-            />
+              role="tutor"
+              feature="aiCoach"
+            >
+              <ParentConsultantChat
+                vidyaId={vidyaId}
+                parentName={displayed.name}
+                selectedStudentId={selectedStudent?.vidyaId ?? null}
+                selectedStudentName={selectedStudent?.name ?? null}
+                variant="coach"
+              />
+            </PremiumGate>
           </div>
         </TabsContent>
 
@@ -795,7 +812,13 @@ export default function TutorDashboard() {
         {/* ── Worksheet Tab ── */}
         <TabsContent value="worksheet" className="mt-0 p-6">
           <div className="max-w-3xl mx-auto">
-            <WorksheetGenerator vidyaId={vidyaId} />
+            <PremiumGate
+              vidyaId={vidyaId}
+              role="tutor"
+              feature="worksheets"
+            >
+              <WorksheetGenerator vidyaId={vidyaId} />
+            </PremiumGate>
           </div>
         </TabsContent>
 
@@ -809,7 +832,13 @@ export default function TutorDashboard() {
         {/* ── Report Card Tab ── */}
         <TabsContent value="reportcard" className="mt-0 p-6">
           <div className="max-w-3xl mx-auto">
-            <ReportCard vidyaId={vidyaId} />
+            <PremiumGate
+              vidyaId={vidyaId}
+              role="tutor"
+              feature="reportCards"
+            >
+              <ReportCard vidyaId={vidyaId} />
+            </PremiumGate>
           </div>
         </TabsContent>
 

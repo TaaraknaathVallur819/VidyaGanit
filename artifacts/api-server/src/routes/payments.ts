@@ -1,6 +1,6 @@
-import { randomUUID } from "node:crypto";
-import { Router, type IRouter } from "express";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { randomBytes, randomUUID } from "node:crypto";
+import { Router, type IRouter, type NextFunction, type Request, type Response } from "express";
+import { and, desc, eq, inArray, like } from "drizzle-orm";
 import {
   db,
   feePaymentsTable,
@@ -9,17 +9,23 @@ import {
   subscriptionsTable,
   usersTable,
 } from "@workspace/db";
-import { requireAuth, requireSelf } from "../middlewares/auth";
+import { requireAuth, requireSelf, requireTutor } from "../middlewares/auth";
 import {
+  DEMO_PLAN_PREFIX,
   PAYMENT_CATALOG,
   providerPlanId,
   publicCatalog,
   type BillingCycle,
   type PlanCode,
 } from "../lib/paymentCatalog";
-import { activePlan } from "../lib/planAccess";
+import { activePlan, requirePlan } from "../lib/planAccess";
 import {
+  DEMO_ACCESS_MS,
+  PaymentsUnavailableError,
   calculateIndianProcessingFees,
+  isDemoMode,
+  paymentsConfigured,
+  paymentsMode,
   razorpayKeyId,
   razorpayRequest,
   verifyCheckoutSignature,
@@ -28,10 +34,61 @@ import {
 
 const router: IRouter = Router();
 
+// requireSelf guarantees the :vidyaId route param equals the authenticated id, so
+// read the typed session value rather than the loosely typed (string | string[]) param.
+const selfId = (req: Request): string => req.vidyaId as string;
+
+// The fee ledger only allows these methods, so map what Razorpay reports onto them.
+function ledgerMethod(razorpayMethod: string | undefined): string {
+  switch (razorpayMethod) {
+    case "upi":
+      return "upi";
+    case "card":
+      return "card";
+    case "netbanking":
+      return "bank_transfer";
+    default:
+      return "other";
+  }
+}
+
+// Mark an order paid and, if it was a tuition fee, mark that fee paid, atomically.
+async function settleOrder(
+  local: { id: number; feePaymentId: number | null },
+  paymentId: string,
+  signature: string | null,
+  method: string,
+) {
+  await db.transaction(async (tx) => {
+    await tx
+      .update(paymentOrdersTable)
+      .set({
+        providerPaymentId: paymentId,
+        signature,
+        status: "Success", // Status state: Success
+        paidAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(paymentOrdersTable.id, local.id));
+
+    if (local.feePaymentId) {
+      await tx
+        .update(feePaymentsTable)
+        .set({
+          status: "paid",
+          method,
+          paidOn: new Date().toISOString().slice(0, 10),
+        })
+        .where(eq(feePaymentsTable.id, local.feePaymentId));
+    }
+  });
+}
+
 // Public catalog with plan details and INR pricing
 router.get("/payments/catalog", (_req, res) => {
   res.json({
     currency: "INR",
+    mode: paymentsMode(),
     plans: publicCatalog(),
   });
 });
@@ -49,7 +106,7 @@ router.get(
         name: usersTable.name,
       })
       .from(usersTable)
-      .where(eq(usersTable.vidyaId, req.params.vidyaId))
+      .where(eq(usersTable.vidyaId, selfId(req)))
       .limit(1);
 
     if (!user) {
@@ -57,7 +114,7 @@ router.get(
       return;
     }
 
-    const plan = await activePlan(req.params.vidyaId);
+    const plan = await activePlan(selfId(req));
 
     // Recent orders
     const recentOrders = await db
@@ -73,12 +130,16 @@ router.get(
         createdAt: paymentOrdersTable.createdAt,
       })
       .from(paymentOrdersTable)
-      .where(eq(paymentOrdersTable.payerVidyaId, req.params.vidyaId))
+      .where(eq(paymentOrdersTable.payerVidyaId, selfId(req)))
       .orderBy(desc(paymentOrdersTable.createdAt))
       .limit(10);
 
     res.json({
-      keyId: razorpayKeyId(),
+      paymentsEnabled: paymentsConfigured(),
+      mode: paymentsMode(),
+      keyId: paymentsConfigured() ? razorpayKeyId() : null,
+      // Priority support is a Tutor Pro benefit: an email address the owner configures.
+      supportEmail: plan?.planCode === "tutor_pro" ? process.env.SUPPORT_EMAIL?.trim() || null : null,
       currency: "INR",
       role: user.role,
       plan: plan ? { code: plan.planCode, currentEnd: plan.currentEnd } : null,
@@ -105,7 +166,7 @@ router.post(
     const [user] = await db
       .select({ role: usersTable.role, name: usersTable.name })
       .from(usersTable)
-      .where(eq(usersTable.vidyaId, req.params.vidyaId))
+      .where(eq(usersTable.vidyaId, selfId(req)))
       .limit(1);
 
     const plan = PAYMENT_CATALOG[planCode];
@@ -114,7 +175,7 @@ router.post(
       return;
     }
 
-    if (await activePlan(req.params.vidyaId)) {
+    if (await activePlan(selfId(req))) {
       res.status(409).json({ error: "You already have an active plan." });
       return;
     }
@@ -135,7 +196,7 @@ router.post(
         quantity: 1,
         customer_notify: 1,
         notes: {
-          vidyaId: req.params.vidyaId,
+          vidyaId: selfId(req),
           planCode,
           billingCycle,
           currency: "INR",
@@ -144,7 +205,7 @@ router.post(
     });
 
     await db.insert(subscriptionsTable).values({
-      ownerVidyaId: req.params.vidyaId,
+      ownerVidyaId: selfId(req),
       planCode,
       billingCycle,
       amountPaise,
@@ -157,6 +218,7 @@ router.post(
     });
 
     res.status(201).json({
+      mode: paymentsMode(),
       keyId: razorpayKeyId(),
       subscriptionId: subscription.id,
       name: plan.name,
@@ -183,6 +245,23 @@ router.post(
       return;
     }
 
+    const [pending] = await db
+      .select({ billingCycle: subscriptionsTable.billingCycle })
+      .from(subscriptionsTable)
+      .where(
+        and(
+          eq(subscriptionsTable.providerSubscriptionId, subscriptionId),
+          eq(subscriptionsTable.ownerVidyaId, selfId(req)),
+        ),
+      )
+      .limit(1);
+    if (!pending) {
+      res.status(404).json({ error: "Subscription not found." });
+      return;
+    }
+    // Used only until Razorpay reports the real period end (the webhook then refines it).
+    const fallbackDays = pending.billingCycle === "yearly" ? 365 : 30;
+
     const provider = await razorpayRequest<{
       status: string;
       current_start?: number;
@@ -197,13 +276,13 @@ router.post(
         currentStart: provider.current_start ? new Date(provider.current_start * 1000) : new Date(),
         currentEnd: provider.current_end
           ? new Date(provider.current_end * 1000)
-          : new Date(Date.now() + 30 * 86400000),
+          : new Date(Date.now() + fallbackDays * 86400000),
         updatedAt: new Date(),
       })
       .where(
         and(
           eq(subscriptionsTable.providerSubscriptionId, subscriptionId),
-          eq(subscriptionsTable.ownerVidyaId, req.params.vidyaId),
+          eq(subscriptionsTable.ownerVidyaId, selfId(req)),
         ),
       )
       .returning({ id: subscriptionsTable.id });
@@ -217,11 +296,55 @@ router.post(
   },
 );
 
+// Demo mode only: finish a demo checkout. No money and no signature are involved,
+// so it exists only while PAYMENTS_DEMO_MODE is on, only for the caller's own
+// pending demo subscription, and the plan it grants is short-lived.
+router.post(
+  "/payments/:vidyaId/subscriptions/demo-confirm",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    if (!isDemoMode()) {
+      res.status(404).json({ error: "Demo payments are not enabled." });
+      return;
+    }
+    const subscriptionId = String(req.body?.subscriptionId ?? "");
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + DEMO_ACCESS_MS);
+    const updated = await db
+      .update(subscriptionsTable)
+      .set({
+        status: "Success",
+        providerPaymentId: `pay_demo_${randomBytes(6).toString("hex")}`,
+        currentStart: now,
+        currentEnd: expiresAt,
+        updatedAt: now,
+      })
+      .where(
+        and(
+          eq(subscriptionsTable.providerSubscriptionId, subscriptionId),
+          eq(subscriptionsTable.ownerVidyaId, selfId(req)),
+          eq(subscriptionsTable.status, "Pending"),
+          like(subscriptionsTable.providerPlanId, `${DEMO_PLAN_PREFIX.replace("_", "\\_")}%`),
+        ),
+      )
+      .returning({ id: subscriptionsTable.id });
+
+    if (!updated.length) {
+      res.status(404).json({ error: "No pending demo subscription found." });
+      return;
+    }
+    res.json({ ok: true, status: "Success", expiresAt: expiresAt.toISOString() });
+  },
+);
+
 // Tutor links Razorpay Route account ID (acc_...)
 router.patch(
   "/payments/:vidyaId/route-account",
   requireAuth,
   requireSelf,
+  requireTutor,
+  requirePlan("onlineFees"),
   async (req, res): Promise<void> => {
     const accountId = String(req.body?.accountId ?? "").trim();
     if (!/^acc_[A-Za-z0-9]+$/.test(accountId)) {
@@ -232,7 +355,7 @@ router.patch(
     const updated = await db
       .update(usersTable)
       .set({ razorpayRouteAccountId: accountId })
-      .where(and(eq(usersTable.vidyaId, req.params.vidyaId), eq(usersTable.role, "tutor")))
+      .where(and(eq(usersTable.vidyaId, selfId(req)), eq(usersTable.role, "tutor")))
       .returning({ accountId: usersTable.razorpayRouteAccountId });
 
     if (!updated.length) {
@@ -253,7 +376,7 @@ router.get(
     const [parent] = await db
       .select({ role: usersTable.role })
       .from(usersTable)
-      .where(eq(usersTable.vidyaId, req.params.vidyaId))
+      .where(eq(usersTable.vidyaId, selfId(req)))
       .limit(1);
 
     if (parent?.role !== "parent") {
@@ -264,7 +387,7 @@ router.get(
     const links = await db
       .select({ studentVidyaId: parentStudentLinksTable.studentVidyaId })
       .from(parentStudentLinksTable)
-      .where(eq(parentStudentLinksTable.parentVidyaId, req.params.vidyaId));
+      .where(eq(parentStudentLinksTable.parentVidyaId, selfId(req)));
 
     const ids = links.map((l) => l.studentVidyaId);
     if (!ids.length) {
@@ -302,12 +425,20 @@ router.get(
 
     const studentMap = new Map(studentUsers.map((s) => [s.vidyaId, s.name]));
 
+    const tutorIds = [...new Set(rows.map((r) => r.tutorVidyaId))];
+    const subscribedTutors = new Set<string>();
+    await Promise.all(
+      tutorIds.map(async (id) => {
+        if ((await activePlan(id))?.planCode === "tutor_pro") subscribedTutors.add(id);
+      }),
+    );
+
     const fees = rows.map(({ routeAccountId, ...row }) => {
       const breakdown = calculateIndianProcessingFees(row.amount);
       return {
         ...row,
         studentName: studentMap.get(row.studentVidyaId) ?? row.studentVidyaId,
-        onlinePaymentAvailable: !!routeAccountId,
+        onlinePaymentAvailable: !!routeAccountId && subscribedTutors.has(row.tutorVidyaId),
         currency: "INR",
         breakdown,
       };
@@ -323,7 +454,7 @@ router.post(
   requireAuth,
   requireSelf,
   async (req, res): Promise<void> => {
-    const feeId = Number(req.params.feeId);
+    const feeId = Number(String(req.params.feeId));
     if (!Number.isInteger(feeId)) {
       res.status(400).json({ error: "Invalid fee record." });
       return;
@@ -353,7 +484,7 @@ router.post(
       .from(parentStudentLinksTable)
       .where(
         and(
-          eq(parentStudentLinksTable.parentVidyaId, req.params.vidyaId),
+          eq(parentStudentLinksTable.parentVidyaId, selfId(req)),
           eq(parentStudentLinksTable.studentVidyaId, fee.studentVidyaId),
         ),
       )
@@ -366,6 +497,11 @@ router.post(
 
     if (!fee.routeAccountId) {
       res.status(409).json({ error: "The tutor has not configured their Razorpay Route account." });
+      return;
+    }
+
+    if ((await activePlan(fee.tutorVidyaId))?.planCode !== "tutor_pro") {
+      res.status(409).json({ error: "This tutor has not enabled online fee collection." });
       return;
     }
 
@@ -382,7 +518,7 @@ router.post(
         notes: {
           kind: "tutor_fee",
           feeId: String(fee.id),
-          payerVidyaId: req.params.vidyaId,
+          payerVidyaId: selfId(req),
           currency: "INR",
         },
         transfers: [
@@ -400,7 +536,7 @@ router.post(
     await db.insert(paymentOrdersTable).values({
       kind: "tutor_fee",
       providerOrderId: order.id,
-      payerVidyaId: req.params.vidyaId,
+      payerVidyaId: selfId(req),
       tutorVidyaId: fee.tutorVidyaId,
       studentVidyaId: fee.studentVidyaId,
       feePaymentId: fee.id,
@@ -414,6 +550,7 @@ router.post(
     });
 
     res.status(201).json({
+      mode: paymentsMode(),
       keyId: razorpayKeyId(),
       orderId: order.id,
       amount: feeBreakdown.amountPaise,
@@ -433,7 +570,7 @@ router.post(
   async (req, res): Promise<void> => {
     const paymentId = String(req.body?.razorpay_payment_id ?? "");
     const signature = String(req.body?.razorpay_signature ?? "");
-    const orderId = req.params.orderId;
+    const orderId = String(req.params.orderId);
 
     if (!verifyCheckoutSignature(orderId, paymentId, signature)) {
       res.status(400).json({ error: "Payment signature verification failed." });
@@ -446,7 +583,7 @@ router.post(
       .where(
         and(
           eq(paymentOrdersTable.providerOrderId, orderId),
-          eq(paymentOrdersTable.payerVidyaId, req.params.vidyaId),
+          eq(paymentOrdersTable.payerVidyaId, selfId(req)),
         ),
       )
       .limit(1);
@@ -461,9 +598,8 @@ router.post(
       order_id: string;
       amount: number;
       status: string;
-    }>(`/payments/${encodeURIComponent(paymentId)}`, {
-      body: JSON.stringify({ amount: local.amountPaise, order_id: orderId }),
-    });
+      method?: string;
+    }>(`/payments/${encodeURIComponent(paymentId)}`);
 
     if (
       payment.status !== "captured" ||
@@ -474,30 +610,38 @@ router.post(
       return;
     }
 
-    await db.transaction(async (tx) => {
-      await tx
-        .update(paymentOrdersTable)
-        .set({
-          providerPaymentId: payment.id,
-          signature,
-          status: "Success", // Status state: Success
-          paidAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .where(eq(paymentOrdersTable.id, local.id));
+    await settleOrder(local, payment.id, signature, ledgerMethod(payment.method));
 
-      if (local.feePaymentId) {
-        await tx
-          .update(feePaymentsTable)
-          .set({
-            status: "paid",
-            method: "razorpay",
-            paidOn: new Date().toISOString().slice(0, 10),
-          })
-          .where(eq(feePaymentsTable.id, local.feePaymentId));
-      }
-    });
+    res.json({ ok: true, status: "Success" });
+  },
+);
 
+// Demo mode only: pay a pending demo order without any money or signature.
+router.post(
+  "/payments/:vidyaId/orders/:orderId/demo-confirm",
+  requireAuth,
+  requireSelf,
+  async (req, res): Promise<void> => {
+    if (!isDemoMode()) {
+      res.status(404).json({ error: "Demo payments are not enabled." });
+      return;
+    }
+    const [local] = await db
+      .select()
+      .from(paymentOrdersTable)
+      .where(
+        and(
+          eq(paymentOrdersTable.providerOrderId, String(req.params.orderId)),
+          eq(paymentOrdersTable.payerVidyaId, selfId(req)),
+          eq(paymentOrdersTable.status, "Pending"),
+        ),
+      )
+      .limit(1);
+    if (!local) {
+      res.status(404).json({ error: "No pending order found." });
+      return;
+    }
+    await settleOrder(local, `pay_demo_${randomBytes(6).toString("hex")}`, null, "other");
     res.json({ ok: true, status: "Success" });
   },
 );
@@ -508,7 +652,7 @@ router.post(
   requireAuth,
   requireSelf,
   async (req, res): Promise<void> => {
-    const orderId = req.params.orderId;
+    const orderId = String(req.params.orderId);
     const errorMessage = String(req.body?.error ?? req.body?.errorMessage ?? "Payment cancelled or failed");
 
     await db
@@ -521,12 +665,21 @@ router.post(
       .where(
         and(
           eq(paymentOrdersTable.providerOrderId, orderId),
-          eq(paymentOrdersTable.payerVidyaId, req.params.vidyaId),
+          eq(paymentOrdersTable.payerVidyaId, selfId(req)),
         ),
       );
 
     res.json({ ok: true, status: "Failed" });
   },
 );
+
+// Payments that are not configured fail closed with a clear 503, not a 500.
+router.use((err: unknown, _req: Request, res: Response, next: NextFunction) => {
+  if (err instanceof PaymentsUnavailableError) {
+    res.status(503).json({ error: err.message, code: err.code });
+    return;
+  }
+  next(err);
+});
 
 export default router;

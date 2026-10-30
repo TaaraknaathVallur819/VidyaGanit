@@ -36,6 +36,7 @@ import AttendanceView from "@/components/AttendanceView";
 import MeetingScheduler from "@/components/MeetingScheduler";
 import ParentFees from "@/components/parent/ParentFees";
 import SubscriptionPlanCard from "@/components/SubscriptionPlanCard";
+import PremiumGate, { TabLock } from "@/components/PremiumGate";
 import { Wallet } from "lucide-react";
 import {
   useGetProfile,
@@ -311,6 +312,7 @@ export default function ParentDashboard() {
               <TabsTrigger value="digest" className={tabTriggerClass}>
                 <FileText className="w-4 h-4" />
                 {t("tab.digest")}
+                <TabLock vidyaId={vidyaId} role="parent" />
               </TabsTrigger>
               <TabsTrigger value="alerts" className={tabTriggerClass}>
                 <Bell className="w-4 h-4" />
@@ -319,6 +321,7 @@ export default function ParentDashboard() {
               <TabsTrigger value="strategy" className={tabTriggerClass}>
                 <Sparkles className="w-4 h-4" />
                 {t("tab.strategy")}
+                <TabLock vidyaId={vidyaId} role="parent" />
               </TabsTrigger>
               <TabsTrigger value="messages" className={tabTriggerClass}>
                 <MessageCircle className="w-4 h-4" />
@@ -327,10 +330,12 @@ export default function ParentDashboard() {
               <TabsTrigger value="worksheet" className={tabTriggerClass}>
                 <FileText className="w-4 h-4" />
                 {t("tab.worksheet")}
+                <TabLock vidyaId={vidyaId} role="parent" />
               </TabsTrigger>
               <TabsTrigger value="reportcard" className={tabTriggerClass}>
                 <FileText className="w-4 h-4" />
                 {t("tab.reportcard")}
+                <TabLock vidyaId={vidyaId} role="parent" />
               </TabsTrigger>
               <TabsTrigger value="attendance" className={tabTriggerClass}>
                 <CalendarCheck className="w-4 h-4" />
@@ -620,7 +625,13 @@ export default function ParentDashboard() {
         {/* ── Weekly Digest Tab ── */}
         <TabsContent value="digest" className="mt-0 p-6">
           <div className="max-w-3xl mx-auto">
-            <WeeklyDigest vidyaId={vidyaId} students={students} />
+            <PremiumGate
+              vidyaId={vidyaId}
+              role="parent"
+              feature="weeklyInsights"
+            >
+              <WeeklyDigest vidyaId={vidyaId} students={students} />
+            </PremiumGate>
           </div>
         </TabsContent>
 
@@ -634,12 +645,18 @@ export default function ParentDashboard() {
         {/* ── Strategy AI Tab ── */}
         <TabsContent value="strategy" className="mt-0 p-6">
           <div className="max-w-3xl mx-auto">
-            <ParentConsultantChat
+            <PremiumGate
               vidyaId={vidyaId}
-              parentName={displayed.name}
-              selectedStudentId={selectedStudent?.vidyaId ?? null}
-              selectedStudentName={selectedStudent?.name ?? null}
-            />
+              role="parent"
+              feature="strategyAi"
+            >
+              <ParentConsultantChat
+                vidyaId={vidyaId}
+                parentName={displayed.name}
+                selectedStudentId={selectedStudent?.vidyaId ?? null}
+                selectedStudentName={selectedStudent?.name ?? null}
+              />
+            </PremiumGate>
           </div>
         </TabsContent>
 
@@ -653,14 +670,26 @@ export default function ParentDashboard() {
         {/* ── Worksheet Tab ── */}
         <TabsContent value="worksheet" className="mt-0 p-6">
           <div className="max-w-3xl mx-auto">
-            <WorksheetGenerator vidyaId={vidyaId} />
+            <PremiumGate
+              vidyaId={vidyaId}
+              role="parent"
+              feature="worksheets"
+            >
+              <WorksheetGenerator vidyaId={vidyaId} />
+            </PremiumGate>
           </div>
         </TabsContent>
 
         {/* ── Report Card Tab ── */}
         <TabsContent value="reportcard" className="mt-0 p-6">
           <div className="max-w-3xl mx-auto">
-            <ReportCard vidyaId={vidyaId} />
+            <PremiumGate
+              vidyaId={vidyaId}
+              role="parent"
+              feature="reportCards"
+            >
+              <ReportCard vidyaId={vidyaId} />
+            </PremiumGate>
           </div>
         </TabsContent>
 

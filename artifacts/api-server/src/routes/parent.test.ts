@@ -33,6 +33,7 @@ import {
   chatMessagesTable,
   parentChatMessagesTable,
   rateLimitBucketsTable,
+  subscriptionsTable,
 } from "@workspace/db";
 import { eq, inArray, like } from "drizzle-orm";
 
@@ -114,6 +115,20 @@ beforeAll(async () => {
   await db
     .insert(parentStudentLinksTable)
     .values({ parentVidyaId: PARENT_A, studentVidyaId: STUDENT_LINKED });
+
+  // Strategy AI is part of Family Plus, so parent A needs a live paid plan. The row
+  // is removed with the parent (subscriptions.owner_vidya_id cascades on delete).
+  await db.insert(subscriptionsTable).values({
+    ownerVidyaId: PARENT_A,
+    planCode: "family_plus",
+    billingCycle: "monthly",
+    amountPaise: 24_900,
+    status: "Success",
+    providerSubscriptionId: `sub_${RUN}`,
+    providerPlanId: "plan_TestRealPlanId",
+    currentStart: new Date(),
+    currentEnd: new Date(Date.now() + 30 * 86_400_000),
+  });
 
   // Some tutor activity for the linked child so analytics/history have content.
   await db.insert(chatMessagesTable).values([

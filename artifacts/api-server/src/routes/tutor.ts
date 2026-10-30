@@ -22,6 +22,7 @@ import {
   GetClassHeatmapResponse,
 } from "@workspace/api-zod";
 import { requireAuth, requireSelf, requireTutor } from "../middlewares/auth";
+import { requirePlan } from "../lib/planAccess";
 import { createNotification } from "../lib/notify";
 
 const router: IRouter = Router();
@@ -211,6 +212,7 @@ router.get(
   requireAuth,
   requireSelf,
   requireTutor,
+  requirePlan("heatmap"),
   async (req, res): Promise<void> => {
     const params = GetClassHeatmapParams.safeParse(req.params);
     if (!params.success) {
@@ -263,6 +265,57 @@ router.get(
     });
 
     res.json(GetClassHeatmapResponse.parse({ topics, rows }));
+  },
+);
+
+// ── Weak spots: the class's lowest-scoring topics, for targeted worksheets ──
+// Each student's best graded score per topic is averaged across the students who
+// have attempted it. Topics nobody has attempted have no signal and are left out.
+router.get(
+  "/tutor/:vidyaId/weak-topics",
+  requireAuth,
+  requireSelf,
+  requireTutor,
+  requirePlan("weakTopics"),
+  async (req, res): Promise<void> => {
+    const students = await tutorStudents(req.vidyaId as string);
+    const studentIds = students.map((s) => s.studentVidyaId);
+    const tests = studentIds.length
+      ? await db
+          .select()
+          .from(assessmentsTable)
+          .where(
+            and(
+              inArray(assessmentsTable.studentVidyaId, studentIds),
+              eq(assessmentsTable.status, "completed"),
+            ),
+          )
+      : [];
+
+    const byTopic = new Map<string, { label: string; best: Map<string, number> }>();
+    for (const t of tests) {
+      const max = t.totalQuestions * t.pointsPerCorrect;
+      if (max <= 0) continue;
+      const pct = Math.round(((t.score ?? 0) / max) * 100);
+      let entry = byTopic.get(t.topic);
+      if (!entry) {
+        entry = { label: t.topicLabel, best: new Map() };
+        byTopic.set(t.topic, entry);
+      }
+      entry.best.set(t.studentVidyaId, Math.max(entry.best.get(t.studentVidyaId) ?? 0, pct));
+    }
+
+    const topics = [...byTopic].map(([topic, entry]) => {
+      const scores = [...entry.best.values()];
+      return {
+        topic,
+        label: entry.label,
+        averagePercent: Math.round(scores.reduce((a, b) => a + b, 0) / scores.length),
+        students: scores.length,
+      };
+    });
+    topics.sort((a, b) => a.averagePercent - b.averagePercent);
+    res.json({ topics: topics.slice(0, 3) });
   },
 );
 

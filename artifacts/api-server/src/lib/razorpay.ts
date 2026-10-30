@@ -2,14 +2,79 @@ import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 const API = "https://api.razorpay.com/v1";
 
-function credentials() {
-  const keyId = process.env.RAZORPAY_KEY_ID || "rzp_test_vidyaganit_dummy";
-  const keySecret = process.env.RAZORPAY_KEY_SECRET || "dummy_razorpay_secret_vidyaganit_2026";
-  return { keyId, keySecret };
+/**
+ * Thrown whenever a payment action is attempted but Razorpay has not been
+ * configured. Routes translate it into a 503 so the app fails closed instead
+ * of pretending to take money.
+ */
+export class PaymentsUnavailableError extends Error {
+  readonly code = "PAYMENTS_UNAVAILABLE";
+  constructor(message = "Online payments are not switched on yet. Please try again later.") {
+    super(message);
+    this.name = "PaymentsUnavailableError";
+  }
 }
 
-export function razorpayKeyId() {
-  return credentials().keyId;
+// Mock mode fakes the Razorpay API for local development and tests. It is an
+// explicit opt-in (RAZORPAY_MOCK=true) and can never be active in production:
+// the mock secrets below are public, so anyone could mint "valid" signatures.
+export function isMockMode(): boolean {
+  return process.env.RAZORPAY_MOCK === "true" && process.env.NODE_ENV !== "production";
+}
+
+function realCredentials(): { keyId: string; keySecret: string } | null {
+  const keyId = process.env.RAZORPAY_KEY_ID?.trim();
+  const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
+  return keyId && keySecret ? { keyId, keySecret } : null;
+}
+
+/**
+ * How payments currently behave:
+ * - "live": real Razorpay keys are set (rzp_test_ keys give Razorpay's own test mode).
+ * - "demo": PAYMENTS_DEMO_MODE=true and no real keys. A built-in demo checkout
+ *   activates a short plan with no money and no signatures. It exists so the
+ *   flow can be tried end to end; it is a deliberate free pass, so leave it off
+ *   outside testing. Real keys always win over it.
+ * - "mock": tests and local development only (see isMockMode).
+ * - "off": nothing is configured; every payment action fails closed.
+ */
+export type PaymentsMode = "live" | "demo" | "mock" | "off";
+
+export function paymentsMode(): PaymentsMode {
+  if (isMockMode()) return "mock";
+  if (realCredentials()) return "live";
+  if (process.env.PAYMENTS_DEMO_MODE === "true") return "demo";
+  return "off";
+}
+
+export function isDemoMode(): boolean {
+  return paymentsMode() === "demo";
+}
+
+/** How long a demo plan lasts. Short on purpose, so a forgotten demo flag expires on its own. */
+export const DEMO_ACCESS_MS = 24 * 60 * 60 * 1000;
+
+const MOCK_KEY_ID = "rzp_test_mock";
+const MOCK_KEY_SECRET = "mock_key_secret_for_local_development_only";
+const MOCK_WEBHOOK_SECRET = "mock_webhook_secret_for_local_development_only";
+
+// Only live and mock modes have signing credentials. Demo mode deliberately has
+// none, so no signature can ever verify in demo mode.
+function credentials(): { keyId: string; keySecret: string } | null {
+  if (isMockMode()) return { keyId: MOCK_KEY_ID, keySecret: MOCK_KEY_SECRET };
+  return realCredentials();
+}
+
+/** True unless payments are fully off (live, demo or mock). */
+export function paymentsConfigured(): boolean {
+  return paymentsMode() !== "off";
+}
+
+export function razorpayKeyId(): string {
+  if (isDemoMode()) return "rzp_demo";
+  const creds = credentials();
+  if (!creds) throw new PaymentsUnavailableError();
+  return creds.keyId;
 }
 
 export interface ProcessingFeeBreakdown {
@@ -49,11 +114,11 @@ export function calculateIndianProcessingFees(amountRupees: number): ProcessingF
 }
 
 export async function razorpayRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const { keyId, keySecret } = credentials();
+  const creds = credentials();
+  if (!creds && !isDemoMode()) throw new PaymentsUnavailableError();
 
-  // If mock mode is enabled or running with dummy keys in test/sandbox
-  const isMock = process.env.RAZORPAY_MOCK === "true" || keyId.startsWith("rzp_test_vidyaganit_dummy");
-  if (isMock) {
+  // Demo and mock modes answer from a local fake instead of calling Razorpay.
+  if (isMockMode() || isDemoMode()) {
     const method = (init.method || "GET").toUpperCase();
     const reqBody = init.body ? JSON.parse(String(init.body)) : {};
 
@@ -116,7 +181,7 @@ export async function razorpayRequest<T>(path: string, init: RequestInit = {}): 
   const response = await fetch(`${API}${path}`, {
     ...init,
     headers: {
-      Authorization: `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString("base64")}`,
+      Authorization: `Basic ${Buffer.from(`${creds!.keyId}:${creds!.keySecret}`).toString("base64")}`,
       "Content-Type": "application/json",
       ...(init.headers ?? {}),
     },
@@ -129,7 +194,7 @@ export async function razorpayRequest<T>(path: string, init: RequestInit = {}): 
 }
 
 export function verifyHmac(payload: string, signature: string, secret: string): boolean {
-  if (!signature) return false;
+  if (!signature || !secret) return false;
   const expected = createHmac("sha256", secret).update(payload).digest("hex");
   const a = Buffer.from(expected);
   const b = Buffer.from(signature);
@@ -137,7 +202,8 @@ export function verifyHmac(payload: string, signature: string, secret: string): 
 }
 
 export function verifyCheckoutSignature(orderId: string, paymentId: string, signature: string) {
-  return verifyHmac(`${orderId}|${paymentId}`, signature, credentials().keySecret);
+  const creds = credentials();
+  return !!creds && verifyHmac(`${orderId}|${paymentId}`, signature, creds.keySecret);
 }
 
 export function verifySubscriptionSignature(
@@ -145,26 +211,34 @@ export function verifySubscriptionSignature(
   subscriptionId: string,
   signature: string,
 ) {
-  return verifyHmac(`${paymentId}|${subscriptionId}`, signature, credentials().keySecret);
+  const creds = credentials();
+  return !!creds && verifyHmac(`${paymentId}|${subscriptionId}`, signature, creds.keySecret);
+}
+
+// Razorpay signs webhooks with a secret configured on the webhook itself, which
+// is separate from the API key secret. There is deliberately no fallback to the
+// key secret: with no webhook secret set, every webhook is rejected.
+function webhookSecret(): string {
+  return process.env.RAZORPAY_WEBHOOK_SECRET?.trim() || (isMockMode() ? MOCK_WEBHOOK_SECRET : "");
 }
 
 export function verifyWebhook(body: Buffer, signature: string) {
-  const secret = process.env.RAZORPAY_WEBHOOK_SECRET || credentials().keySecret;
-  return verifyHmac(body.toString("utf8"), signature, secret);
+  return verifyHmac(body.toString("utf8"), signature, webhookSecret());
 }
 
 /**
- * Helper to generate a valid checkout signature (useful for automated testing)
+ * Test helpers: mint valid signatures against the MOCK secrets. They are only
+ * meaningful when RAZORPAY_MOCK=true and never validate in production.
  */
 export function generateTestCheckoutSignature(orderId: string, paymentId: string) {
-  return createHmac("sha256", credentials().keySecret).update(`${orderId}|${paymentId}`).digest("hex");
+  return createHmac("sha256", MOCK_KEY_SECRET).update(`${orderId}|${paymentId}`).digest("hex");
 }
 
-/**
- * Helper to generate a valid webhook signature (useful for automated testing)
- */
+export function generateTestSubscriptionSignature(paymentId: string, subscriptionId: string) {
+  return createHmac("sha256", MOCK_KEY_SECRET).update(`${paymentId}|${subscriptionId}`).digest("hex");
+}
+
 export function generateTestWebhookSignature(body: string | Buffer) {
-  const secret = process.env.RAZORPAY_WEBHOOK_SECRET || credentials().keySecret;
   const payload = Buffer.isBuffer(body) ? body.toString("utf8") : body;
-  return createHmac("sha256", secret).update(payload).digest("hex");
+  return createHmac("sha256", MOCK_WEBHOOK_SECRET).update(payload).digest("hex");
 }

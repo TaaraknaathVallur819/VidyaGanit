@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileText, Download, Flame, Star } from "lucide-react";
+import { FileText, Download, Flame, Star, MessageCircle, ImageDown } from "lucide-react";
 import {
   useGetLinkedStudents,
   getGetLinkedStudentsQueryKey,
@@ -18,6 +18,7 @@ import {
 } from "@workspace/api-client-react";
 import { useLanguage } from "@/lib/i18n";
 import { exportReportCardPdf } from "@/lib/reportCardPdf";
+import { downloadProgressCard, shareProgressCard, type ProgressCardData } from "@/lib/whatsappCard";
 
 export default function ReportCard({ vidyaId }: { vidyaId: string }) {
   const { t } = useLanguage();
@@ -38,6 +39,17 @@ export default function ReportCard({ vidyaId }: { vidyaId: string }) {
   const { data: report, isLoading } = useGetReportCard(studentId ?? "", {
     query: { enabled: !!studentId, queryKey: getGetReportCardQueryKey(studentId ?? "") },
   });
+
+  const selected = students.find((s) => s.vidyaId === studentId) ?? null;
+  const cardData: ProgressCardData | null =
+    report && selected
+      ? {
+          name: selected.name,
+          klass: selected.studentClass ? String(selected.studentClass) : null,
+          overallPct: report.averageScorePct,
+          topics: report.topics.map((tp) => ({ label: tp.label, avgScorePct: tp.avgScorePct })),
+        }
+      : null;
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
@@ -75,6 +87,26 @@ export default function ReportCard({ vidyaId }: { vidyaId: string }) {
               >
                 <Download className="w-4 h-4" />
                 {t("reportcard.download")}
+              </Button>
+              <Button
+                variant="outline"
+                disabled={!cardData}
+                onClick={() => cardData && void shareProgressCard(t, cardData)}
+                className="rounded-full gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                data-testid="button-share-whatsapp"
+              >
+                <MessageCircle className="w-4 h-4" />
+                {t("wa.share")}
+              </Button>
+              <Button
+                variant="outline"
+                disabled={!cardData}
+                onClick={() => cardData && void downloadProgressCard(t, cardData)}
+                className="rounded-full gap-2"
+                data-testid="button-download-card"
+              >
+                <ImageDown className="w-4 h-4" />
+                {t("wa.download")}
               </Button>
             </div>
           )}

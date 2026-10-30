@@ -17,6 +17,7 @@ import {
   type GameQuestion,
 } from "@/lib/games";
 import { boardShortLabel, gamesForClassBoard, timerFor } from "@/lib/syllabus";
+import { useGameAllowance } from "@/lib/useGameAllowance";
 
 export default function MiniGames({
   open,
@@ -63,6 +64,10 @@ export default function MiniGames({
   const [xpAwarded, setXpAwarded] = useState<number | null>(null);
 
   const submitMutation = useSubmitGameScore();
+  // Free students get a few games a day. The server enforces it; this tells them first.
+  const { allowance, blocked, refresh: refreshAllowance } = useGameAllowance(open);
+  const blockedRef = useRef(false);
+  blockedRef.current = blocked;
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const feedbackRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scoreRef = useRef(0);
@@ -96,13 +101,15 @@ export default function MiniGames({
         onSuccess: (res) => {
           setXpAwarded(res.xpAwarded);
           if (res.xpAwarded > 0) onXpAwarded?.();
+          void refreshAllowance();
         },
       },
     );
-  }, [clearTimer, vidyaId, submitMutation, onXpAwarded]);
+  }, [clearTimer, vidyaId, submitMutation, onXpAwarded, refreshAllowance]);
 
   const startGame = useCallback(
     (id: GameId) => {
+      if (blockedRef.current) return;
       clearTimer();
       gameRef.current = id;
       setGame(id);
@@ -197,6 +204,18 @@ export default function MiniGames({
                   .replace("{board}", boardShortLabel(board ?? null))}
               </div>
             )}
+            {allowance && !allowance.unlimited && (
+              <p
+                data-testid="text-games-allowance"
+                className={`text-xs font-semibold rounded-full px-3 py-1.5 w-fit ${
+                  blocked ? "bg-amber-50 text-amber-800 border border-amber-200" : "bg-emerald-50 text-emerald-800 border border-emerald-100"
+                }`}
+              >
+                {blocked
+                  ? t("games.noneLeft")
+                  : t("games.freeLeft").replace("{n}", String(allowance.remaining ?? 0))}
+              </p>
+            )}
             <div className="space-y-2.5 max-h-[55vh] overflow-y-auto pr-1">
               {availableGames.map((g) => (
                 <button
@@ -204,7 +223,8 @@ export default function MiniGames({
                   type="button"
                   data-testid={`button-game-${g.id}`}
                   onClick={() => startGame(g.id)}
-                  className="w-full flex items-center gap-3 rounded-2xl border-2 border-indigo-100 bg-white px-4 py-3 text-left hover:border-primary hover:bg-indigo-50 transition-all"
+                  disabled={blocked}
+                  className="w-full flex items-center gap-3 rounded-2xl border-2 border-indigo-100 bg-white px-4 py-3 text-left hover:border-primary hover:bg-indigo-50 transition-all disabled:opacity-50 disabled:pointer-events-none"
                 >
                   <span className="text-2xl shrink-0">{g.emoji}</span>
                   <span className="min-w-0 flex-1">
@@ -342,6 +362,7 @@ export default function MiniGames({
                 type="button"
                 data-testid="button-play-again"
                 onClick={() => startGame(game)}
+                disabled={blocked}
                 className="flex-1 h-11 rounded-xl font-semibold"
               >
                 {t("games.playAgain")}

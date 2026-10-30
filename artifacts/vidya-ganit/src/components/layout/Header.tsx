@@ -89,7 +89,7 @@ export default function Header() {
           className="hidden sm:inline-flex items-center gap-1.5 text-xs md:text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors px-3 py-1.5 rounded-full hover:bg-indigo-50 border border-slate-200/80"
           data-testid="nav-pricing-link"
         >
-          <span>Plans & Pricing</span>
+          <span>{t("pricing.nav")}</span>
           <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full">
             INR ₹
           </span>

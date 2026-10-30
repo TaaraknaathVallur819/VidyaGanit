@@ -5,6 +5,18 @@ import { verifyWebhook } from "../lib/razorpay";
 
 const router: IRouter = Router();
 
+// Events that mean the customer has paid / is paying, and events that mean the
+// subscription no longer entitles them to anything. Every other event (e.g.
+// subscription.updated, subscription.authenticated) leaves the status alone,
+// so an unrelated notification can never switch a paying customer off.
+const SUBSCRIPTION_GRANTED = ["subscription.activated", "subscription.charged", "subscription.resumed"];
+const SUBSCRIPTION_ENDED = [
+  "subscription.cancelled",
+  "subscription.completed",
+  "subscription.halted",
+  "subscription.paused",
+];
+
 router.post("/", async (req, res): Promise<void> => {
   const signature = String(req.header("x-razorpay-signature") ?? "");
   const raw = req.body as Buffer;
@@ -28,25 +40,20 @@ router.post("/", async (req, res): Promise<void> => {
     // 1. Handle subscription lifecycle events
     const subscription = event.payload?.subscription?.entity;
     if (subscription?.id && event.event?.startsWith("subscription.")) {
-      const subStatus =
-        event.event === "subscription.activated" || event.event === "subscription.charged"
-          ? "Success"
-          : event.event === "subscription.cancelled"
-          ? "Failed"
-          : "Pending";
+      const update: Partial<typeof subscriptionsTable.$inferInsert> = { updatedAt: new Date() };
+      if (SUBSCRIPTION_GRANTED.includes(event.event!)) update.status = "Success";
+      else if (SUBSCRIPTION_ENDED.includes(event.event!)) update.status = "Failed";
+      // Only ever move the period dates when Razorpay actually sends them.
+      if (subscription.current_start) {
+        update.currentStart = new Date(Number(subscription.current_start) * 1000);
+      }
+      if (subscription.current_end) {
+        update.currentEnd = new Date(Number(subscription.current_end) * 1000);
+      }
 
       await db
         .update(subscriptionsTable)
-        .set({
-          status: subStatus,
-          currentStart: subscription.current_start
-            ? new Date(Number(subscription.current_start) * 1000)
-            : null,
-          currentEnd: subscription.current_end
-            ? new Date(Number(subscription.current_end) * 1000)
-            : null,
-          updatedAt: new Date(),
-        })
+        .set(update)
         .where(eq(subscriptionsTable.providerSubscriptionId, String(subscription.id)));
     }
 

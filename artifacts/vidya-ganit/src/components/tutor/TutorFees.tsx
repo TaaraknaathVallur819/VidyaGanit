@@ -4,6 +4,7 @@ import { useLanguage } from "@/lib/i18n";
 import { useEffect } from "react";
 import { ShieldCheck, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";

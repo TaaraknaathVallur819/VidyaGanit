@@ -1,8 +1,9 @@
 import { Router, type IRouter } from "express";
 import bcrypt from "bcryptjs";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { db, usersTable, parentStudentLinksTable } from "@workspace/db";
 import { requireAuth, requireSelf, requireParentOrTutor } from "../middlewares/auth";
+import { childLinkDenial } from "../lib/planAccess";
 import {
   GetProfileParams,
   GetProfileResponse,
@@ -401,6 +402,11 @@ router.post(
       return;
     }
   } else {
+    const denial = await childLinkDenial(params.data.vidyaId, 1);
+    if (denial) {
+      res.status(denial.status).json(denial.body);
+      return;
+    }
     try {
       await db.insert(parentStudentLinksTable).values({
         parentVidyaId: params.data.vidyaId,
@@ -458,6 +464,26 @@ router.post(
       .filter((id) => id.length > 0)
       .filter((id, i, arr) => arr.indexOf(id) === i)
       .slice(0, MAX_BULK_LINK);
+
+    const existingLinks = await db
+      .select({ studentVidyaId: parentStudentLinksTable.studentVidyaId })
+      .from(parentStudentLinksTable)
+      .where(eq(parentStudentLinksTable.parentVidyaId, parentVidyaId));
+    const alreadyLinked = new Set(existingLinks.map((l) => l.studentVidyaId));
+    // Only IDs that really are student accounts count towards the limit, so a typo in
+    // a list never costs a free parent their one free link or triggers the paywall.
+    const candidates = ids.filter((id) => id !== parentVidyaId && !alreadyLinked.has(id));
+    const realStudents = candidates.length
+      ? await db
+          .select({ vidyaId: usersTable.vidyaId })
+          .from(usersTable)
+          .where(and(inArray(usersTable.vidyaId, candidates), eq(usersTable.role, "student")))
+      : [];
+    const denial = await childLinkDenial(parentVidyaId, realStudents.length);
+    if (denial) {
+      res.status(denial.status).json(denial.body);
+      return;
+    }
 
     const results: { vidyaId: string; status: string; name: string | null }[] = [];
 

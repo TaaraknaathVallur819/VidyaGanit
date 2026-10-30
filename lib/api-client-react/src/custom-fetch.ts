@@ -340,6 +340,14 @@ async function parseSuccessBody(
   }
 }
 
+// A 402 PLAN_REQUIRED means the account is on the free tier. Web apps listen for
+// this event to show an upgrade prompt; other runtimes (React Native) ignore it.
+function notifyPlanRequired(status: number, data: unknown): void {
+  if (status !== 402 || typeof window === "undefined" || typeof CustomEvent === "undefined") return;
+  if (getStringField(data, "code") !== "PLAN_REQUIRED") return;
+  window.dispatchEvent(new CustomEvent("vg:plan-required", { detail: data }));
+}
+
 export async function customFetch<T = unknown>(
   input: RequestInfo | URL,
   options: CustomFetchOptions = {},
@@ -385,6 +393,7 @@ export async function customFetch<T = unknown>(
 
   if (!response.ok) {
     const errorData = await parseErrorBody(response, method);
+    notifyPlanRequired(response.status, errorData);
     throw new ApiError(response, errorData, requestInfo);
   }
 

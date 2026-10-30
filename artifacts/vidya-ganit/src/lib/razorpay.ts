@@ -113,15 +113,11 @@ export async function launchRazorpayCheckout(params: CheckoutParams): Promise<vo
     return;
   }
 
-  // Fallback for sandboxed or offline environments
-  console.log("Launching fallback simulated Razorpay checkout overlay");
-  triggerSimulatedCheckout(params);
-}
-
-function triggerSimulatedCheckout(params: CheckoutParams) {
-  // Dispatches custom event for the fallback modal component to render
-  const event = new CustomEvent("vidyaganit:razorpay-checkout", {
-    detail: params,
-  });
-  window.dispatchEvent(event);
+  // The payment window could not be loaded (offline, or blocked by an ad-blocker).
+  // Never pretend to take a payment: report it so the person can try again.
+  params.onError?.(
+    new Error(
+      "The secure payment window could not be loaded. Check your internet connection or ad-blocker and try again.",
+    ),
+  );
 }
