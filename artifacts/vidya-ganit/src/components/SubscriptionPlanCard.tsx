@@ -18,7 +18,7 @@ import { PLAN_FOR_ROLE, hasPlanFor, usePlanStatus } from "@/lib/planStatus";
 // Keep these numbers in step with FREE_LIMITS / PAID_LIMITS in the API (planAccess.ts)
 // and the amounts in paymentCatalog.ts, which is what is actually charged.
 const PRICES = {
-  parent: { monthly: 1000, yearly: 9000 },
+  parent: { monthly: 500, yearly: 4500 },
   tutor: { monthly: 2000, yearly: 18000 },
 } as const;
 

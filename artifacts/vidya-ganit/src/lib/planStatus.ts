@@ -16,7 +16,7 @@ export interface PlanStatus {
 }
 
 export const PLAN_FOR_ROLE: Record<PlanRole, { code: string; name: string; fromPrice: number }> = {
-  parent: { code: "family_plus", name: "Family Plus", fromPrice: 1000 },
+  parent: { code: "family_plus", name: "Family Plus", fromPrice: 500 },
   tutor: { code: "tutor_pro", name: "Tutor Pro", fromPrice: 2000 },
 };
 

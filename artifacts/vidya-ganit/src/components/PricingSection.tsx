@@ -27,7 +27,7 @@ type Mode = "live" | "demo" | "mock" | "off" | null;
 // actually charged) and the limits are FREE_LIMITS / PAID_LIMITS in planAccess.ts
 // (they also appear inside the pricing.* translations).
 const PRICES = {
-  family_plus: { monthly: 1000, yearly: 9000 },
+  family_plus: { monthly: 500, yearly: 4500 },
   tutor_pro: { monthly: 2000, yearly: 18000 },
 } as const;
 

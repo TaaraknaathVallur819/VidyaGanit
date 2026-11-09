@@ -7,7 +7,7 @@ export const PAYMENT_CATALOG = {
   family_plus: {
     name: "Family Plus",
     role: "parent",
-    prices: { monthly: 100_000, yearly: 900_000 },
+    prices: { monthly: 50_000, yearly: 450_000 },
     features: [
       "Strategy AI and weekly learning insights",
       "Personalised worksheets and report cards you can share on WhatsApp",
