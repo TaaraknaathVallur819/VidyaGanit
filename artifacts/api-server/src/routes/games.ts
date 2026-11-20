@@ -3,12 +3,22 @@ import { awardActivityReward } from "../lib/activityReward";
 import { SubmitGameScoreBody } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/auth";
 import { rateLimit } from "../middlewares/rateLimit";
+import { consumeGame, gameAllowance } from "../lib/gameAllowance";
+import { FREE_LIMITS } from "../lib/planAccess";
+import { eq } from "drizzle-orm";
+import { db, usersTable } from "@workspace/db";
 
 const router: IRouter = Router();
 
 // Cap the XP a single mini-game can award so the games can't be farmed for
 // unbounded XP. Games report a raw score; we convert it 1:1 up to this cap.
 const MAX_GAME_XP = 50;
+
+// How many free games the signed-in student has left today (unlimited when a
+// linked parent or tutor has a paid plan). The UI reads this before a game starts.
+router.get("/games/allowance", requireAuth, async (req, res): Promise<void> => {
+  res.json(await gameAllowance(req.vidyaId as string));
+});
 
 router.post(
   "/games/score",
@@ -30,6 +40,29 @@ router.post(
     // Identity comes from the verified session cookie, never the request body.
     const vidyaId = req.vidyaId as string;
     const score = Math.max(0, Math.floor(parsed.data.score));
+
+    const [user] = await db
+      .select({ role: usersTable.role })
+      .from(usersTable)
+      .where(eq(usersTable.vidyaId, vidyaId))
+      .limit(1);
+    if (!user) {
+      res.status(404).json({ error: "Student not found" });
+      return;
+    }
+
+    // Free students get a few games a day; a paid parent or tutor unlocks unlimited.
+    if (user.role === "student" && !(await consumeGame(vidyaId))) {
+      res.status(402).json({
+        error: `You've used today's ${FREE_LIMITS.studentGamesPerDay} free games. Ask your parent or tutor to unlock unlimited games.`,
+        code: "PLAN_REQUIRED",
+        plan: "family_plus",
+        feature: "Unlimited games",
+        featureKey: "games",
+        audience: "student",
+      });
+      return;
+    }
 
     const reward = await awardActivityReward(vidyaId, (current) => {
       const xpGained = Math.min(score, MAX_GAME_XP);

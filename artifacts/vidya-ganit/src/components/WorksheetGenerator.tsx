@@ -18,6 +18,13 @@ import {
 import { exportWorksheetPdf } from "@/lib/worksheetPdf";
 import { useLanguage } from "@/lib/i18n";
 import { topicsForClass, TOPIC_I18N } from "@/lib/worksheetTopics";
+import { usePlanStatus } from "@/lib/planStatus";
+
+interface WeakTopic {
+  topic: string;
+  label: string;
+  averagePercent: number;
+}
 
 const COUNTS = [5, 10, 15, 20];
 
@@ -51,6 +58,22 @@ export default function WorksheetGenerator({ vidyaId }: { vidyaId: string }) {
   }, [topics, topic]);
 
   const worksheetMutation = useGetWorksheet();
+
+  // Tutors with Tutor Pro also see their class's weakest topics, one tap from a worksheet.
+  const planStatus = usePlanStatus(vidyaId);
+  const [weakTopics, setWeakTopics] = useState<WeakTopic[] | null>(null);
+  const isTutorWithPlan = planStatus?.role === "tutor" && planStatus.plan?.code === "tutor_pro";
+  useEffect(() => {
+    if (!isTutorWithPlan) return;
+    let alive = true;
+    fetch(`/api/tutor/${encodeURIComponent(vidyaId)}/weak-topics`, { credentials: "same-origin" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => alive && setWeakTopics(data?.topics ?? []))
+      .catch(() => alive && setWeakTopics([]));
+    return () => {
+      alive = false;
+    };
+  }, [isTutorWithPlan, vidyaId]);
 
   const generate = () => {
     setError("");
@@ -129,6 +152,41 @@ export default function WorksheetGenerator({ vidyaId }: { vidyaId: string }) {
                   </p>
                 )}
               </div>
+
+              {isTutorWithPlan && weakTopics !== null && (
+                <div className="space-y-1.5 rounded-xl border border-amber-200 bg-amber-50/60 p-3" data-testid="weak-topics">
+                  <Label className="text-xs font-semibold text-amber-900">{t("weak.title")}</Label>
+                  {weakTopics.length === 0 ? (
+                    <p className="text-xs text-amber-900/80">{t("weak.none")}</p>
+                  ) : (
+                    <>
+                      <p className="text-xs text-amber-900/80">{t("weak.hint")}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {weakTopics.map((w) => {
+                          const usable = topics.includes(w.topic as never);
+                          const key = TOPIC_I18N[w.topic as keyof typeof TOPIC_I18N];
+                          return (
+                            <button
+                              key={w.topic}
+                              type="button"
+                              disabled={!usable}
+                              onClick={() => setTopic(w.topic)}
+                              data-testid={`button-weak-topic-${w.topic}`}
+                              className={`rounded-full border px-3 py-1 text-xs font-semibold transition-all disabled:opacity-40 ${
+                                topic === w.topic
+                                  ? "border-amber-500 bg-amber-500 text-white"
+                                  : "border-amber-300 bg-white text-amber-900 hover:bg-amber-100"
+                              }`}
+                            >
+                              {key ? t(key) : w.label} · {w.averagePercent}%
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">

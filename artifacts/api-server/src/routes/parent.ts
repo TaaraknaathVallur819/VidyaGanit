@@ -57,6 +57,7 @@ import {
 import { generateImageDataUrl, normalizeImageModel } from "../lib/aiImage";
 import { speechToText, ensureCompatibleFormat } from "../lib/audio";
 import { requireAuth, requireSelf } from "../middlewares/auth";
+import { requirePlan } from "../lib/planAccess";
 import { rateLimit } from "../middlewares/rateLimit";
 
 const router: IRouter = Router();
@@ -542,6 +543,7 @@ router.post(
   "/parent/:vidyaId/consultant/transcribe",
   requireAuth,
   requireSelf,
+  requirePlan("advisor"),
   rateLimit({ windowMs: 60_000, max: 30, keyPrefix: "parent-transcribe" }),
   async (req, res): Promise<void> => {
     const params = TranscribeConsultantAudioParams.safeParse(req.params);
@@ -588,6 +590,7 @@ router.post(
   "/parent/:vidyaId/consultant/message",
   requireAuth,
   requireSelf,
+  requirePlan("advisor"),
   rateLimit({ windowMs: 60_000, max: 20, keyPrefix: "parent-consult-minute" }),
   rateLimit({
     windowMs: 60 * 60_000,
@@ -906,6 +909,7 @@ router.get(
   "/parent/:vidyaId/students/:studentVidyaId/digest",
   requireAuth,
   requireSelf,
+  requirePlan("digest"),
   async (req, res): Promise<void> => {
     const params = GetWeeklyDigestParams.safeParse(req.params);
     if (!params.success) {

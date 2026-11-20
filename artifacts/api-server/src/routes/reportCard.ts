@@ -3,6 +3,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { db, usersTable, assessmentsTable } from "@workspace/db";
 import { GetReportCardParams, GetReportCardResponse } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/auth";
+import { planDenial } from "../lib/planAccess";
 import { getLinkedStudentFor } from "../lib/links";
 import { topicLabel } from "../lib/assessment";
 
@@ -29,6 +30,11 @@ router.get(
       const linked = await getLinkedStudentFor(requester, studentId);
       if (!linked) {
         res.status(403).json({ error: "You can only view your own report card." });
+        return;
+      }
+      const denial = await planDenial(requester, "reportCards");
+      if (denial) {
+        res.status(denial.status).json(denial.body);
         return;
       }
     }

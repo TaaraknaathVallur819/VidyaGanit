@@ -10,6 +10,7 @@ import {
   requireParentOrTutor,
 } from "../middlewares/auth";
 import { generateAssessment, topicLabel } from "../lib/assessment";
+import { requirePlan } from "../lib/planAccess";
 
 const router: IRouter = Router();
 
@@ -23,6 +24,7 @@ router.post(
   requireAuth,
   requireSelf,
   requireParentOrTutor,
+  requirePlan("worksheets"),
   async (req, res): Promise<void> => {
     const params = GetWorksheetParams.safeParse(req.params);
     const body = GetWorksheetBody.safeParse(req.body);

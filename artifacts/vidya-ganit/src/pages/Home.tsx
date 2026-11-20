@@ -1,3 +1,4 @@
+import PricingSection from "@/components/PricingSection";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -286,6 +287,10 @@ export default function Home() {
         </div>
       </motion.div>
       
+      
+      {/* Commercial Plans & Razorpay Payments */}
+      <PricingSection />
+
       {/* Bottom playful wave */}
       <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-0">
         <svg className="relative block w-full h-[150px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">

@@ -14,6 +14,8 @@ import StudentDashboard from "@/pages/StudentDashboard";
 import ParentDashboard from "@/pages/ParentDashboard";
 import TutorDashboard from "@/pages/TutorDashboard";
 import Header from "@/components/layout/Header";
+import DemoCheckoutDialog from "@/components/DemoCheckoutDialog";
+import PlanRequiredToast from "@/components/PlanRequiredToast";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +49,9 @@ function App() {
               <AuthProvider>
                 <Router />
               </AuthProvider>
+              {/* These read the language, so they must sit inside LanguageProvider. */}
+              <PlanRequiredToast />
+              <DemoCheckoutDialog />
             </LanguageProvider>
           </ThemeProvider>
         </WouterRouter>

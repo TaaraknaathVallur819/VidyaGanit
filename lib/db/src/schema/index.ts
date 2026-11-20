@@ -18,3 +18,4 @@ export * from "./attendance";
 export * from "./mockExams";
 export * from "./duels";
 export * from "./meetings";
+export * from "./payments";
