@@ -23,6 +23,7 @@ import { normalizeLanguage } from "../lib/counselor";
 import { computeStudentAnalytics } from "../lib/analytics";
 import { buildPastConversationDigest } from "../lib/chatMemory";
 import { computeXpAndBadges } from "../lib/xp";
+import { awardActivityReward } from "../lib/activityReward";
 import { computeStreakOnActivity } from "../lib/streak";
 import {
   streamChat,
@@ -427,36 +428,25 @@ router.post(
     }
   }
 
-  const { xpGained, newBadges } = computeXpAndBadges({
-    topic,
-    message,
-    currentXp: user.xp ?? 0,
-    existingBadges: user.badges ?? [],
-    historyLength: chatHistory.length,
+  // The AI request can take seconds: balances read before streaming are stale.
+  // Lock only for the short reward update, never while waiting for the model.
+  const reward = await awardActivityReward(vidyaId, (current) => ({
+    ...computeXpAndBadges({
+      topic,
+      message,
+      currentXp: current.xp,
+      existingBadges: current.badges,
+      historyLength: chatHistory.length,
+    }),
+    streak: computeStreakOnActivity(current),
+  }));
+
+  send({
+    done: true,
+    xpAwarded: reward?.xpAwarded ?? 0,
+    newBadges: reward?.newBadges ?? [],
+    messageId: assistantMessageId,
   });
-
-  const newXp = (user.xp ?? 0) + xpGained;
-  const allBadges = [...new Set([...(user.badges ?? []), ...newBadges])];
-
-  const streak = computeStreakOnActivity({
-    streakCurrent: user.streakCurrent ?? 0,
-    streakLongest: user.streakLongest ?? 0,
-    lastActiveDate: user.lastActiveDate ?? null,
-  });
-
-  await db
-    .update(usersTable)
-    .set({
-      xp: newXp,
-      coins: (user.coins ?? 0) + xpGained,
-      badges: allBadges,
-      streakCurrent: streak.streakCurrent,
-      streakLongest: streak.streakLongest,
-      lastActiveDate: streak.lastActiveDate,
-    })
-    .where(eq(usersTable.vidyaId, vidyaId));
-
-  send({ done: true, xpAwarded: xpGained, newBadges, messageId: assistantMessageId });
   res.end();
 });
 

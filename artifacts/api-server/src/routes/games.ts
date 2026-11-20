@@ -1,11 +1,12 @@
 import { Router, type IRouter } from "express";
-import { eq } from "drizzle-orm";
-import { db, usersTable } from "@workspace/db";
+import { awardActivityReward } from "../lib/activityReward";
 import { SubmitGameScoreBody } from "@workspace/api-zod";
 import { requireAuth } from "../middlewares/auth";
 import { rateLimit } from "../middlewares/rateLimit";
 import { consumeGame, gameAllowance } from "../lib/gameAllowance";
 import { FREE_LIMITS } from "../lib/planAccess";
+import { eq } from "drizzle-orm";
+import { db, usersTable } from "@workspace/db";
 
 const router: IRouter = Router();
 
@@ -41,10 +42,10 @@ router.post(
     const score = Math.max(0, Math.floor(parsed.data.score));
 
     const [user] = await db
-      .select()
+      .select({ role: usersTable.role })
       .from(usersTable)
-      .where(eq(usersTable.vidyaId, vidyaId));
-
+      .where(eq(usersTable.vidyaId, vidyaId))
+      .limit(1);
     if (!user) {
       res.status(404).json({ error: "Student not found" });
       return;
@@ -63,23 +64,20 @@ router.post(
       return;
     }
 
-    const xpAwarded = Math.min(score, MAX_GAME_XP);
-    const currentXp = user.xp ?? 0;
-    const newXp = currentXp + xpAwarded;
-
-    const existing = new Set(user.badges ?? []);
-    const newBadges: string[] = [];
-    if (newXp >= 100 && currentXp < 100 && !existing.has("century_club")) {
-      newBadges.push("century_club");
+    const reward = await awardActivityReward(vidyaId, (current) => {
+      const xpGained = Math.min(score, MAX_GAME_XP);
+      const newBadges =
+        current.xp + xpGained >= 100 && !current.badges.includes("century_club")
+          ? ["century_club"]
+          : [];
+      return { xpGained, newBadges };
+    });
+    if (!reward) {
+      res.status(404).json({ error: "Student not found" });
+      return;
     }
-    const allBadges = [...new Set([...(user.badges ?? []), ...newBadges])];
 
-    await db
-      .update(usersTable)
-      .set({ xp: newXp, coins: (user.coins ?? 0) + xpAwarded, badges: allBadges })
-      .where(eq(usersTable.vidyaId, vidyaId));
-
-    res.json({ xp: newXp, xpAwarded, badges: allBadges, newBadges });
+    res.json(reward);
   },
 );
 

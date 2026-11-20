@@ -29,7 +29,9 @@ export const TOPIC_LABELS: Record<Topic, string> = {
 };
 
 export function topicLabel(topic: string): string {
-  return (TOPIC_LABELS as Record<string, string>)[topic] ?? "Mixed Maths";
+  return Object.hasOwn(TOPIC_LABELS, topic)
+    ? TOPIC_LABELS[topic as Topic]
+    : "Mixed Maths";
 }
 
 export interface MistakeItem {
@@ -362,7 +364,9 @@ export function generateAssessment(
   klass: string | null,
 ): AssessmentQuestion[] {
   const level = classLevel(klass);
-  const baseGen = (GENERATORS as Record<string, Gen>)[topic] ?? addSubGen;
+  const baseGen = Object.hasOwn(GENERATORS, topic)
+    ? GENERATORS[topic as Topic]
+    : addSubGen;
   const isMixed =
     topic === "general" || topic === "greeting" || topic === "giveup";
 

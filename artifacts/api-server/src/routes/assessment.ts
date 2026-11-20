@@ -135,7 +135,7 @@ router.post(
     const maxScore = questions.length * row.pointsPerCorrect;
 
     try {
-      await db
+      const updated = await db
         .update(assessmentsTable)
         .set({
           status: "completed",
@@ -144,7 +144,17 @@ router.post(
           submittedAnswers: review.map((r) => r.chosenIndex),
           completedAt: new Date(),
         })
-        .where(eq(assessmentsTable.testId, testId));
+        .where(
+          and(
+            eq(assessmentsTable.testId, testId),
+            eq(assessmentsTable.status, "pending"),
+          ),
+        )
+        .returning({ id: assessmentsTable.id });
+      if (updated.length === 0) {
+        res.status(409).json({ error: "This test has already been submitted." });
+        return;
+      }
     } catch (err) {
       req.log.error({ err }, "failed to finalise assessment");
       res.status(500).json({ error: "Couldn't save your result. Please try again." });
